@@ -59,6 +59,7 @@ For in-depth guides, manuals, and technical specifications, explore the **`docs/
 | **[📘 Editor User & Developer Manual](docs/EDITOR_MANUAL.md)** | Exhaustive manual covering every panel, tool, gizmo, catalog component, multi-user workflow, asset browser, and shortcut. |
 | **[🏗️ Engine Architecture Deep Dive](docs/ARCHITECTURE.md)** | Technical breakdown of Bevy ECS scheduling, 120Hz UDP networking protocol, Rhai AST reloader, and off-screen viewport pipeline. |
 | **[📜 Rhai Scripting Guide & API Reference](docs/SCRIPTING_GUIDE.md)** | Complete guide to writing behavior scripts, lifecycle hooks (`on_start`, `on_update`), and live hot-reloading with VS Code. |
+| **[🌐 Interactive Web Portfolio & Resume Showcase](docs/portfolio_preview.html)** | Interactive visual showcase with live architecture breakdown, metrics cards, and 1-click CV bullet export. |
 | **[🎮 Portfolio Technical Case Study](docs/PORTFOLIO_CASE_STUDY.md)** | Polished, in-depth engineering case study highlighting metrics, challenges solved, architecture diagrams, and lessons. |
 | **[📄 CV & Resume Impact Bullet Points](docs/CV_RESUME_BULLETS.md)** | High-impact, quantifiable resume bullets tailored for Game Engine, Systems, Gameplay, and Tools Programmer roles. |
 

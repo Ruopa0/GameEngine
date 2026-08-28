@@ -57,6 +57,8 @@ pub fn check_transitions(cs: &CharacterState, double_tap_crouch: bool) -> Moveme
         MovementState::Slide
     } else if cs.wishes_crouch {
         MovementState::Crouch
+    } else if cs.wishes_tac_sprint && moving {
+        MovementState::TacSprint
     } else if cs.wishes_sprint && moving {
         MovementState::Sprint
     } else if moving {

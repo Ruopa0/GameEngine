@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use avian3d::prelude::*;
+
 use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default, Reflect, Serialize, Deserialize)]

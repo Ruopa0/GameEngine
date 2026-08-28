@@ -1,6 +1,5 @@
-/// Recoil recovery — visual kick lerps back to zero when trigger is released.
-/// Actual aim correction is handled in systems.rs per-shot advancement.
-
+//! Recoil recovery — visual kick lerps back to zero when trigger is released.
+//! Actual aim correction is handled in systems.rs per-shot advancement.
 use bevy::prelude::*;
 
 use crate::components::RecoilPattern;

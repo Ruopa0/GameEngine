@@ -141,18 +141,20 @@ pub fn spawn_first_person_weapon(
 pub fn update_viewmodel_sway(
     time: Res<Time>,
     mut mouse_events: MessageReader<bevy::input::mouse::MouseMotion>,
-    keys: Res<ButtonInput<KeyCode>>,
+    input: Option<Res<cb_input::PlayerInput>>,
     mut query: Query<(&mut FirstPersonWeapon, &mut Transform)>,
 ) {
+    let Some(input) = input else { return; };
     let dt = time.delta_secs();
     let mut mouse_delta = Vec2::ZERO;
     for ev in mouse_events.read() {
         mouse_delta += ev.delta;
     }
 
-    let is_sprinting = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
-    let is_crouching = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::KeyC);
-    let is_moving = keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::KeyS) || keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::KeyD);
+    let is_sprinting = input.sprint;
+    let is_tac_sprinting = input.tac_sprint;
+    let is_crouching = input.crouch;
+    let is_moving = input.move_dir.length_squared() > 0.01;
 
     for (mut weapon, mut transform) in query.iter_mut() {
         // 1. Mouse Sway & Rotational Inertia
@@ -166,7 +168,7 @@ pub fn update_viewmodel_sway(
         weapon.sway_rot = weapon.sway_rot.slerp(Quat::IDENTITY, (dt * 8.0).min(1.0));
 
         // 2. Walking Bobbing
-        let speed_factor = if is_sprinting { 1.5 } else if is_crouching { 0.5 } else { 1.0 };
+        let speed_factor = if is_tac_sprinting { 2.0 } else if is_sprinting { 1.5 } else if is_crouching { 0.5 } else { 1.0 };
         if is_moving {
             weapon.bob_timer += dt * 10.0 * speed_factor;
         } else {
@@ -181,12 +183,24 @@ pub fn update_viewmodel_sway(
         weapon.recoil_pos = weapon.recoil_pos.lerp(Vec3::ZERO, (dt * 16.0).min(1.0));
         weapon.recoil_rot = weapon.recoil_rot.slerp(Quat::IDENTITY, (dt * 20.0).min(1.0));
 
+        let mut pose_offset = Vec3::ZERO;
+        let mut pose_rot = Quat::IDENTITY;
+
+        if is_tac_sprinting && is_moving {
+            pose_offset = Vec3::new(0.1, 0.02, -0.1);
+            pose_rot = Quat::from_euler(EulerRot::YXZ, -0.3, 0.8, -0.4);
+        } else if is_sprinting && is_moving {
+            pose_offset = Vec3::new(0.05, -0.05, 0.05);
+            pose_rot = Quat::from_rotation_z(0.1) * Quat::from_rotation_x(0.1);
+        }
+
         // 4. Combine into final local transform
-        let target_pos = weapon.rest_pos + Vec3::new(bob_h, -bob_v, 0.0) + weapon.recoil_pos;
-        weapon.current_pos = weapon.current_pos.lerp(target_pos, (dt * 20.0).min(1.0));
+        let target_pos = weapon.rest_pos + Vec3::new(bob_h, -bob_v, 0.0) + weapon.recoil_pos + pose_offset;
+        weapon.current_pos = weapon.current_pos.lerp(target_pos, (dt * 12.0).min(1.0));
 
         // Smooth rotational lag
-        weapon.current_rot = weapon.current_rot.slerp(weapon.sway_rot * weapon.recoil_rot, (dt * 18.0).min(1.0));
+        let target_rot = weapon.sway_rot * weapon.recoil_rot * pose_rot;
+        weapon.current_rot = weapon.current_rot.slerp(target_rot, (dt * 12.0).min(1.0));
 
         transform.translation = weapon.current_pos;
         transform.rotation = weapon.current_rot;

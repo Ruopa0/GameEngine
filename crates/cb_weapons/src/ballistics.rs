@@ -16,11 +16,20 @@ pub struct DamageEvent {
     pub normal:  Vec3,
 }
 
+#[derive(Message, Clone)]
+pub struct HitVfxEvent {
+    pub point: Vec3,
+    pub normal: Vec3,
+    pub hit_entity: Entity,
+}
+
 pub fn process_hitscan(
     mut commands: Commands,
     configs:    Query<&WeaponConfig>,
     mut shots:  MessageReader<ShotFiredEvent>,
+    q_combatants: Query<(), With<crate::components::PlayerCombatant>>,
     mut damage: MessageWriter<DamageEvent>,
+    mut vfx: MessageWriter<HitVfxEvent>,
     spatial:    SpatialQuery,
     time:       Res<Time>,
 ) {
@@ -60,12 +69,20 @@ pub fn process_hitscan(
                 // Wall penetration: check if we should continue through thin geometry
                 let final_damage = config.damage * penetration_factor(hit.distance, config.penetration);
 
-                damage.write(DamageEvent {
-                    target: hit.entity,
-                    amount: final_damage,
-                    point:  hit_point,
+                vfx.write(HitVfxEvent {
+                    point: hit_point,
                     normal: hit.normal,
+                    hit_entity: hit.entity,
                 });
+
+                if hit.entity != shot.shooter && q_combatants.contains(hit.entity) {
+                    damage.write(DamageEvent {
+                        target: hit.entity,
+                        amount: final_damage,
+                        point:  hit_point,
+                        normal: hit.normal,
+                    });
+                }
             }
         }
     }
@@ -74,7 +91,9 @@ pub fn process_hitscan(
 pub fn process_projectiles(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &mut crate::components::Projectile)>,
+    q_combatants: Query<(), With<crate::components::PlayerCombatant>>,
     mut damage: MessageWriter<DamageEvent>,
+    mut vfx: MessageWriter<HitVfxEvent>,
     spatial: SpatialQuery,
     time: Res<Time>,
 ) {
@@ -90,22 +109,29 @@ pub fn process_projectiles(
         let dir = proj.velocity * dt;
         let distance = dir.length();
 
-        // Raycast ahead for this frame's movement
         if let Some(hit) = spatial.cast_ray(
             origin,
             Dir3::new(dir).unwrap_or(Dir3::NEG_Z),
             distance,
             true,
-            &SpatialQueryFilter::default(), // Can filter out shooter here if needed
+            &SpatialQueryFilter::from_excluded_entities([proj.owner, entity]),
         ) {
             let hit_point = origin + dir.normalize_or_zero() * hit.distance;
             
-            damage.write(DamageEvent {
-                target: hit.entity,
-                amount: proj.damage, // Note: no damage falloff yet
-                point:  hit_point,
+            vfx.write(HitVfxEvent {
+                point: hit_point,
                 normal: hit.normal,
+                hit_entity: hit.entity,
             });
+
+            if q_combatants.contains(hit.entity) {
+                damage.write(DamageEvent {
+                    target: hit.entity,
+                    amount: proj.damage,
+                    point:  hit_point,
+                    normal: hit.normal,
+                });
+            }
 
             commands.entity(entity).despawn();
         } else {

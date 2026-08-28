@@ -19,6 +19,16 @@ struct Cli {
     client: bool,
 }
 
+fn trigger_system(
+    mut events: bevy::prelude::MessageWriter<cb_engine::editor::serialization::GenerateCityEvent>,
+    input: Res<ButtonInput<KeyCode>>
+) {
+    if input.just_pressed(KeyCode::KeyG) {
+        events.write(cb_engine::editor::serialization::GenerateCityEvent);
+        println!("Triggered GenerateCityEvent!");
+    }
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -74,7 +84,7 @@ fn main() {
         }
 
         app.add_plugins(cb_engine::player::PlayerPlugin);
-        app.add_systems(Update, toggle_cursor_grab);
+        app.add_systems(Update, (toggle_cursor_grab, trigger_system));
     }
 
     app.run();

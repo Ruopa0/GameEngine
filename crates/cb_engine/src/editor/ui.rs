@@ -165,7 +165,7 @@ pub const COMPONENT_CATALOG: &[ComponentMeta] = &[
     },
     // Visuals & Lights
     ComponentMeta {
-        type_path: "bevy_pbr::light::point_light::PointLight",
+        type_path: "cb_engine::editor::serialization::EditorPointLight",
         name: "Point Light Source",
         icon: "💡",
         category: "💡 Visuals & Lights",
@@ -425,7 +425,7 @@ struct TabViewer<'a> {
     world: &'a mut World,
     gltf_input: &'a mut String,
     inspector_state: &'a mut InspectorState,
-    dialogs: &'a mut EditorUiDialogs,
+    _dialogs: &'a mut EditorUiDialogs,
 }
 
 impl<'a> egui_dock::TabViewer for TabViewer<'a> {
@@ -654,7 +654,9 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             InspectorMode::Developer => {
                                 bevy_inspector::ui_for_entity(self.world, entity, ui);
                                 
-                                if ui.input(|i| i.pointer.any_released() || i.key_pressed(egui::Key::Enter) || i.pointer.is_decidedly_dragging()) {
+                                let released = ui.input(|i| i.pointer.any_released() || i.key_pressed(egui::Key::Enter));
+
+                                if released {
                                     sync_all_entity_components(self.world, entity);
                                 }
                             }
@@ -831,9 +833,9 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
 
                                     // 4. Point Light Card
                                     let mut remove_light = false;
-                                    let has_light = self.world.get::<PointLight>(entity).is_some();
+                                    let has_light = self.world.get::<super::serialization::EditorPointLight>(entity).is_some();
                                     if has_light {
-                                        let mut current_light = self.world.get::<PointLight>(entity).cloned().unwrap_or_default();
+                                        let mut current_light = self.world.get::<super::serialization::EditorPointLight>(entity).cloned().unwrap_or_default();
                                         let mut light_changed = false;
                                         egui::Frame::group(ui.style()).show(ui, |ui| {
                                             ui.horizontal(|ui| {
@@ -880,11 +882,12 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                         ui.add_space(6.0);
                                     }
                                     if remove_light {
+                                        self.world.entity_mut(entity).remove::<super::serialization::EditorPointLight>();
                                         self.world.entity_mut(entity).remove::<PointLight>();
                                         if let Some(net_id) = net_id_opt {
                                             self.world.write_message(super::serialization::EditorActionRequest::RemoveComponent {
                                                 id: net_id.0,
-                                                type_path: "bevy_pbr::light::point_light::PointLight".to_string(),
+                                                type_path: "cb_engine::editor::serialization::EditorPointLight".to_string(),
                                             });
                                         }
                                     }
@@ -893,11 +896,15 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                     let mat_handle_opt = self.world.get::<MeshMaterial3d<StandardMaterial>>(entity).map(|m| m.0.clone());
                                     if let Some(mat_handle) = mat_handle_opt {
                                         let mut mat_changed = false;
+                                        let mut color_changed = false;
                                         let mut current_color = [0.8, 0.8, 0.8];
                                         let mut current_roughness = 0.5;
                                         let mut current_metallic = 0.0;
                                         
-                                        if let Some(materials) = self.world.get_resource::<Assets<StandardMaterial>>() {
+                                        if let Some(ed_col) = self.world.get::<super::serialization::EditorColor>(entity) {
+                                            let srgba = ed_col.0.to_srgba();
+                                            current_color = [srgba.red, srgba.green, srgba.blue];
+                                        } else if let Some(materials) = self.world.get_resource::<Assets<StandardMaterial>>() {
                                             if let Some(mat) = materials.get(&mat_handle) {
                                                 let srgba = mat.base_color.to_srgba();
                                                 current_color = [srgba.red, srgba.green, srgba.blue];
@@ -913,7 +920,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                             ui.horizontal(|ui| {
                                                 ui.label("Base Color:");
                                                 if ui.color_edit_button_rgb(&mut current_color).changed() {
-                                                    mat_changed = true;
+                                                    color_changed = true;
                                                 }
                                             });
                                             
@@ -928,10 +935,17 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                             });
                                         });
                                         
+                                        if color_changed {
+                                            let new_col = super::serialization::EditorColor(Color::srgb(current_color[0], current_color[1], current_color[2]));
+                                            self.world.entity_mut(entity).insert(new_col);
+                                            if ui.input(|i| i.pointer.any_released()) {
+                                                sync_component_to_network(self.world, entity, new_col);
+                                            }
+                                        }
+                                        
                                         if mat_changed {
                                             if let Some(mut materials) = self.world.get_resource_mut::<Assets<StandardMaterial>>() {
                                                 if let Some(mat) = materials.get_mut(&mat_handle) {
-                                                    mat.base_color = Color::srgb(current_color[0], current_color[1], current_color[2]);
                                                     mat.perceptual_roughness = current_roughness;
                                                     mat.metallic = current_metallic;
                                                 }
@@ -1228,7 +1242,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                     if ui.button("🎯 Target Dummy (Cube)").on_hover_text("Spawn a physical target cube with health").clicked() {
                         self.world.write_message(super::serialization::EditorActionRequest::SpawnObject { 
                             id: rand::random::<u64>(),
-                            object_type: "cube".to_string(), 
+                            object_type: "target_dummy".to_string(), 
                             asset_path: None, 
                             transform: Transform::from_xyz(0.0, 1.0, -4.0) 
                         });
@@ -1309,8 +1323,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             } else {
                                 let icon = if name.ends_with(".gltf") || name.ends_with(".glb") { "📦" }
                                            else if name.ends_with(".png") || name.ends_with(".jpg") { "🖼️" }
-                                           else if name.ends_with(".ron") { "📜" }
-                                           else if name.ends_with(".rhai") { "📜" }
+                                           else if name.ends_with(".ron") || name.ends_with(".rhai") { "📜" }
                                            else { "📄" };
                                 
                                 let path = file.strip_prefix("assets").unwrap_or(file).to_string_lossy().replace("\\", "/");
@@ -1568,28 +1581,26 @@ fn render_editor_ui(world: &mut World) {
                         for entry in entries.filter_map(|e| e.ok()) {
                             let name = entry.file_name().to_string_lossy().to_string();
                             let is_scene = name.ends_with(".ron") || name.ends_with(".scn.ron") || name.ends_with(".scn");
-                            if !dialogs.filter_scene_types_only || is_scene {
-                                if entry.path().is_file() {
+                            if (!dialogs.filter_scene_types_only || is_scene)
+                                && entry.path().is_file() {
                                     let icon = if is_scene { "📜" } else { "📄" };
                                     if ui.button(format!("{} {}", icon, name)).clicked() {
                                         picked_file = Some(name);
                                     }
                                 }
-                            }
                         }
                     }
                     if let Ok(entries) = std::fs::read_dir("assets") {
                         for entry in entries.filter_map(|e| e.ok()) {
                             let name = entry.path().to_string_lossy().replace("\\", "/");
                             let is_scene = name.ends_with(".ron") || name.ends_with(".scn.ron") || name.ends_with(".scn");
-                            if !dialogs.filter_scene_types_only || is_scene {
-                                if entry.path().is_file() {
+                            if (!dialogs.filter_scene_types_only || is_scene)
+                                && entry.path().is_file() {
                                     let icon = if is_scene { "📜" } else { "📄" };
                                     if ui.button(format!("{} {}", icon, name)).clicked() {
                                         picked_file = Some(name);
                                     }
                                 }
-                            }
                         }
                     }
                     if let Some(p) = picked_file {
@@ -1947,6 +1958,11 @@ fn render_editor_ui(world: &mut World) {
                         transform: Transform::default(),
                     });
                 }
+                ui.separator();
+                if ui.button("🏙 Generate Example City Map").clicked() {
+                    world.write_message(super::serialization::GenerateCityEvent);
+                    ui.close_menu();
+                }
             });
             
             ui.menu_button("Help", |ui| {
@@ -2021,7 +2037,7 @@ fn render_editor_ui(world: &mut World) {
             world,
             gltf_input: &mut ui_state.gltf_input,
             inspector_state: &mut inspector_state,
-            dialogs: &mut dialogs,
+            _dialogs: &mut dialogs,
         };
         DockArea::new(&mut ui_state.tree)
             .style(egui_dock::Style::from_egui(ui.style().as_ref()))

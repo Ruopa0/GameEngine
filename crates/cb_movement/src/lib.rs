@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::empty_line_after_doc_comments, clippy::if_same_then_else)]
 /// cb_movement — Movement plugin and public API.
 ///
 /// Exports:
@@ -30,3 +31,5 @@ impl Plugin for MovementPlugin {
             .add_systems(FixedUpdate, parkour::detect_parkour.before(fsm::update_fsm));
     }
 }
+
+

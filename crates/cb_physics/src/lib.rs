@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::empty_line_after_doc_comments, clippy::if_same_then_else)]
 use bevy::prelude::*;
 
 pub struct CbPhysicsPlugin;
@@ -31,3 +32,5 @@ pub mod layers {
     pub const PROJECTILE: u32 = 1 << 2;
     pub const TRIGGER:    u32 = 1 << 3;
 }
+
+

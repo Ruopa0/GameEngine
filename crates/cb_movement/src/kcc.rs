@@ -29,7 +29,8 @@ pub fn apply_movement(
         controller.initiate_action_feeding();
         // ─── Speed from state ────────────────────────────────────────
         let base_speed: f32 = match state.current {
-            MovementState::Sprint => 4.0,
+            MovementState::TacSprint => 7.5,
+            MovementState::Sprint => 4.5,
             MovementState::Walk => 2.5,
             MovementState::Slide => 3.5, // fast initial slide
             MovementState::Crouch => 0.625,

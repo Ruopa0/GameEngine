@@ -34,6 +34,7 @@ pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
             // Health & Combat
             cb_weapons::components::Health::new(100.0),
             cb_weapons::health::ImmortalPlayer,
+            cb_weapons::components::PlayerCombatant,
         ))
         .with_children(|parent| {
             // FPS camera at eye level
@@ -49,10 +50,10 @@ pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
                         damage: 25.0,
                         penetration: 0.2,
                         range: 50.0,
-                        projectile_speed: None,
+                        projectile_speed: Some(150.0),
                     },
                     fire: cb_weapons::components::FireRate::new(400.0),
-                    mag: cb_weapons::components::Magazine::new(15, 60, 1.5),
+                    mag: cb_weapons::components::Magazine::new(8, 24, 1.5),
                     spread: cb_weapons::components::Spread::default(),
                     recoil: cb_weapons::components::RecoilPattern::default(),
                 },
@@ -87,7 +88,6 @@ impl Plugin for PlayerPlugin {
                update_remote_player_pitch,
                player_input,
                camera_look,
-               draw_weapon_gizmos,
            ));
     }
 }
@@ -149,6 +149,7 @@ pub fn setup_remote_player_mesh(
             RigidBody::Kinematic,
             Collider::capsule(0.35, 1.0),
             cb_weapons::components::Health::new(100.0),
+            cb_weapons::components::PlayerCombatant,
         ));
 
         commands.entity(entity).with_children(|parent| {
@@ -207,6 +208,7 @@ pub fn player_input(
     state.desired_direction = direction;
     state.wishes_jump   = input.jump;
     state.wishes_sprint = input.sprint;
+    state.wishes_tac_sprint = input.tac_sprint;
     state.wishes_crouch = input.crouch;
 
     if let Ok((mut fire_rate, mut mag)) = q_weapon.single_mut() {
@@ -219,14 +221,6 @@ pub fn player_input(
     }
 }
 
-pub fn draw_weapon_gizmos(
-    mut gizmos: Gizmos,
-    mut events: MessageReader<cb_weapons::systems::ShotFiredEvent>,
-) {
-    for ev in events.read() {
-        gizmos.line(ev.origin, ev.origin + ev.direction * 50.0, Color::srgb(1.0, 0.8, 0.0));
-    }
-}
 
 pub fn camera_look(
     mut mouse_events: MessageReader<bevy::input::mouse::MouseMotion>,

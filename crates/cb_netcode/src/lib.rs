@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::empty_line_after_doc_comments, clippy::if_same_then_else)]
 pub mod protocol;
 pub mod client;
 pub mod server;
@@ -11,4 +12,7 @@ impl Plugin for NetcodePlugin {
         app.add_plugins(protocol::ProtocolPlugin);
     }
 }
+
+
+
 

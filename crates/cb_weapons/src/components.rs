@@ -7,12 +7,16 @@ use bevy::prelude::*;
 
 // ─── Fire Mode ────────────────────────────────────────────────────────────────
 
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+pub struct PlayerCombatant;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect, Default)]
 pub enum FireMode {
     #[default]
     SemiAuto,
     FullAuto,
-    Burst(u8), // rounds per burst
+    Burst(u8),
 }
 
 // ─── Weapon Config (static, shared via Handle<WeaponData>) ────────────────────

@@ -58,7 +58,7 @@ pub fn replicate_players_to_clients(
 }
 
 pub fn relay_play_mode_enter(
-    mut commands: Commands,
+    _commands: Commands,
     mut receivers: Query<&mut MessageReceiver<crate::protocol::EnterPlayModeMessage>>,
     mut senders: Query<(Entity, &lightyear::prelude::Client, &mut MessageSender<crate::protocol::EnterPlayModeMessage>)>,
 ) {
@@ -73,7 +73,7 @@ pub fn relay_play_mode_enter(
         info!("Server: Broadcasting EnterPlayModeMessage and spawning Players for {} clients", senders.iter().count());
         for (entity, _client, mut sender) in senders.iter_mut() {
             let _client_id = entity.to_bits();
-            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EnterPlayModeMessage);
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EnterPlayModeMessage);
         }
     }
 }
@@ -93,7 +93,7 @@ pub fn relay_play_mode_exit(
         load_events.write(cb_engine::editor::serialization::LoadSceneEvent("level.ron".to_string()));
         
         for (_entity, mut sender) in senders.iter_mut() {
-            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::ExitPlayModeMessage);
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::ExitPlayModeMessage);
         }
     }
 }
@@ -109,20 +109,20 @@ pub fn handle_editor_actions(
             match action {
                 crate::protocol::EditorAction::SpawnObject { id, object_type, asset_path, transform } => {
                     info!("Server: Received SpawnObject id={} type={}", id, object_type);
-                    let mut entity = commands.spawn((
+                    let _entity = commands.spawn((
                         cb_engine::editor::serialization::SceneObject { object_type: object_type.clone(), asset_path: asset_path.clone() },
                         cb_engine::editor::serialization::NetworkId(id),
                         transform,
                         GlobalTransform::default(),
                     ));
                     
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::SpawnObject { id, object_type: object_type.clone(), asset_path: asset_path.clone(), transform });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::SpawnObject { id, object_type: object_type.clone(), asset_path: asset_path.clone(), transform });
                     }
                 },
                 crate::protocol::EditorAction::MoveObject { id, transform, sender_user_id } => {
                     let mut found = false;
-                    for (entity, net_id, mut tf, scene_obj, lock) in query_objects.iter_mut() {
+                    for (_entity, net_id, mut tf, _scene_obj, _lock) in query_objects.iter_mut() {
                         if net_id.0 == id {
                             *tf = transform;
                             found = true;
@@ -131,8 +131,8 @@ pub fn handle_editor_actions(
                     }
                     if !found { warn!("Server: Got move for unknown id {}", id); }
                     
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::MoveObject { id, transform, sender_user_id });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::MoveObject { id, transform, sender_user_id });
                     }
                 },
                 crate::protocol::EditorAction::DespawnObject { id } => {
@@ -142,8 +142,8 @@ pub fn handle_editor_actions(
                             break;
                         }
                     }
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::DespawnObject { id });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::DespawnObject { id });
                     }
                 },
                 crate::protocol::EditorAction::LockObject { id, user_id } => {
@@ -153,8 +153,8 @@ pub fn handle_editor_actions(
                             break;
                         }
                     }
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LockObject { id, user_id });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LockObject { id, user_id });
                     }
                 },
                 crate::protocol::EditorAction::UnlockObject { id, user_id } => {
@@ -164,8 +164,8 @@ pub fn handle_editor_actions(
                             break;
                         }
                     }
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UnlockObject { id, user_id });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UnlockObject { id, user_id });
                     }
                 },
                 crate::protocol::EditorAction::AddComponent { id, type_path } => {
@@ -183,8 +183,8 @@ pub fn handle_editor_actions(
                             let _ = cb_engine::editor::serialization::add_default_component(world, e, &type_path_clone);
                         }
                     });
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::AddComponent { id, type_path: type_path.clone() });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::AddComponent { id, type_path: type_path.clone() });
                     }
                 },
                 crate::protocol::EditorAction::RemoveComponent { id, type_path } => {
@@ -202,8 +202,8 @@ pub fn handle_editor_actions(
                             let _ = cb_engine::editor::serialization::remove_component_by_name(world, e, &type_path_clone);
                         }
                     });
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::RemoveComponent { id, type_path: type_path.clone() });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::RemoveComponent { id, type_path: type_path.clone() });
                     }
                 },
                 crate::protocol::EditorAction::UpdateComponent { id, type_path, ron_data } => {
@@ -222,8 +222,8 @@ pub fn handle_editor_actions(
                             let _ = cb_engine::editor::serialization::apply_component_ron(world, e, &type_path_clone, &ron_data_clone);
                         }
                     });
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdateComponent { id, type_path: type_path.clone(), ron_data: ron_data.clone() });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdateComponent { id, type_path: type_path.clone(), ron_data: ron_data.clone() });
                     }
                 },
                 crate::protocol::EditorAction::RenameObject { id, name } => {
@@ -233,8 +233,8 @@ pub fn handle_editor_actions(
                             break;
                         }
                     }
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::RenameObject { id, name: name.clone() });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::RenameObject { id, name: name.clone() });
                     }
                 },
                 crate::protocol::EditorAction::ReparentObject { id, parent_id } => {
@@ -246,11 +246,10 @@ pub fn handle_editor_actions(
                             if nid.0 == id {
                                 child_entity = Some(e);
                             }
-                            if let Some(pid) = parent_id {
-                                if nid.0 == pid {
+                            if let Some(pid) = parent_id
+                                && nid.0 == pid {
                                     parent_entity = Some(e);
                                 }
-                            }
                         }
                         if let Some(child) = child_entity {
                             if let Some(parent) = parent_entity {
@@ -260,18 +259,18 @@ pub fn handle_editor_actions(
                             }
                         }
                     });
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::ReparentObject { id, parent_id });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::ReparentObject { id, parent_id });
                     }
                 },
                 crate::protocol::EditorAction::UpdateEditorCamera { user_id, transform } => {
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdateEditorCamera { user_id, transform });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdateEditorCamera { user_id, transform });
                     }
                 },
                 crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch } => {
-                    for (sender_entity, mut sender) in senders.iter_mut() {
-                        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch });
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch });
                     }
                 },
                 crate::protocol::EditorAction::RequestFullSync => {
@@ -287,16 +286,14 @@ pub fn handle_editor_actions(
                                 let mut components = Vec::new();
                                 if let Ok(entity_ref) = world.get_entity(entity) {
                                     for registration in type_registry.iter() {
-                                        if let Some(reflect_comp) = registration.data::<bevy::ecs::reflect::ReflectComponent>() {
-                                            if let Some(reflected) = reflect_comp.reflect(entity_ref) {
-                                                if let Some(_reflect_ser) = registration.data::<bevy::reflect::ReflectSerialize>() {
+                                        if let Some(reflect_comp) = registration.data::<bevy::ecs::reflect::ReflectComponent>()
+                                            && let Some(reflected) = reflect_comp.reflect(entity_ref)
+                                                && let Some(_reflect_ser) = registration.data::<bevy::reflect::ReflectSerialize>() {
                                                     let serializer = bevy::reflect::serde::ReflectSerializer::new(reflected, &type_registry);
                                                     if let Ok(ron_str) = ron::to_string(&serializer) {
                                                         components.push((registration.type_info().type_path().to_string(), ron_str));
                                                     }
                                                 }
-                                            }
-                                        }
                                     }
                                 }
 
@@ -316,7 +313,7 @@ pub fn handle_editor_actions(
                         for (sender_entity, mut sender) in senders_query.iter_mut(world) {
                             if sender_entity == receiver_entity {
                                 info!("Server: Sending FullSceneSync ({} objects with all components) to client {}", sync_objects.len(), receiver_entity.to_bits());
-                                let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::FullSceneSync {
+                                sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::FullSceneSync {
                                     objects: sync_objects.clone(),
                                 });
                             }
@@ -352,7 +349,7 @@ pub fn handle_editor_actions(
                     });
                     for (sender_entity, mut sender) in senders.iter_mut() {
                         if sender_entity != receiver_entity {
-                            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LoadScene {
+                            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LoadScene {
                                 path: path.clone(),
                                 scene_ron: scene_ron.clone(),
                             });
@@ -366,7 +363,7 @@ pub fn handle_editor_actions(
                     }
                     for (sender_entity, mut sender) in senders.iter_mut() {
                         if sender_entity != receiver_entity {
-                            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::ClearScene);
+                            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::ClearScene);
                         }
                     }
                 },
@@ -404,7 +401,7 @@ pub fn handle_client_disconnect(
                 
                 // Broadcast unlock to remaining clients
                 for mut sender in senders.iter_mut() {
-                    let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UnlockObject {
+                    sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UnlockObject {
                         id: net_id.0,
                         user_id: disconnected_client_id,
                     });

@@ -63,7 +63,7 @@ pub fn request_initial_sync(
 ) {
     for mut sender in senders.iter_mut() {
         info!("Client: Requesting full initial scene sync from server...");
-        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::RequestFullSync);
+        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::RequestFullSync);
     }
 }
 
@@ -124,7 +124,7 @@ pub fn sync_play_mode_enter(
     info!("sync_play_mode_enter: checking senders. Found: {}", senders_enter.iter().count());
     for mut sender in senders_enter.iter_mut() {
         info!("sync_play_mode_enter: sending EnterPlayModeMessage!");
-        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EnterPlayModeMessage);
+        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EnterPlayModeMessage);
     }
 }
 
@@ -132,7 +132,7 @@ pub fn sync_play_mode_exit(
     mut senders_exit: Query<&mut MessageSender<crate::protocol::ExitPlayModeMessage>>,
 ) {
     for mut sender in senders_exit.iter_mut() {
-        let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::ExitPlayModeMessage);
+        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::ExitPlayModeMessage);
     }
 }
 
@@ -146,18 +146,16 @@ pub fn handle_play_mode_from_server(
     let is_connected = !receivers_enter.is_empty();
     if !is_connected { return; }
     for mut receiver in receivers_enter.iter_mut() {
-        if receiver.receive().next().is_some() {
-            if *current_state.get() != cb_engine::editor::EngineState::Play {
+        if receiver.receive().next().is_some()
+            && *current_state.get() != cb_engine::editor::EngineState::Play {
                 dialogs.show_join_play = true;
             }
-        }
     }
     for mut receiver in receivers_exit.iter_mut() {
-        if receiver.receive().next().is_some() {
-            if *current_state.get() != cb_engine::editor::EngineState::Edit {
+        if receiver.receive().next().is_some()
+            && *current_state.get() != cb_engine::editor::EngineState::Edit {
                 next_state.set(cb_engine::editor::EngineState::Edit);
             }
-        }
     }
 }
 
@@ -219,21 +217,18 @@ pub fn send_editor_actions(
                         crate::protocol::EditorAction::UpdateEditorCamera { user_id: *user_id, transform: *transform }
                     }
                 };
-                let _ = sender.send::<crate::protocol::PlayModeChannel>(msg);
+                sender.send::<crate::protocol::PlayModeChannel>(msg);
             }
         }
         
         // Client Prediction: apply locally regardless of connection status!
-        match request {
-            cb_engine::editor::serialization::EditorActionRequest::SpawnObject { id, object_type, asset_path, transform } => {
-                commands.spawn((
-                    cb_engine::editor::serialization::SceneObject { object_type: object_type.clone(), asset_path: asset_path.clone() },
-                    cb_engine::editor::serialization::NetworkId(*id),
-                    *transform,
-                    GlobalTransform::default(),
-                ));
-            }
-            _ => {}
+        if let cb_engine::editor::serialization::EditorActionRequest::SpawnObject { id, object_type, asset_path, transform } = request {
+            commands.spawn((
+                cb_engine::editor::serialization::SceneObject { object_type: object_type.clone(), asset_path: asset_path.clone() },
+                cb_engine::editor::serialization::NetworkId(*id),
+                *transform,
+                GlobalTransform::default(),
+            ));
         }
     }
 }
@@ -282,11 +277,10 @@ pub fn handle_remote_editor_actions(
                         continue;
                     }
                     for (_, net_id, mut obj_transform_opt) in query_objects.iter_mut() {
-                        if net_id.0 == id {
-                            if let Some(ref mut obj_transform) = obj_transform_opt {
+                        if net_id.0 == id
+                            && let Some(ref mut obj_transform) = obj_transform_opt {
                                 **obj_transform = transform;
                             }
-                        }
                     }
                 }
                 crate::protocol::EditorAction::SpawnObject { id, object_type, asset_path, transform } => {
@@ -374,11 +368,10 @@ pub fn handle_remote_editor_actions(
                             if nid.0 == id {
                                 child_entity = Some(e);
                             }
-                            if let Some(pid) = parent_id {
-                                if nid.0 == pid {
+                            if let Some(pid) = parent_id
+                                && nid.0 == pid {
                                     parent_entity = Some(e);
                                 }
-                            }
                         }
                         if let Some(child) = child_entity {
                             if let Some(parent) = parent_entity {
@@ -464,8 +457,8 @@ pub fn handle_remote_editor_actions(
                         });
                     }
                 }
-                crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch } => {
-                    if user_id != session.client_id {
+                crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch }
+                    if user_id != session.client_id => {
                         commands.queue(move |world: &mut World| {
                             let mut target = None;
                             let mut q = world.query::<(Entity, &mut cb_engine::player::RemotePlayer)>();
@@ -489,7 +482,6 @@ pub fn handle_remote_editor_actions(
                             }
                         });
                     }
-                }
                 _ => {}
             }
         }
@@ -503,7 +495,7 @@ pub fn broadcast_local_editor_camera(
 ) {
     if let Ok(transform) = q_camera.single() {
         for mut sender in senders.iter_mut() {
-            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdateEditorCamera {
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdateEditorCamera {
                 user_id: session.client_id,
                 transform: *transform,
             });
@@ -524,7 +516,7 @@ pub fn broadcast_local_player_transform(
             0.0
         };
         for mut sender in senders.iter_mut() {
-            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform {
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform {
                 user_id: session.client_id,
                 transform: *player_tf,
                 pitch,
@@ -548,7 +540,7 @@ pub fn send_save_scene(
 ) {
     for mut sender in senders.iter_mut() {
         for ev in save_events.read() {
-            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::SaveScene {
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::SaveScene {
                 path: ev.0.clone(),
             });
         }
@@ -562,7 +554,7 @@ pub fn send_load_scene(
     for mut sender in senders.iter_mut() {
         for ev in load_events.read() {
             if let Ok(data) = std::fs::read_to_string(&ev.0) {
-                let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LoadScene {
+                sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LoadScene {
                     path: ev.0.clone(),
                     scene_ron: data,
                 });
@@ -577,7 +569,7 @@ pub fn send_clear_scene(
 ) {
     for mut sender in senders.iter_mut() {
         for _ in clear_events.read() {
-            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::ClearScene);
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::ClearScene);
         }
     }
 }

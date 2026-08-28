@@ -42,12 +42,12 @@ pub fn weapon_fire_system(
         }
 
         let should_fire = match weapon_cfg.fire_mode {
-            FireMode::FullAuto  => fire_rate.trigger_held,
-            FireMode::SemiAuto  => fire_rate.trigger_just,
-            FireMode::Burst(_)  => fire_rate.burst_remaining > 0,
+            FireMode::FullAuto  => fire_rate.trigger_held && fire_rate.can_fire(),
+            FireMode::SemiAuto  => fire_rate.trigger_just, // NO cooldown for semi-auto
+            FireMode::Burst(_)  => fire_rate.burst_remaining > 0 && fire_rate.can_fire(),
         };
 
-        if should_fire && fire_rate.can_fire() && mag.try_fire() {
+        if should_fire && mag.try_fire() {
             fire_rate.consume();
             if fire_rate.burst_remaining > 0 {
                 fire_rate.burst_remaining -= 1;

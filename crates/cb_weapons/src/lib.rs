@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::empty_line_after_doc_comments, clippy::if_same_then_else)]
 /// cb_weapons — Weapon system: ECS components, fire modes, ballistics, recoil.
 ///
 /// Architecture:
@@ -32,6 +33,7 @@ impl Plugin for WeaponsPlugin {
             .register_type::<health::ImmortalPlayer>()
             .add_message::<systems::ShotFiredEvent>()
             .add_message::<ballistics::DamageEvent>()
+            .add_message::<ballistics::HitVfxEvent>()
             .add_message::<health::EntityKilledEvent>()
             .add_systems(FixedUpdate, (
                 systems::weapon_fire_system,
@@ -42,6 +44,9 @@ impl Plugin for WeaponsPlugin {
             ).chain());
     }
 }
+
+
+
 
 
 

@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::empty_line_after_doc_comments, clippy::if_same_then_else)]
 use bevy::prelude::*;
 
 pub struct InputPlugin;
@@ -25,6 +26,7 @@ pub struct PlayerInput {
     pub reload: bool,
     pub prone: bool,
     pub prone_just_pressed: bool,
+    pub tac_sprint: bool,
 }
 
 #[derive(Resource)]
@@ -35,8 +37,14 @@ fn gather_input(
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     mut input: ResMut<PlayerInput>,
     enabled: Res<InputEnabled>,
+    time: Res<Time>,
+    mut last_sprint_time: Local<f32>,
+    mut is_tac_sprinting: Local<bool>,
+    cursor_options: Query<&bevy::window::CursorOptions, With<Window>>,
 ) {
-    if !enabled.0 {
+    let is_cursor_grabbed = cursor_options.iter().next().map_or(false, |c| c.grab_mode != bevy::window::CursorGrabMode::None);
+
+    if !enabled.0 || !is_cursor_grabbed {
         *input = PlayerInput::default();
         return;
     }
@@ -50,6 +58,21 @@ fn gather_input(
     input.move_dir = dir.normalize_or_zero();
     input.jump = keyboard.just_pressed(KeyCode::Space);
     input.sprint = keyboard.pressed(KeyCode::ShiftLeft);
+
+    let now = time.elapsed_secs();
+    if keyboard.just_pressed(KeyCode::ShiftLeft) {
+        if now - *last_sprint_time < 0.3 {
+            *is_tac_sprinting = true;
+        }
+        *last_sprint_time = now;
+    }
+
+    if !input.sprint {
+        *is_tac_sprinting = false;
+    }
+
+    input.tac_sprint = *is_tac_sprinting;
+
     input.crouch = keyboard.pressed(KeyCode::KeyC);
     input.crouch_just_pressed = keyboard.just_pressed(KeyCode::KeyC);
     input.prone = keyboard.pressed(KeyCode::ControlLeft);
@@ -59,3 +82,5 @@ fn gather_input(
     input.fire_just = mouse_buttons.just_pressed(MouseButton::Left);
     input.reload = keyboard.just_pressed(KeyCode::KeyR);
 }
+
+

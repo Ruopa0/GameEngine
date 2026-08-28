@@ -20,5 +20,6 @@ bevy-tnua-avian3d = { workspace = true }
 rhai = { version = "1.26.0", features = ["sync"] }
 rfd = "0.17.2"
 rand = "0.8"
+fastrand = "2.5.0"
 
 

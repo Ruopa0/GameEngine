@@ -23,6 +23,7 @@ pub enum MovementState {
     Idle,
     Walk,
     Sprint,
+    TacSprint,
     Crouch,
     Slide,
     Prone,
@@ -39,7 +40,7 @@ pub enum MovementState {
 
 impl MovementState {
     pub fn is_grounded(&self) -> bool {
-        matches!(self, Self::Idle | Self::Walk | Self::Sprint | Self::Crouch | Self::Slide | Self::Prone)
+        matches!(self, Self::Idle | Self::Walk | Self::Sprint | Self::TacSprint | Self::Crouch | Self::Slide | Self::Prone)
     }
 
     pub fn is_airborne(&self) -> bool {
@@ -58,6 +59,7 @@ pub struct CharacterState {
     pub desired_direction: Vec3,
     pub wishes_jump:       bool,
     pub wishes_sprint:     bool,
+    pub wishes_tac_sprint: bool,
     pub wishes_crouch:     bool,
     pub wishes_crouch_tap: bool, // just-pressed C (for double-tap detection)
     pub wishes_prone:      bool, // ControlLeft
@@ -86,6 +88,7 @@ impl Default for CharacterState {
             desired_direction: Vec3::ZERO,
             wishes_jump:       false,
             wishes_sprint:     false,
+            wishes_tac_sprint: false,
             wishes_crouch:     false,
             wishes_crouch_tap: false,
             wishes_prone:      false,

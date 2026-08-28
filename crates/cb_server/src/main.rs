@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::empty_line_after_doc_comments, clippy::if_same_then_else)]
 use bevy::prelude::*;
 use avian3d::prelude::*;
 use bevy_tnua::prelude::*;
@@ -23,6 +24,7 @@ fn main() {
             cb_engine::EnginePlugin,
             cb_engine::editor::serialization::EditorSerializationPlugin,
             cb_movement::MovementPlugin,
+            cb_weapons::WeaponsPlugin,
             cb_netcode::NetcodePlugin,
             cb_netcode::server::ServerNetPlugin,
         ))
@@ -45,3 +47,5 @@ fn setup_server_level(
 
     // The other blocks will be loaded from scene.ron now.
 }
+
+

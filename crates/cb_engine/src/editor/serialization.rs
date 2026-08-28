@@ -56,7 +56,25 @@ impl Plugin for EditorSerializationPlugin {
            .register_type::<crate::gamemode::TargetDummy>()
            .register_type::<crate::gamemode::GoalZone>()
            .register_type::<TestComponent>()
-           .add_systems(Update, (handle_save, handle_load, handle_clear_scene, restore_missing_visuals));
+           .register_type::<cb_weapons::components::Health>()
+           .register_type::<cb_weapons::health::ImmortalPlayer>()
+           .register_type::<EditorColor>()
+           .register_type::<EditorPointLight>()
+           .register_type::<avian3d::prelude::RigidBody>()
+           .register_type::<avian3d::prelude::Friction>()
+           .register_type::<avian3d::prelude::Restitution>()
+           .register_type::<avian3d::prelude::GravityScale>()
+           .register_type::<avian3d::prelude::Mass>()
+           .add_message::<GenerateCityEvent>()
+           .add_systems(Update, (
+                handle_save, 
+                handle_load, 
+                handle_clear_scene, 
+                restore_missing_visuals, 
+                apply_editor_color, 
+                apply_editor_pointlight,
+                handle_generate_city
+            ));
     }
 }
 
@@ -97,6 +115,9 @@ pub struct LoadSceneEvent(pub String);
 
 #[derive(Message, Debug, Clone)]
 pub struct ClearSceneEvent;
+
+#[derive(Message, Debug, Clone)]
+pub struct GenerateCityEvent;
 
 #[derive(Message, Debug)]
 pub struct ConnectToServerEvent;
@@ -350,27 +371,45 @@ fn handle_clear_scene(
 
 pub fn restore_missing_visuals(
     mut commands: Commands,
-    q_objects: Query<(Entity, &SceneObject), (Without<Mesh3d>, Without<PointLight>, Without<SceneRoot>)>,
+    q_objects: Query<(Entity, &SceneObject, Option<&EditorColor>), (Without<Mesh3d>, Without<EditorPointLight>, Without<SceneRoot>)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    for (entity, obj) in q_objects.iter() {
+    for (entity, obj, color_opt) in q_objects.iter() {
         match obj.object_type.as_str() {
             "cube" => {
                 let mesh = meshes.add(Cuboid::default());
                 let material = materials.add(StandardMaterial::default());
+                let mut e_cmds = commands.entity(entity);
+                e_cmds.insert((
+                    Mesh3d(mesh),
+                    MeshMaterial3d(material),
+                    avian3d::prelude::RigidBody::Static,
+                    avian3d::prelude::Collider::cuboid(1.0, 1.0, 1.0),
+                ));
+                if color_opt.is_none() {
+                    e_cmds.insert(EditorColor(Color::WHITE));
+                }
+            }
+            "target_dummy" => {
+                let mesh = meshes.add(Cuboid::new(0.6, 1.8, 0.6));
+                let material = materials.add(StandardMaterial {
+                    base_color: Color::srgb(0.8, 0.2, 0.2),
+                    ..default()
+                });
                 commands.entity(entity).insert((
                     Mesh3d(mesh),
                     MeshMaterial3d(material),
-                    avian3d::prelude::RigidBody::Dynamic,
-                    avian3d::prelude::Collider::cuboid(1.0, 1.0, 1.0),
-                    cb_weapons::components::Health::new(50.0),
+                    avian3d::prelude::RigidBody::Static,
+                    avian3d::prelude::Collider::cuboid(0.6, 1.8, 0.6),
+                    cb_weapons::components::Health::new(100.0),
                     crate::gamemode::TargetDummy,
+                    EditorColor(Color::srgb(0.8, 0.2, 0.2)),
                 ));
             }
             "light" => {
-                commands.entity(entity).insert(PointLight {
+                commands.entity(entity).insert(EditorPointLight {
                     intensity: 1500.0,
                     shadows_enabled: true,
                     ..default()
@@ -421,3 +460,130 @@ pub struct TestComponent {
     pub speed: f32,
     pub name: String,
 }
+
+#[derive(Component, Reflect, Clone, Debug, Copy, serde::Serialize, serde::Deserialize)]
+#[reflect(Component, Default, Serialize, Deserialize)]
+pub struct EditorColor(pub Color);
+
+impl Default for EditorColor {
+    fn default() -> Self {
+        Self(Color::WHITE)
+    }
+}
+
+
+#[derive(Component, Reflect, Clone, Debug, Copy, serde::Serialize, serde::Deserialize)]
+#[reflect(Component, Default, Serialize, Deserialize)]
+pub struct EditorPointLight {
+    pub color: Color,
+    pub intensity: f32,
+    pub range: f32,
+    pub radius: f32,
+    pub shadows_enabled: bool,
+}
+
+impl Default for EditorPointLight {
+    fn default() -> Self {
+        Self {
+            color: Color::WHITE,
+            intensity: 800.0,
+            range: 20.0,
+            radius: 0.0,
+            shadows_enabled: false,
+        }
+    }
+}
+
+pub fn apply_editor_pointlight(
+    mut commands: Commands,
+    mut q: Query<(Entity, &EditorPointLight, Option<&mut PointLight>), Changed<EditorPointLight>>,
+) {
+    for (entity, ed_light, light_opt) in q.iter_mut() {
+        if let Some(mut light) = light_opt {
+            light.color = ed_light.color;
+            light.intensity = ed_light.intensity;
+            light.range = ed_light.range;
+            light.radius = ed_light.radius;
+            light.shadows_enabled = ed_light.shadows_enabled;
+        } else {
+            let mut light = PointLight::default();
+            light.color = ed_light.color;
+            light.intensity = ed_light.intensity;
+            light.range = ed_light.range;
+            light.radius = ed_light.radius;
+            light.shadows_enabled = ed_light.shadows_enabled;
+            commands.entity(entity).insert(light);
+        }
+    }
+}
+
+pub fn apply_editor_color(
+    q_colors: Query<(&EditorColor, &MeshMaterial3d<StandardMaterial>), Changed<EditorColor>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for (ed_color, mat_handle) in q_colors.iter() {
+        if let Some(mat) = materials.get_mut(&mat_handle.0) {
+            mat.base_color = ed_color.0;
+        }
+    }
+}
+
+fn handle_generate_city(
+    mut events: MessageReader<GenerateCityEvent>,
+    mut commands: Commands,
+    mut active_state: ResMut<ActiveSceneState>,
+    q_existing: Query<Entity, With<SceneObject>>,
+) {
+    let mut generated = false;
+    for _ in events.read() {
+        generated = true;
+    }
+
+    if generated {
+        for entity in q_existing.iter() {
+            commands.entity(entity).despawn();
+        }
+        
+        let mut rng = fastrand::Rng::new();
+        
+        // Spawn 64-128 random colored buildings
+        for i in 0..100 {
+            let x = (rng.f32() * 200.0) - 100.0;
+            let z = (rng.f32() * 200.0) - 100.0;
+            let width = rng.f32() * 8.0 + 4.0;
+            let depth = rng.f32() * 8.0 + 4.0;
+            let height = rng.f32() * 30.0 + 10.0;
+            
+            let color = Color::srgb(rng.f32() * 0.8, rng.f32() * 0.8, rng.f32() * 0.8);
+            
+            commands.spawn((
+                Name::new(format!("Building_{}", i)),
+                SceneObject {
+                    object_type: "cube".to_string(),
+                    asset_path: None,
+                },
+                NetworkId(rand::random::<u64>()),
+                Transform::from_xyz(x, height / 2.0, z)
+                    .with_scale(Vec3::new(width, height, depth)),
+                EditorColor(color),
+            ));
+        }
+
+        // Spawn a large grey concrete floor
+        commands.spawn((
+            Name::new("CityFloor"),
+            SceneObject {
+                object_type: "cube".to_string(),
+                asset_path: None,
+            },
+            NetworkId(rand::random::<u64>()),
+            Transform::from_xyz(0.0, -0.5, 0.0)
+                .with_scale(Vec3::new(250.0, 1.0, 250.0)),
+            EditorColor(Color::srgb(0.3, 0.3, 0.32)),
+        ));
+
+        active_state.current_path = Some("assets/scenes/exampleMap.ron".to_string());
+        active_state.is_dirty = true;
+    }
+}
+
