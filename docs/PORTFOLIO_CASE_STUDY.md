@@ -6,7 +6,7 @@
 **Role:** Engine & Systems Programmer  
 **Tech Stack:** Rust, Bevy 0.16 ECS, Avian3D Physics, Lightyear UDP (120Hz), Rhai Embedded Scripting, Egui, Rayon, RFD, RON  
 **Development Partner:** Built in collaboration with **Google Antigravity**  
-**Repository:** [GitHub: Code Blue Engine](https://github.com/ruan-prinsloo/code_blue)
+**Repository:** [GitHub: GameEngine (Code Blue)](https://github.com/Ruopa0/GameEngine)
 
 ---
 
