@@ -1,0 +1,15 @@
+[package]
+name = "cb_server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = { workspace = true }
+avian3d = { workspace = true }
+bevy-tnua-avian3d = { workspace = true }
+cb_engine = { workspace = true }
+cb_physics = { workspace = true }
+cb_movement = { workspace = true }
+cb_netcode = { workspace = true }
+bevy-tnua = { workspace = true }
+cb_weapons = { workspace = true }

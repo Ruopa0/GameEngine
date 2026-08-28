@@ -1,0 +1,7 @@
+/target
+*.log
+editor_backup.ron
+Cargo-RuMSI.toml
+crates/**/Cargo-RuMSI.toml
+.DS_Store
+Thumbs.db
