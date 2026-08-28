@@ -1,0 +1,8 @@
+[package]
+name = "cb_input"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = { workspace = true }
+leafwing-input-manager = "0.20.0"
