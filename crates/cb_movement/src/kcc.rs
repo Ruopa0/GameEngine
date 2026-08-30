@@ -1,6 +1,6 @@
 use crate::fsm::{CharacterState, MovementState};
 use crate::parkour::ParkourSense;
-/// Kinematic Character Controller — maps CharacterState to bevy_tnua inputs.
+/// Kinematic Character Controller -- maps CharacterState to bevy_tnua inputs.
 ///
 /// Reads the FSM state and feeds TnuaBuiltinWalk + TnuaBuiltinJump each frame.
 /// Jump height is boosted by momentum.flow.
@@ -27,29 +27,29 @@ pub fn apply_movement(
 ) {
     for (state, sense, mut controller, config_handle, mut gravity) in query.iter_mut() {
         controller.initiate_action_feeding();
-        // ─── Speed from state ────────────────────────────────────────
+        // --- Speed from state ----------------------------------------
         let base_speed: f32 = match state.current {
-            MovementState::TacSprint => 7.5,
-            MovementState::Sprint => 4.5,
-            MovementState::Walk => 2.5,
-            MovementState::Slide => 3.5, // fast initial slide
-            MovementState::Crouch => 0.625,
-            MovementState::Prone => 0.8,  // MW4-style slow prone crawl
+            MovementState::TacSprint => 1.875,
+            MovementState::Sprint => 1.125,
+            MovementState::Walk => 0.625,
+            MovementState::Slide => 0.875,
+            MovementState::Crouch => 0.15625,
+            MovementState::Prone => 0.2,
             MovementState::Idle => 0.0,
-            MovementState::Vault => 1.75,
-            MovementState::Mantle => 1.0,
+            MovementState::Vault => 0.4375,
+            MovementState::Mantle => 0.25,
             MovementState::LedgeGrab => 0.0,
-            _ => 1.375,
+            _ => 0.34375,
         };
 
-        let flow_bonus = (state.momentum.flow * 2.0) / 4.0;
+        let flow_bonus = (state.momentum.flow * 2.0) / 16.0;
         let speed = base_speed + flow_bonus;
 
         let mut desired_velocity = state.desired_direction.normalize_or_zero() * speed;
 
-        // Baseline physics tuning
-        let mut air_accel = 5.0;
-        let mut accel = 35.0;
+        // Baseline physics tuning (high acceleration for crisp ground friction and stopping power)
+        let mut air_accel = 15.0;
+        let mut accel = 60.0;
         let mut free_fall_gravity = 3.5;
         gravity.0 = 0.5;
 
@@ -58,11 +58,11 @@ pub fn apply_movement(
             float_height = 0.5;
         }
         if state.current == MovementState::Prone {
-            float_height = 0.25; // very low — flat on the ground
+            float_height = 0.25; // very low -- flat on the ground
         }
 
         if state.current == MovementState::Slide {
-            accel = 2.0; // Very low acceleration to prevent sharp turning during slide
+            accel = 2.0; // Controlled momentum slide
         }
 
         if state.current == MovementState::Vault || state.current == MovementState::Mantle {
@@ -77,12 +77,12 @@ pub fn apply_movement(
                 // 3-Phase Kinematic Arc
                 if t < 0.15 {
                     // Phase 1: Launch (Up and forward)
-                    desired_velocity = horizontal_dir * speed + Vec3::Y * 9.0;
-                    air_accel = 100.0;
+                    desired_velocity = horizontal_dir * speed + Vec3::Y * 2.25;
+                    air_accel = 25.0;
                 } else if t < 0.40 {
                     // Phase 2: Apex float
                     desired_velocity = horizontal_dir * speed;
-                    air_accel = 80.0;
+                    air_accel = 20.0;
                     gravity.0 = 0.5; // hover slightly
                     free_fall_gravity = 0.0;
                 } else {
@@ -92,7 +92,7 @@ pub fn apply_movement(
             }
         }
 
-        // ─── Mutate Tnua Config ──────────────────────────────────────
+        // --- Mutate Tnua Config --------------------------------------
         if let Some(config) = configs.get_mut(&config_handle.0) {
             config.basis.acceleration = accel;
             config.basis.air_acceleration = air_accel;
@@ -103,13 +103,13 @@ pub fn apply_movement(
             config.jump.shorten_extra_gravity = 5.0;
         }
 
-        // ─── Walk basis ──────────────────────────────────────────────
+        // --- Walk basis ----------------------------------------------
         controller.basis = bevy_tnua::builtins::TnuaBuiltinWalk {
             desired_motion: desired_velocity,
             desired_forward: Dir3::new(state.desired_direction).ok(),
         };
 
-        // ─── Jump action ─────────────────────────────────────────────
+        // --- Jump action ---------------------------------------------
         if state.wishes_jump
             || state.current == MovementState::Jump
         {

@@ -1,18 +1,21 @@
-/// Weapon fire and reload systems — run in FixedUpdate.
+/// Weapon fire and reload systems -- run in FixedUpdate.
 
 use bevy::prelude::*;
+use bevy::ecs::relationship::Relationship;
 
 
 use crate::components::{FireRate, Magazine, Spread, RecoilPattern, FireMode};
 
-/// Marker event — emitted when a shot is confirmed this tick.
+/// Marker event -- emitted when a shot is confirmed this tick.
 /// ballistics::process_hitscan listens to this.
 #[derive(Message)]
 pub struct ShotFiredEvent {
     pub shooter:    Entity,
+    pub weapon:     Entity,
     pub origin:     Vec3,
     pub direction:  Vec3,
     pub spread_rad: f32,
+    pub is_local:   bool,
 }
 
 pub fn weapon_fire_system(
@@ -25,12 +28,13 @@ pub fn weapon_fire_system(
         &mut Spread,
         &mut RecoilPattern,
         &GlobalTransform,
+        Option<&ChildOf>,
     )>,
     mut ev_shot: MessageWriter<ShotFiredEvent>,
 ) {
     let dt = time.delta_secs();
 
-    for (entity, weapon_cfg, mut fire_rate, mut mag, mut spread, mut recoil, gtf) in query.iter_mut() {
+    for (entity, weapon_cfg, mut fire_rate, mut mag, mut spread, mut recoil, gtf, parent) in query.iter_mut() {
         fire_rate.tick(dt);
         mag.tick(dt);
         spread.current = (spread.current - spread.recovery_rate * dt).max(spread.base);
@@ -67,13 +71,23 @@ pub fn weapon_fire_system(
             // Grow spread
             spread.current = (spread.current + spread.per_shot).min(spread.max);
 
-            // Compute shot direction from entity forward + spread
+            // Compute gun muzzle origin (aligned with the first-person gun muzzle tip at center-bottom)
             let forward = gtf.forward();
+            let up = gtf.up();
+            let muzzle_origin = gtf.translation() + (*up * -0.21) + (*forward * 0.74);
+
+            // Compute shot direction aiming toward the crosshair focal point (100m ahead)
+            let crosshair_focal_point = gtf.translation() + *forward * 100.0;
+            let shot_direction = (crosshair_focal_point - muzzle_origin).normalize_or_zero();
+
+            let shooter_entity = parent.map(|p| p.get()).unwrap_or(entity);
             ev_shot.write(ShotFiredEvent {
-                shooter:   entity,
-                origin:    gtf.translation(),
-                direction: *forward,
+                shooter:   shooter_entity,
+                weapon:    entity,
+                origin:    muzzle_origin,
+                direction: shot_direction,
                 spread_rad: spread.current,
+                is_local:  true,
             });
         }
 
@@ -82,6 +96,9 @@ pub fn weapon_fire_system(
             if recoil.index > 0 { recoil.index = recoil.index.saturating_sub(1); }
             recoil.kick = recoil.kick.lerp(Vec2::ZERO, (recoil.recovery * dt).min(1.0));
         }
+
+        // Consume the just_pressed event so it isn't processed twice
+        fire_rate.trigger_just = false;
     }
 }
 

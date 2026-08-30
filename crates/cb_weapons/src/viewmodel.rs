@@ -212,7 +212,10 @@ pub fn viewmodel_recoil_kick(
     mut events: MessageReader<crate::systems::ShotFiredEvent>,
     mut query: Query<&mut FirstPersonWeapon>,
 ) {
-    for _ in events.read() {
+    for shot in events.read() {
+        if !shot.is_local {
+            continue;
+        }
         for mut weapon in query.iter_mut() {
             // Kick backwards along Z
             weapon.recoil_pos += Vec3::new(0.0, 0.015, 0.05);

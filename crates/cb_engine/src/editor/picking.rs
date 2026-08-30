@@ -7,27 +7,37 @@ pub struct EditorPickingPlugin;
 
 impl Plugin for EditorPickingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, handle_picking.run_if(in_state(EngineState::Edit)).in_set(super::EditorSet::Picking));
+        app.add_systems(
+            Update,
+            handle_picking
+                .run_if(in_state(EngineState::Edit))
+                .in_set(super::EditorSet::Picking),
+        );
     }
 }
 
 #[derive(Component)]
 pub struct Selected;
 
-fn ray_sphere_intersect(ray_origin: Vec3, ray_dir: Vec3, sphere_center: Vec3, sphere_radius: f32) -> Option<f32> {
+fn ray_sphere_intersect(
+    ray_origin: Vec3,
+    ray_dir: Vec3,
+    sphere_center: Vec3,
+    sphere_radius: f32,
+) -> Option<f32> {
     let v = ray_origin - sphere_center;
     let b = 2.0 * ray_dir.dot(v);
     let c = v.length_squared() - sphere_radius * sphere_radius;
     let discriminant = b * b - 4.0 * c;
-    
+
     if discriminant < 0.0 {
         return None;
     }
-    
+
     let sqrt_d = discriminant.sqrt();
     let t1 = (-b - sqrt_d) / 2.0;
     let t2 = (-b + sqrt_d) / 2.0;
-    
+
     if t1 >= 0.0 {
         Some(t1)
     } else if t2 >= 0.0 {
@@ -41,7 +51,14 @@ fn handle_picking(
     mut commands: Commands,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     q_camera: Query<(&Camera, &GlobalTransform), With<EditorCamera>>,
-    q_objects: Query<(Entity, &GlobalTransform, Option<&super::serialization::NetworkId>), With<super::serialization::SceneObject>>,
+    q_objects: Query<
+        (
+            Entity,
+            &GlobalTransform,
+            Option<&super::serialization::NetworkId>,
+        ),
+        With<super::serialization::SceneObject>,
+    >,
     q_selected: Query<(Entity, Option<&super::serialization::NetworkId>), With<Selected>>,
     active_gizmo: Res<crate::editor::gizmos::ActiveGizmo>,
     viewport_state: Res<super::ui::EditorViewportState>,
@@ -60,7 +77,9 @@ fn handle_picking(
         return;
     }
 
-    let Ok((camera, camera_transform)) = q_camera.single() else { return };
+    let Ok((camera, camera_transform)) = q_camera.single() else {
+        return;
+    };
 
     let ndc = Vec2::new(
         viewport_state.normalized_mouse_pos.x * 2.0 - 1.0,
@@ -90,8 +109,8 @@ fn handle_picking(
     for (entity, transform, net_id_opt) in q_objects.iter() {
         let center = transform.translation();
         // A generic radius for picking meshes and icons
-        let radius = 1.0; 
-        
+        let radius = 1.0;
+
         if let Some(t) = ray_sphere_intersect(ray_origin, ray_dir, center, radius) {
             if t < min_t {
                 min_t = t;

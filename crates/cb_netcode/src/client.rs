@@ -42,6 +42,9 @@ impl Plugin for ClientNetPlugin {
             send_save_scene,
             send_load_scene,
             send_clear_scene,
+            broadcast_damage_events,
+            broadcast_shot_events,
+            broadcast_respawn_events,
         ));
     }
 }
@@ -49,28 +52,28 @@ impl Plugin for ClientNetPlugin {
 pub fn auto_reconnect(
     mut commands: Commands,
     q_disconnected: Query<Entity, Added<lightyear::prelude::Disconnected>>,
-    mut connect_events: bevy::prelude::MessageWriter<cb_engine::editor::serialization::ConnectToServerEvent>,
 ) {
     for client_entity in q_disconnected.iter() {
-        info!("Client connection dropped! Auto-reconnecting in next frame...");
+        info!("Client disconnected from server. Running in standalone mode.");
         commands.entity(client_entity).despawn();
-        connect_events.write(cb_engine::editor::serialization::ConnectToServerEvent);
     }
 }
 
 pub fn request_initial_sync(
-    mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>, Added<MessageSender<crate::protocol::EditorAction>>>,
+    mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>>,
+    q_connected: Query<Entity, Added<lightyear::prelude::Connected>>,
 ) {
-    for mut sender in senders.iter_mut() {
-        info!("Client: Requesting full initial scene sync from server...");
-        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::RequestFullSync);
+    if !q_connected.is_empty() {
+        info!("Client: Connected to server! Requesting full initial scene sync...");
+        for mut sender in senders.iter_mut() {
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::RequestFullSync);
+        }
     }
 }
 
 fn connect_client(
     mut commands: Commands,
     mut events: bevy::prelude::MessageReader<cb_engine::editor::serialization::ConnectToServerEvent>,
-    q_local_objects: Query<Entity, (With<cb_engine::editor::serialization::SceneObject>, Without<lightyear::prelude::Replicated>)>,
     q_existing_clients: Query<Entity, With<NetcodeClient>>,
 ) {
     for _ in events.read() {
@@ -81,10 +84,7 @@ fn connect_client(
             }
         }
 
-        info!("Connecting to server and syncing server scene data...");
-        for entity in q_local_objects.iter() {
-            commands.entity(entity).despawn();
-        }
+        info!("Connecting to server (port 5000)...");
         let server_addr = SocketAddr::new(Ipv4Addr::LOCALHOST.into(), 5000);
         let client_addr = SocketAddr::new(Ipv4Addr::UNSPECIFIED.into(), 0);
 
@@ -240,37 +240,42 @@ pub fn handle_remote_editor_actions(
     session: Res<cb_engine::editor::serialization::LocalEditorSession>,
 ) {
     for mut receiver in receivers.iter_mut() {
-        while let Some(message) = receiver.receive().next() {
+        for message in receiver.receive() {
             match message {
                 crate::protocol::EditorAction::RequestFullSync => {}
                 crate::protocol::EditorAction::FullSceneSync { objects } => {
                     info!("Client: Received FullSceneSync with {} objects", objects.len());
-                    for (entity, _, _) in query_objects.iter() {
-                        commands.entity(entity).despawn();
-                    }
-                    for obj in objects {
-                        let mut entity_cmds = commands.spawn((
-                            cb_engine::editor::serialization::SceneObject {
-                                object_type: obj.object_type,
-                                asset_path: obj.asset_path,
-                            },
-                            cb_engine::editor::serialization::NetworkId(obj.id),
-                            obj.transform,
-                            GlobalTransform::default(),
-                        ));
-                        if let Some(name) = obj.name {
-                            entity_cmds.insert(Name::new(name));
+                    commands.queue(move |world: &mut World| {
+                        let mut q = world.query_filtered::<Entity, (Or<(With<cb_engine::editor::serialization::SceneObject>, With<cb_engine::editor::serialization::NetworkId>)>, Without<cb_engine::player::Player>, Without<cb_engine::player::PlayerCamera>)>();
+                        let to_despawn: Vec<Entity> = q.iter(world).collect();
+                        for e in to_despawn {
+                            if let Ok(entity_mut) = world.get_entity_mut(e) {
+                                entity_mut.despawn();
+                            }
                         }
-                        if let Some(lock_user_id) = obj.lock_user_id {
-                            entity_cmds.insert(cb_engine::editor::serialization::EditorLock { user_id: lock_user_id });
+
+                        for obj in objects {
+                            let entity = world.spawn((
+                                cb_engine::editor::serialization::SceneObject {
+                                    object_type: obj.object_type,
+                                    asset_path: obj.asset_path,
+                                },
+                                cb_engine::editor::serialization::NetworkId(obj.id),
+                                obj.transform,
+                                GlobalTransform::default(),
+                            )).id();
+
+                            if let Some(name) = obj.name {
+                                world.entity_mut(entity).insert(Name::new(name));
+                            }
+                            if let Some(lock_user_id) = obj.lock_user_id {
+                                world.entity_mut(entity).insert(cb_engine::editor::serialization::EditorLock { user_id: lock_user_id });
+                            }
+                            for (type_path, ron_data) in obj.components {
+                                let _ = cb_engine::editor::serialization::apply_component_ron(world, entity, &type_path, &ron_data);
+                            }
                         }
-                        let entity_id = entity_cmds.id();
-                        for (type_path, ron_data) in obj.components {
-                            commands.queue(move |world: &mut World| {
-                                let _ = cb_engine::editor::serialization::apply_component_ron(world, entity_id, &type_path, &ron_data);
-                            });
-                        }
-                    }
+                    });
                 }
                 crate::protocol::EditorAction::MoveObject { id, transform, sender_user_id } => {
                     if sender_user_id == session.client_id {
@@ -398,15 +403,20 @@ pub fn handle_remote_editor_actions(
                 }
                 crate::protocol::EditorAction::LoadScene { path, scene_ron } => {
                     info!("Client: Received LoadScene for '{}' ({} bytes)", path, scene_ron.len());
-                    for (entity, _, _) in query_objects.iter() {
-                        commands.entity(entity).despawn();
-                    }
-                    commands.insert_resource(cb_engine::editor::serialization::ActiveSceneState {
-                        current_path: Some(path.clone()),
-                        is_dirty: false,
-                    });
                     let scene_ron_clone = scene_ron.clone();
+                    let path_clone = path.clone();
                     commands.queue(move |world: &mut World| {
+                        let mut q = world.query_filtered::<Entity, (Or<(With<cb_engine::editor::serialization::SceneObject>, With<cb_engine::editor::serialization::NetworkId>)>, Without<cb_engine::player::Player>, Without<cb_engine::player::PlayerCamera>)>();
+                        let to_despawn: Vec<Entity> = q.iter(world).collect();
+                        for e in to_despawn {
+                            if let Ok(entity_mut) = world.get_entity_mut(e) {
+                                entity_mut.despawn();
+                            }
+                        }
+                        world.insert_resource(cb_engine::editor::serialization::ActiveSceneState {
+                            current_path: Some(path_clone),
+                            is_dirty: false,
+                        });
                         let type_registry_arc = world.resource::<AppTypeRegistry>().0.clone();
                         let type_registry = type_registry_arc.read();
                         if let Ok(mut deserializer) = ron::de::Deserializer::from_str(&scene_ron_clone) {
@@ -424,12 +434,18 @@ pub fn handle_remote_editor_actions(
                 }
                 crate::protocol::EditorAction::ClearScene => {
                     info!("Client: Received ClearScene from server");
-                    for (entity, _, _) in query_objects.iter() {
-                        commands.entity(entity).despawn();
-                    }
-                    commands.insert_resource(cb_engine::editor::serialization::ActiveSceneState {
-                        current_path: None,
-                        is_dirty: false,
+                    commands.queue(move |world: &mut World| {
+                        let mut q = world.query_filtered::<Entity, (Or<(With<cb_engine::editor::serialization::SceneObject>, With<cb_engine::editor::serialization::NetworkId>)>, Without<cb_engine::player::Player>, Without<cb_engine::player::PlayerCamera>)>();
+                        let to_despawn: Vec<Entity> = q.iter(world).collect();
+                        for e in to_despawn {
+                            if let Ok(entity_mut) = world.get_entity_mut(e) {
+                                entity_mut.despawn();
+                            }
+                        }
+                        world.insert_resource(cb_engine::editor::serialization::ActiveSceneState {
+                            current_path: None,
+                            is_dirty: false,
+                        });
                     });
                 }
                 crate::protocol::EditorAction::UpdateEditorCamera { user_id, transform } => {
@@ -457,8 +473,8 @@ pub fn handle_remote_editor_actions(
                         });
                     }
                 }
-                crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch }
-                    if user_id != session.client_id => {
+                crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch } => {
+                    if user_id != session.client_id {
                         commands.queue(move |world: &mut World| {
                             let mut target = None;
                             let mut q = world.query::<(Entity, &mut cb_engine::player::RemotePlayer)>();
@@ -473,6 +489,12 @@ pub fn handle_remote_editor_actions(
                                 if let Some(mut tf) = world.get_mut::<Transform>(e) {
                                     *tf = transform;
                                 }
+                                if let Some(mut pos) = world.get_mut::<avian3d::prelude::Position>(e) {
+                                    pos.0 = transform.translation;
+                                }
+                                if let Some(mut rot) = world.get_mut::<avian3d::prelude::Rotation>(e) {
+                                    rot.0 = transform.rotation;
+                                }
                             } else {
                                 world.spawn((
                                     cb_engine::player::RemotePlayer { user_id, pitch },
@@ -482,6 +504,137 @@ pub fn handle_remote_editor_actions(
                             }
                         });
                     }
+                }
+                crate::protocol::EditorAction::PlayerHit { victim_user_id, attacker_user_id, damage, hit_point, hit_normal } => {
+                    if victim_user_id == session.client_id {
+                        info!("Client: I took {} damage from player {}!", damage, attacker_user_id);
+                        commands.queue(move |world: &mut World| {
+                            let mut q = world.query_filtered::<Entity, With<cb_engine::player::Player>>();
+                            if let Some(player_entity) = q.iter(world).next() {
+                                world.write_message(cb_weapons::ballistics::DamageEvent {
+                                    target: player_entity,
+                                    amount: damage,
+                                    point: hit_point,
+                                    normal: hit_normal,
+                                });
+                                world.write_message(cb_weapons::ballistics::HitVfxEvent {
+                                    point: hit_point,
+                                    normal: hit_normal,
+                                    hit_entity: player_entity,
+                                });
+                            }
+                        });
+                    } else if attacker_user_id != session.client_id {
+                        commands.queue(move |world: &mut World| {
+                            let mut target = None;
+                            let mut q = world.query::<(Entity, &cb_engine::player::RemotePlayer)>();
+                            for (e, rp) in q.iter(world) {
+                                if rp.user_id == victim_user_id {
+                                    target = Some(e);
+                                    break;
+                                }
+                            }
+                            if let Some(target_entity) = target {
+                                world.write_message(cb_weapons::ballistics::DamageEvent {
+                                    target: target_entity,
+                                    amount: damage,
+                                    point: hit_point,
+                                    normal: hit_normal,
+                                });
+                                world.write_message(cb_weapons::ballistics::HitVfxEvent {
+                                    point: hit_point,
+                                    normal: hit_normal,
+                                    hit_entity: target_entity,
+                                });
+                            }
+                        });
+                    }
+                }
+                crate::protocol::EditorAction::DamageNetworkObject { id, damage, hit_point, hit_normal } => {
+                    commands.queue(move |world: &mut World| {
+                        let mut target = None;
+                        let mut q = world.query::<(Entity, &cb_engine::editor::serialization::NetworkId)>();
+                        for (e, nid) in q.iter(world) {
+                            if nid.0 == id {
+                                target = Some(e);
+                                break;
+                            }
+                        }
+                        if let Some(target_entity) = target {
+                            world.write_message(cb_weapons::ballistics::DamageEvent {
+                                target: target_entity,
+                                amount: damage,
+                                point: hit_point,
+                                normal: hit_normal,
+                            });
+                            world.write_message(cb_weapons::ballistics::HitVfxEvent {
+                                point: hit_point,
+                                normal: hit_normal,
+                                hit_entity: target_entity,
+                            });
+                        }
+                    });
+                }
+                crate::protocol::EditorAction::PlayerFired { user_id, origin, direction } => {
+                    if user_id != session.client_id {
+                        commands.queue(move |world: &mut World| {
+                            let mut target_player = None;
+                            let mut q_rp = world.query::<(Entity, &cb_engine::player::RemotePlayer)>();
+                            for (e, rp) in q_rp.iter(world) {
+                                if rp.user_id == user_id {
+                                    target_player = Some(e);
+                                    break;
+                                }
+                            }
+                            if let Some(shooter) = target_player {
+                                // Find gun child
+                                let mut final_gun = shooter;
+                                let mut q_descendants = world.query::<&Children>();
+                                let mut stack = vec![shooter];
+                                while let Some(curr) = stack.pop() {
+                                    if world.get::<cb_engine::player::RemotePlayerGun>(curr).is_some() {
+                                        final_gun = curr;
+                                        break;
+                                    }
+                                    if let Ok(children) = q_descendants.get(world, curr) {
+                                        for child in children.iter() {
+                                            stack.push(child);
+                                        }
+                                    }
+                                }
+
+                                world.write_message(cb_weapons::systems::ShotFiredEvent {
+                                    shooter,
+                                    weapon: final_gun,
+                                    origin,
+                                    direction,
+                                    spread_rad: 0.0,
+                                    is_local: false,
+                                });
+                            }
+                        });
+                    }
+                }
+                crate::protocol::EditorAction::PlayerRespawned { user_id } => {
+                    if user_id != session.client_id {
+                        commands.queue(move |world: &mut World| {
+                            let mut target_player = None;
+                            let mut q_rp = world.query::<(Entity, &cb_engine::player::RemotePlayer)>();
+                            for (e, rp) in q_rp.iter(world) {
+                                if rp.user_id == user_id {
+                                    target_player = Some(e);
+                                    break;
+                                }
+                            }
+                            if let Some(target_entity) = target_player {
+                                if let Some(mut health) = world.get_mut::<cb_weapons::components::Health>(target_entity) {
+                                    health.current = health.max;
+                                }
+                                world.entity_mut(target_entity).insert(avian3d::prelude::Collider::capsule(0.35, 1.0));
+                            }
+                        });
+                    }
+                }
                 _ => {}
             }
         }
@@ -536,12 +689,16 @@ pub fn cleanup_remote_players_on_exit(
 
 pub fn send_save_scene(
     mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>>,
-    mut save_events: bevy::prelude::MessageReader<cb_engine::editor::serialization::SaveSceneEvent>,
+    mut save_events: bevy::prelude::MessageReader<cb_engine::editor::serialization::SceneSavedEvent>,
 ) {
-    for mut sender in senders.iter_mut() {
-        for ev in save_events.read() {
-            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::SaveScene {
+    let events: Vec<_> = save_events.read().cloned().collect();
+    if events.is_empty() { return; }
+    for ev in events {
+        info!("Client: Broadcasting saved/generated scene '{}' ({} bytes) to sync all editors", ev.0, ev.1.len());
+        for mut sender in senders.iter_mut() {
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LoadScene {
                 path: ev.0.clone(),
+                scene_ron: ev.1.clone(),
             });
         }
     }
@@ -551,12 +708,15 @@ pub fn send_load_scene(
     mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>>,
     mut load_events: bevy::prelude::MessageReader<cb_engine::editor::serialization::LoadSceneEvent>,
 ) {
-    for mut sender in senders.iter_mut() {
-        for ev in load_events.read() {
-            if let Ok(data) = std::fs::read_to_string(&ev.0) {
+    let events: Vec<_> = load_events.read().cloned().collect();
+    if events.is_empty() { return; }
+    for ev in events {
+        if let Ok(data) = std::fs::read_to_string(&ev.0) {
+            info!("Client: Broadcasting LoadScene for '{}' ({} bytes) over network to sync all editors", ev.0, data.len());
+            for mut sender in senders.iter_mut() {
                 sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LoadScene {
                     path: ev.0.clone(),
-                    scene_ron: data,
+                    scene_ron: data.clone(),
                 });
             }
         }
@@ -567,9 +727,78 @@ pub fn send_clear_scene(
     mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>>,
     mut clear_events: bevy::prelude::MessageReader<cb_engine::editor::serialization::ClearSceneEvent>,
 ) {
-    for mut sender in senders.iter_mut() {
-        for _ in clear_events.read() {
+    let events: Vec<_> = clear_events.read().cloned().collect();
+    if events.is_empty() { return; }
+    for _ in events {
+        for mut sender in senders.iter_mut() {
             sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::ClearScene);
+        }
+    }
+}
+
+pub fn broadcast_shot_events(
+    session: Res<cb_engine::editor::serialization::LocalEditorSession>,
+    mut shot_events: MessageReader<cb_weapons::systems::ShotFiredEvent>,
+    mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>>,
+) {
+    for ev in shot_events.read() {
+        if ev.is_local {
+            for mut sender in senders.iter_mut() {
+                sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::PlayerFired {
+                    user_id: session.client_id,
+                    origin: ev.origin,
+                    direction: ev.direction,
+                });
+            }
+        }
+    }
+}
+
+pub fn broadcast_respawn_events(
+    session: Res<cb_engine::editor::serialization::LocalEditorSession>,
+    mut respawn_events: MessageReader<cb_engine::player::PlayerRespawnedEvent>,
+    mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>>,
+) {
+    if respawn_events.read().next().is_some() {
+        for mut sender in senders.iter_mut() {
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::PlayerRespawned {
+                user_id: session.client_id,
+            });
+        }
+    }
+}
+
+pub fn broadcast_damage_events(
+    session: Res<cb_engine::editor::serialization::LocalEditorSession>,
+    mut damage_events: MessageReader<cb_weapons::ballistics::DamageEvent>,
+    q_remote: Query<&cb_engine::player::RemotePlayer>,
+    q_net_id: Query<&cb_engine::editor::serialization::NetworkId>,
+    mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>>,
+) {
+    let events: Vec<_> = damage_events.read().cloned().collect();
+    if events.is_empty() { return; }
+    for ev in events {
+        if let Ok(remote_player) = q_remote.get(ev.target) {
+            info!("Client: Sending PlayerHit on RemotePlayer (victim={}, damage={})", remote_player.user_id, ev.amount);
+            for mut sender in senders.iter_mut() {
+                sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::PlayerHit {
+                    victim_user_id: remote_player.user_id,
+                    attacker_user_id: session.client_id,
+                    damage: ev.amount,
+                    hit_point: ev.point,
+                    hit_normal: ev.normal,
+                });
+            }
+        } else if let Ok(net_id) = q_net_id.get(ev.target) {
+            info!("Client: Sending DamageNetworkObject on id={} (damage={})", net_id.0, ev.amount);
+            for mut sender in senders.iter_mut() {
+                sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::DamageNetworkObject {
+                    id: net_id.0,
+                    damage: ev.amount,
+                    hit_point: ev.point,
+                    hit_normal: ev.normal,
+                });
+            }
         }
     }
 }

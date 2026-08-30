@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use serde::{Serialize, Deserialize};
 
-/// Scalar representation of "flow" — chaining tactical moves increases this.
+/// Scalar representation of "flow" -- chaining tactical moves increases this.
 /// It gates: animation speed multipliers, slide jump bonus, input buffer windows.
 #[derive(Default, Debug, Reflect, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Momentum {
-    /// 0.0 = no flow … 1.0 = full flow
+    /// 0.0 = no flow   1.0 = full flow
     pub flow:           f32,
     /// Velocity carried through a parkour transition
     pub carry_velocity: Vec3,

@@ -105,7 +105,7 @@ pub fn handle_editor_actions(
     mut query_objects: Query<(Entity, &cb_engine::editor::serialization::NetworkId, &mut Transform, Option<&cb_engine::editor::serialization::SceneObject>, Option<&cb_engine::editor::serialization::EditorLock>)>,
 ) {
     for (receiver_entity, mut receiver) in receivers.iter_mut() {
-        while let Some(action) = receiver.receive().next() {
+        for action in receiver.receive() {
             match action {
                 crate::protocol::EditorAction::SpawnObject { id, object_type, asset_path, transform } => {
                     info!("Server: Received SpawnObject id={} type={}", id, object_type);
@@ -273,6 +273,45 @@ pub fn handle_editor_actions(
                         sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch });
                     }
                 },
+                crate::protocol::EditorAction::PlayerHit { victim_user_id, attacker_user_id, damage, hit_point, hit_normal } => {
+                    info!("Server: Relaying PlayerHit (victim={}, attacker={}, damage={})", victim_user_id, attacker_user_id, damage);
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::PlayerHit {
+                            victim_user_id,
+                            attacker_user_id,
+                            damage,
+                            hit_point,
+                            hit_normal,
+                        });
+                    }
+                },
+                crate::protocol::EditorAction::DamageNetworkObject { id, damage, hit_point, hit_normal } => {
+                    info!("Server: Relaying DamageNetworkObject (id={}, damage={})", id, damage);
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::DamageNetworkObject {
+                            id,
+                            damage,
+                            hit_point,
+                            hit_normal,
+                        });
+                    }
+                },
+                crate::protocol::EditorAction::PlayerFired { user_id, origin, direction } => {
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::PlayerFired {
+                            user_id,
+                            origin,
+                            direction,
+                        });
+                    }
+                },
+                crate::protocol::EditorAction::PlayerRespawned { user_id } => {
+                    for (_sender_entity, mut sender) in senders.iter_mut() {
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::PlayerRespawned {
+                            user_id,
+                        });
+                    }
+                },
                 crate::protocol::EditorAction::RequestFullSync => {
                     commands.queue(move |world: &mut World| {
                         let type_registry_arc = world.resource::<AppTypeRegistry>().0.clone();
@@ -309,13 +348,21 @@ pub fn handle_editor_actions(
                             }
                         }
 
-                        let mut senders_query = world.query::<(Entity, &mut MessageSender<crate::protocol::EditorAction>)>();
-                        for (sender_entity, mut sender) in senders_query.iter_mut(world) {
-                            if sender_entity == receiver_entity {
-                                info!("Server: Sending FullSceneSync ({} objects with all components) to client {}", sync_objects.len(), receiver_entity.to_bits());
+                        let sync_count = sync_objects.len();
+                        if let Some(mut sender) = world.get_mut::<MessageSender<crate::protocol::EditorAction>>(receiver_entity) {
+                            if sync_count > 0 {
+                                info!("Server: Sending FullSceneSync ({} objects with all components) to client {}", sync_count, receiver_entity.to_bits());
                                 sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::FullSceneSync {
-                                    objects: sync_objects.clone(),
+                                    objects: sync_objects,
                                 });
+                            } else if std::path::Path::new("level.ron").exists() {
+                                if let Ok(scene_ron) = std::fs::read_to_string("level.ron") {
+                                    info!("Server: sync_objects was empty, reading level.ron from disk ({} bytes) and serving LoadScene to client", scene_ron.len());
+                                    sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LoadScene {
+                                        path: "level.ron".to_string(),
+                                        scene_ron,
+                                    });
+                                }
                             }
                         }
                     });
@@ -328,11 +375,16 @@ pub fn handle_editor_actions(
                 },
                 crate::protocol::EditorAction::LoadScene { path, scene_ron } => {
                     info!("Server: Received LoadScene for '{}' ({} bytes). Syncing to server world and all clients...", path, scene_ron.len());
-                    for (entity, _, _, _, _) in query_objects.iter() {
-                        commands.entity(entity).despawn();
-                    }
+                    let _ = std::fs::write(&path, &scene_ron);
                     let scene_ron_clone = scene_ron.clone();
                     commands.queue(move |world: &mut World| {
+                        let mut q = world.query_filtered::<Entity, (Or<(With<cb_engine::editor::serialization::SceneObject>, With<cb_engine::editor::serialization::NetworkId>)>, Without<cb_engine::player::Player>, Without<cb_engine::player::PlayerCamera>)>();
+                        let to_despawn: Vec<Entity> = q.iter(world).collect();
+                        for e in to_despawn {
+                            if let Ok(entity_mut) = world.get_entity_mut(e) {
+                                entity_mut.despawn();
+                            }
+                        }
                         let type_registry_arc = world.resource::<AppTypeRegistry>().0.clone();
                         let type_registry = type_registry_arc.read();
                         if let Ok(mut deserializer) = ron::de::Deserializer::from_str(&scene_ron_clone) {
@@ -358,9 +410,15 @@ pub fn handle_editor_actions(
                 },
                 crate::protocol::EditorAction::ClearScene => {
                     info!("Server: Received ClearScene. Clearing server world and relaying to clients...");
-                    for (entity, _, _, _, _) in query_objects.iter() {
-                        commands.entity(entity).despawn();
-                    }
+                    commands.queue(move |world: &mut World| {
+                        let mut q = world.query_filtered::<Entity, (Or<(With<cb_engine::editor::serialization::SceneObject>, With<cb_engine::editor::serialization::NetworkId>)>, Without<cb_engine::player::Player>, Without<cb_engine::player::PlayerCamera>)>();
+                        let to_despawn: Vec<Entity> = q.iter(world).collect();
+                        for e in to_despawn {
+                            if let Ok(entity_mut) = world.get_entity_mut(e) {
+                                entity_mut.despawn();
+                            }
+                        }
+                    });
                     for (sender_entity, mut sender) in senders.iter_mut() {
                         if sender_entity != receiver_entity {
                             sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::ClearScene);

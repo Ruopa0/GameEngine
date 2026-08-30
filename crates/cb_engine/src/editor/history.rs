@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::serialization::{EditorActionRequest, NetworkId, SceneObject};
+use bevy::prelude::*;
 
 // ---------------------------------------------------------------------------------
 // EDITOR UNDO / REDO HISTORY SYSTEM (COMMAND PATTERN)
@@ -165,7 +165,13 @@ fn handle_undo_events(
                         }
                     }
                 }
-                EditorCommand::Spawn { id, object_type: _, asset_path: _, transform: _, name: _ } => {
+                EditorCommand::Spawn {
+                    id,
+                    object_type: _,
+                    asset_path: _,
+                    transform: _,
+                    name: _,
+                } => {
                     // Undo spawn -> Despawn the spawned entity
                     for (entity, net_id, _, _) in q_objects.iter() {
                         if net_id.0 == *id {
@@ -174,7 +180,13 @@ fn handle_undo_events(
                         }
                     }
                 }
-                EditorCommand::Despawn { id, object_type, asset_path, transform, name } => {
+                EditorCommand::Despawn {
+                    id,
+                    object_type,
+                    asset_path,
+                    transform,
+                    name,
+                } => {
                     // Undo despawn -> Respawn the entity with same NetworkId and Transform
                     let mut entity_cmds = commands.spawn((
                         SceneObject {
@@ -195,7 +207,11 @@ fn handle_undo_events(
                         transform: *transform,
                     });
                 }
-                EditorCommand::Reparent { child_id, old_parent_id, new_parent_id: _ } => {
+                EditorCommand::Reparent {
+                    child_id,
+                    old_parent_id,
+                    new_parent_id: _,
+                } => {
                     // Revert child parent to old_parent_id
                     let mut child_entity = None;
                     let mut old_parent_entity = None;
@@ -252,7 +268,13 @@ fn handle_redo_events(
                         }
                     }
                 }
-                EditorCommand::Spawn { id, object_type, asset_path, transform, name } => {
+                EditorCommand::Spawn {
+                    id,
+                    object_type,
+                    asset_path,
+                    transform,
+                    name,
+                } => {
                     // Redo spawn -> Respawn the entity
                     let mut entity_cmds = commands.spawn((
                         SceneObject {
@@ -273,7 +295,13 @@ fn handle_redo_events(
                         transform: *transform,
                     });
                 }
-                EditorCommand::Despawn { id, object_type: _, asset_path: _, transform: _, name: _ } => {
+                EditorCommand::Despawn {
+                    id,
+                    object_type: _,
+                    asset_path: _,
+                    transform: _,
+                    name: _,
+                } => {
                     // Redo despawn -> Remove the entity
                     for (entity, net_id, _, _) in q_objects.iter() {
                         if net_id.0 == *id {
@@ -282,7 +310,11 @@ fn handle_redo_events(
                         }
                     }
                 }
-                EditorCommand::Reparent { child_id, old_parent_id: _, new_parent_id } => {
+                EditorCommand::Reparent {
+                    child_id,
+                    old_parent_id: _,
+                    new_parent_id,
+                } => {
                     // Re-apply child parent to new_parent_id
                     let mut child_entity = None;
                     let mut new_parent_entity = None;

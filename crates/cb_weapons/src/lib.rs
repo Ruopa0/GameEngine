@@ -1,12 +1,12 @@
 #![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::empty_line_after_doc_comments, clippy::if_same_then_else)]
-/// cb_weapons — Weapon system: ECS components, fire modes, ballistics, recoil.
+/// cb_weapons -- Weapon system: ECS components, fire modes, ballistics, recoil.
 ///
 /// Architecture:
-///   WeaponConfig      — static weapon definition (fire rate, damage, etc.)
-///   Magazine          — current ammo state
-///   RecoilPattern     — COD-style deterministic recoil sequence
-///   Spread            — bloom / accuracy model
-///   WeaponPlugin      — wires all weapon systems into Bevy
+///   WeaponConfig      -- static weapon definition (fire rate, damage, etc.)
+///   Magazine          -- current ammo state
+///   RecoilPattern     -- COD-style deterministic recoil sequence
+///   Spread            -- bloom / accuracy model
+///   WeaponPlugin      -- wires all weapon systems into Bevy
 
 pub mod components;
 pub mod systems;
@@ -31,6 +31,7 @@ impl Plugin for WeaponsPlugin {
             .register_type::<Spread>()
             .register_type::<Health>()
             .register_type::<health::ImmortalPlayer>()
+            .register_type::<health::DespawnDelay>()
             .add_message::<systems::ShotFiredEvent>()
             .add_message::<ballistics::DamageEvent>()
             .add_message::<ballistics::HitVfxEvent>()
@@ -41,6 +42,7 @@ impl Plugin for WeaponsPlugin {
                 ballistics::process_hitscan,
                 ballistics::process_projectiles,
                 health::process_damage,
+                health::update_despawn_delays,
             ).chain());
     }
 }

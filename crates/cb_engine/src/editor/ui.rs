@@ -86,80 +86,80 @@ pub const COMPONENT_CATALOG: &[ComponentMeta] = &[
     ComponentMeta {
         type_path: "avian3d::dynamics::rigid_body::RigidBody",
         name: "Physical Body",
-        icon: "🧱",
-        category: "⚡ Physics & Motion",
+        icon: "[RigidBody]",
+        category: "Physics & Motion",
         description: "Enables realistic physics, gravity, and collisions (Dynamic, Static, or Kinematic).",
         keywords: &["physics", "rigid", "body", "dynamic", "static", "collision", "gravity"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::rigid_body::GravityScale",
         name: "Gravity Multiplier",
-        icon: "🌍",
-        category: "⚡ Physics & Motion",
+        icon: "    ",
+        category: "Physics & Motion",
         description: "Controls how strongly gravity pulls this object down (or floats up).",
         keywords: &["gravity", "fall", "float", "weight", "pull"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::material::Restitution",
         name: "Bounciness (Restitution)",
-        icon: "🏀",
-        category: "⚡ Physics & Motion",
+        icon: "    ",
+        category: "Physics & Motion",
         description: "Controls elasticity and how high the object bounces when hitting surfaces.",
         keywords: &["bounce", "elastic", "restitution", "rebound", "jump"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::material::Friction",
         name: "Surface Friction",
-        icon: "🛹",
-        category: "⚡ Physics & Motion",
+        icon: "[Friction]",
+        category: "Physics & Motion",
         description: "Controls grip and sliding resistance when contacting other objects.",
         keywords: &["friction", "slide", "grip", "rough", "ice", "skate"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::rigid_body::Mass",
         name: "Mass & Weight",
-        icon: "⚖️",
-        category: "⚡ Physics & Motion",
+        icon: "      ",
+        category: "Physics & Motion",
         description: "Sets the physical mass and resistance to acceleration.",
         keywords: &["mass", "weight", "heavy", "light", "kg"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::rigid_body::LinearVelocity",
         name: "Movement Velocity",
-        icon: "🚀",
-        category: "⚡ Physics & Motion",
+        icon: "[Velocity]",
+        category: "Physics & Motion",
         description: "Initial movement speed and direction vector in 3D space.",
         keywords: &["velocity", "speed", "movement", "direction", "impulse"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::rigid_body::AngularVelocity",
         name: "Spin Velocity",
-        icon: "🔄",
-        category: "⚡ Physics & Motion",
+        icon: "[Angular]",
+        category: "Physics & Motion",
         description: "Rotational spin speed around X, Y, and Z axes.",
         keywords: &["spin", "rotation", "angular", "turn", "roll"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::rigid_body::LinearDamping",
         name: "Air Drag (Movement)",
-        icon: "🛑",
-        category: "⚡ Physics & Motion",
+        icon: "[Damping]",
+        category: "Physics & Motion",
         description: "Slows down translational movement over time (air resistance).",
         keywords: &["drag", "damping", "air", "friction", "slow"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::rigid_body::AngularDamping",
         name: "Spin Drag (Rotation)",
-        icon: "🌀",
-        category: "⚡ Physics & Motion",
+        icon: "[Spin]",
+        category: "Physics & Motion",
         description: "Slows down rotational spinning over time.",
         keywords: &["drag", "spin", "damping", "rotation"],
     },
     ComponentMeta {
         type_path: "avian3d::dynamics::rigid_body::LockedAxes",
         name: "Constrain Movement",
-        icon: "🔒",
-        category: "⚡ Physics & Motion",
+        icon: "[Lock]",
+        category: "Physics & Motion",
         description: "Locks rotation or position along specific axes (e.g. 2D platformers).",
         keywords: &["lock", "constrain", "freeze", "axis", "axes", "2d"],
     },
@@ -167,8 +167,8 @@ pub const COMPONENT_CATALOG: &[ComponentMeta] = &[
     ComponentMeta {
         type_path: "cb_engine::editor::serialization::EditorPointLight",
         name: "Point Light Source",
-        icon: "💡",
-        category: "💡 Visuals & Lights",
+        icon: "[Light]",
+        category: "Visuals & Lights",
         description: "Emits light in all directions with custom color, brightness, range, and shadows.",
         keywords: &["light", "lamp", "glow", "bulb", "illumination", "shadow", "bright"],
     },
@@ -176,8 +176,8 @@ pub const COMPONENT_CATALOG: &[ComponentMeta] = &[
     ComponentMeta {
         type_path: "cb_engine::scripting::ScriptComponent",
         name: "Behavior Script",
-        icon: "📜",
-        category: "📜 Scripting & Logic",
+        icon: "[Scene]",
+        category: "[Scene] Scripting & Logic",
         description: "Attaches a Rhai script to execute custom game logic and behaviors.",
         keywords: &["script", "code", "rhai", "behavior", "logic", "event", "program"],
     },
@@ -185,24 +185,24 @@ pub const COMPONENT_CATALOG: &[ComponentMeta] = &[
     ComponentMeta {
         type_path: "bevy_core::name::Name",
         name: "Entity Name",
-        icon: "🏷️",
-        category: "🏷️ General & Identity",
+        icon: "       ",
+        category: "        General & Identity",
         description: "Human-readable label shown in the Scene Hierarchy.",
         keywords: &["name", "label", "tag", "title", "identity"],
     },
     ComponentMeta {
         type_path: "bevy_transform::components::transform::Transform",
         name: "Transform (Position & Size)",
-        icon: "📐",
-        category: "🏷️ General & Identity",
+        icon: "    ",
+        category: "        General & Identity",
         description: "3D world position, rotation angles, and scale multiplier.",
         keywords: &["transform", "position", "rotation", "scale", "location", "place"],
     },
     ComponentMeta {
         type_path: "cb_engine::editor::serialization::TestComponent",
         name: "Test Component",
-        icon: "🧪",
-        category: "🏷️ General & Identity",
+        icon: "[Script]",
+        category: "        General & Identity",
         description: "Custom test component for experimentation.",
         keywords: &["test", "debug", "dummy"],
     },
@@ -365,7 +365,7 @@ fn sync_component_to_network<T: Component + Reflect>(
                     if let Some(reflect_comp) = registration.data::<bevy::ecs::reflect::ReflectComponent>() {
                         if let Some(reflected) = reflect_comp.reflect(entity_ref) {
                             if let Some(_reflect_ser) = registration.data::<bevy::reflect::ReflectSerialize>() {
-                                let serializer = bevy::reflect::serde::ReflectSerializer::new(reflected, &type_registry);
+                                let serializer = bevy::reflect::serde::TypedReflectSerializer::new(reflected, &type_registry);
                                 if let Ok(ron_str) = ron::to_string(&serializer) {
                                     update_to_send = Some((registration.type_info().type_path().to_string(), ron_str));
                                     break;
@@ -448,15 +448,15 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                     for (e, name, obj, net_id, lock_opt, parent, is_selected) in query.iter(self.world) {
                         let type_name = obj.map(|o| o.object_type.as_str()).unwrap_or("Object");
                         let net_tag = if let Some(nid) = net_id {
-                            format!(" [🌐 Net #{}]", nid.0 % 10000)
+                            format!(" [     Net #{}]", nid.0 % 10000)
                         } else {
                             String::new()
                         };
                         let lock_tag = if let Some(lock) = lock_opt {
                             if lock.user_id == session_client_id {
-                                " [🔒 You]".to_string()
+                                " [Locked: You]".to_string()
                             } else {
-                                format!(" [🔒 User #{:04}]", lock.user_id % 10000)
+                                format!(" [Locked: #{:04}]", lock.user_id % 10000)
                             }
                         } else {
                             String::new()
@@ -498,7 +498,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                         if children.is_empty() {
                             ui.add_space(15.0);
                         } else {
-                            if ui.button(if is_open { "▼" } else { "▶" }).clicked() {
+                            if ui.button(if is_open { "v" } else { ">" }).clicked() {
                                 is_open = !is_open;
                             }
                         }
@@ -549,7 +549,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                 if flat_nodes.is_empty() {
                     ui.vertical_centered(|ui| {
                         ui.add_space(20.0);
-                        ui.heading("Ghost Town 👻");
+                        ui.heading("Empty Scene");
                         ui.label("Your scene is completely empty.");
                         ui.label("Use the Prefabs or Assets panel below to spawn objects.");
                     });
@@ -632,18 +632,18 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                         let lock_col = super::user_color::get_user_color_egui(lock_user_id);
                         ui.vertical_centered(|ui| {
                             ui.add_space(10.0);
-                            ui.colored_label(lock_col, format!("🔒 Locked by User #{:04}", lock_user_id % 10000));
+                            ui.colored_label(lock_col, format!("[Locked] User #{:04}", lock_user_id % 10000));
                             ui.label("Editing this object is currently disabled to prevent conflicts.");
                         });
                     } else {
                         // Mode Switch Header
                         let mut current_mode = self.inspector_state.mode.clone();
                         ui.horizontal(|ui| {
-                            if ui.selectable_label(current_mode == InspectorMode::Simple, "✨ Simple Mode").clicked() {
+                            if ui.selectable_label(current_mode == InspectorMode::Simple, "Simple Mode").clicked() {
                                 self.inspector_state.mode = InspectorMode::Simple;
                                 current_mode = InspectorMode::Simple;
                             }
-                            if ui.selectable_label(current_mode == InspectorMode::Developer, "🛠️ Developer Mode").clicked() {
+                            if ui.selectable_label(current_mode == InspectorMode::Developer, "        Developer Mode").clicked() {
                                 self.inspector_state.mode = InspectorMode::Developer;
                                 current_mode = InspectorMode::Developer;
                             }
@@ -668,7 +668,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                     let net_id_opt = self.world.get::<super::serialization::NetworkId>(entity).copied();
                                     egui::Frame::group(ui.style()).show(ui, |ui| {
                                         ui.horizontal(|ui| {
-                                            ui.label(egui::RichText::new("🏷️ Entity Name:").strong());
+                                            ui.label(egui::RichText::new("        Entity Name:").strong());
                                             if ui.text_edit_singleline(&mut current_name).changed() {
                                                 name_changed = true;
                                             }
@@ -693,9 +693,9 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                     let mut current_tf = self.world.get::<Transform>(entity).copied().unwrap_or_default();
                                     egui::Frame::group(ui.style()).show(ui, |ui| {
                                         ui.horizontal(|ui| {
-                                            ui.label(egui::RichText::new("📐 Transform (Position & Size)").strong());
+                                            ui.label(egui::RichText::new("     Transform (Position & Size)").strong());
                                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                                if ui.button("↺ Reset").on_hover_text("Reset position, rotation, and scale").clicked() {
+                                                if ui.button("Reset").on_hover_text("Reset position, rotation, and scale").clicked() {
                                                     current_tf = Transform::default();
                                                     tf_changed = true;
                                                 }
@@ -719,9 +719,9 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                         let mut rot_changed = false;
                                         ui.horizontal(|ui| {
                                             ui.label("Rotation: ");
-                                            rot_changed |= ui.add(egui::DragValue::new(&mut deg_roll).prefix("X: ").suffix("°").speed(1.0)).changed();
-                                            rot_changed |= ui.add(egui::DragValue::new(&mut deg_pitch).prefix("Y: ").suffix("°").speed(1.0)).changed();
-                                            rot_changed |= ui.add(egui::DragValue::new(&mut deg_yaw).prefix("Z: ").suffix("°").speed(1.0)).changed();
+                                            rot_changed |= ui.add(egui::DragValue::new(&mut deg_roll).prefix("X: ").suffix(" deg").speed(1.0)).changed();
+                                            rot_changed |= ui.add(egui::DragValue::new(&mut deg_pitch).prefix("Y: ").suffix(" deg").speed(1.0)).changed();
+                                            rot_changed |= ui.add(egui::DragValue::new(&mut deg_yaw).prefix("Z: ").suffix(" deg").speed(1.0)).changed();
                                         });
                                         if rot_changed {
                                             current_tf.rotation = Quat::from_euler(EulerRot::XYZ, deg_roll.to_radians(), deg_pitch.to_radians(), deg_yaw.to_radians());
@@ -757,9 +757,9 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                     if has_physics {
                                         egui::Frame::group(ui.style()).show(ui, |ui| {
                                             ui.horizontal(|ui| {
-                                                ui.label(egui::RichText::new("🧱 Physics Body (Avian3D)").strong());
+                                                ui.label(egui::RichText::new("Physics Body (Avian3D)").strong());
                                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                                    if ui.button("🗑️ Remove").clicked() {
+                                                    if ui.button("        Remove").clicked() {
                                                         remove_physics = true;
                                                     }
                                                 });
@@ -782,17 +782,17 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                             // Bounciness (Restitution)
                                             let mut restitution = self.world.get::<avian3d::prelude::Restitution>(entity).map(|r| r.coefficient).unwrap_or(0.0);
                                             ui.horizontal(|ui| {
-                                                ui.label("🏀 Bounciness:");
+                                                ui.label("     Bounciness:");
                                                 if ui.add(egui::Slider::new(&mut restitution, 0.0..=1.0).text("Rebound")).changed() {
                                                     sync_component_to_network(self.world, entity, avian3d::prelude::Restitution::new(restitution));
                                                 }
                                             });
 
                                             // Surface Friction
-                                            let mut friction = self.world.get::<avian3d::prelude::Friction>(entity).map(|f| f.static_coefficient).unwrap_or(0.5);
+                                            let mut friction = self.world.get::<avian3d::prelude::Friction>(entity).map(|f| f.static_coefficient).unwrap_or(1.0);
                                             ui.horizontal(|ui| {
-                                                ui.label("🛹 Surface Friction:");
-                                                if ui.add(egui::Slider::new(&mut friction, 0.0..=1.0).text("Grip")).changed() {
+                                                ui.label("Surface Friction:");
+                                                if ui.add(egui::Slider::new(&mut friction, 0.0..=5.0).text("Grip")).changed() {
                                                     sync_component_to_network(self.world, entity, avian3d::prelude::Friction::new(friction));
                                                 }
                                             });
@@ -800,7 +800,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                             // Gravity Multiplier
                                             let mut gravity = self.world.get::<avian3d::prelude::GravityScale>(entity).map(|g| g.0).unwrap_or(1.0);
                                             ui.horizontal(|ui| {
-                                                ui.label("🌍 Gravity Scale:");
+                                                ui.label("     Gravity Scale:");
                                                 if ui.add(egui::Slider::new(&mut gravity, 0.0..=5.0).text("Multiplier")).changed() {
                                                     sync_component_to_network(self.world, entity, avian3d::prelude::GravityScale(gravity));
                                                 }
@@ -809,7 +809,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                             // Mass
                                             let mut mass = self.world.get::<avian3d::prelude::Mass>(entity).map(|m| m.0).unwrap_or(1.0);
                                             ui.horizontal(|ui| {
-                                                ui.label("⚖️ Mass (kg):");
+                                                ui.label("       Mass (kg):");
                                                 if ui.add(egui::DragValue::new(&mut mass).speed(0.1).range(0.01..=10000.0)).changed() {
                                                     sync_component_to_network(self.world, entity, avian3d::prelude::Mass(mass));
                                                 }
@@ -839,9 +839,9 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                         let mut light_changed = false;
                                         egui::Frame::group(ui.style()).show(ui, |ui| {
                                             ui.horizontal(|ui| {
-                                                ui.label(egui::RichText::new("💡 Point Light Source").strong());
+                                                ui.label(egui::RichText::new("[Light] Point Light Source").strong());
                                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                                    if ui.button("🗑️ Remove").clicked() {
+                                                    if ui.button("        Remove").clicked() {
                                                         remove_light = true;
                                                     }
                                                 });
@@ -908,13 +908,21 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                             if let Some(mat) = materials.get(&mat_handle) {
                                                 let srgba = mat.base_color.to_srgba();
                                                 current_color = [srgba.red, srgba.green, srgba.blue];
+                                            }
+                                        }
+
+                                        if let Some(ed_mat) = self.world.get::<super::serialization::EditorMaterial>(entity) {
+                                            current_roughness = ed_mat.roughness;
+                                            current_metallic = ed_mat.metallic;
+                                        } else if let Some(materials) = self.world.get_resource::<Assets<StandardMaterial>>() {
+                                            if let Some(mat) = materials.get(&mat_handle) {
                                                 current_roughness = mat.perceptual_roughness;
                                                 current_metallic = mat.metallic;
                                             }
                                         }
                                         
                                         egui::Frame::group(ui.style()).show(ui, |ui| {
-                                            ui.label(egui::RichText::new("🎨 Material & Color").strong());
+                                            ui.label(egui::RichText::new("Material & Color").strong());
                                             ui.separator();
                                             
                                             ui.horizontal(|ui| {
@@ -944,11 +952,13 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                         }
                                         
                                         if mat_changed {
-                                            if let Some(mut materials) = self.world.get_resource_mut::<Assets<StandardMaterial>>() {
-                                                if let Some(mat) = materials.get_mut(&mat_handle) {
-                                                    mat.perceptual_roughness = current_roughness;
-                                                    mat.metallic = current_metallic;
-                                                }
+                                            let new_mat = super::serialization::EditorMaterial {
+                                                roughness: current_roughness,
+                                                metallic: current_metallic,
+                                            };
+                                            self.world.entity_mut(entity).insert(new_mat.clone());
+                                            if ui.input(|i| i.pointer.any_released()) {
+                                                sync_component_to_network(self.world, entity, new_mat);
                                             }
                                         }
                                         ui.add_space(6.0);
@@ -962,9 +972,9 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                         let mut script_changed = false;
                                         egui::Frame::group(ui.style()).show(ui, |ui| {
                                             ui.horizontal(|ui| {
-                                                ui.label(egui::RichText::new("📜 Behavior Script (Rhai)").strong());
+                                                ui.label(egui::RichText::new("[Scene] Behavior Script (Rhai)").strong());
                                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                                    if ui.button("🗑️ Remove").clicked() {
+                                                    if ui.button("        Remove").clicked() {
                                                         remove_script = true;
                                                     }
                                                 });
@@ -977,10 +987,10 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                             });
 
                                             ui.add_space(4.0);
-                                            if ui.button("📝 Open & Edit in VS Code").on_hover_text("Opens this script in VS Code with live hot-reloading!").clicked() {
+                                            if ui.button("     Open & Edit in VS Code").on_hover_text("Opens this script in VS Code with live hot-reloading!").clicked() {
                                                 open_in_vscode(&current_script.path);
                                             }
-                                            ui.label(egui::RichText::new("💡 Saving changes in VS Code hot-reloads script logic in real time.").color(egui::Color32::from_rgb(140, 190, 255)).size(11.0));
+                                            ui.label(egui::RichText::new("Tip: Saving changes in VS Code hot-reloads script logic in real time.").color(egui::Color32::from_rgb(140, 190, 255)).size(11.0));
                                         });
                                         if script_changed {
                                             sync_component_to_network(self.world, entity, current_script);
@@ -1000,18 +1010,23 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                     // 6. Prominent Add Component Button
                                     ui.add_space(10.0);
                                     ui.vertical_centered(|ui| {
-                                        if ui.add_sized([ui.available_width() * 0.95, 34.0], egui::Button::new(egui::RichText::new("➕ Add Component...").strong().size(14.0))).clicked() {
+                                        if ui.add_sized([ui.available_width() * 0.95, 34.0], egui::Button::new(egui::RichText::new("Add Component...").strong().size(14.0))).clicked() {
                                             self.inspector_state.show_add_component_modal = true;
                                         }
                                     });
                                 });
+                                
+                                let released = ui.input(|i| i.pointer.any_released() || i.key_pressed(egui::Key::Enter));
+                                if released {
+                                    sync_all_entity_components(self.world, entity);
+                                }
                             }
                         }
                     }
                 } else {
                     ui.vertical_centered(|ui| {
                         ui.add_space(20.0);
-                        ui.heading("👈 No entity selected");
+                        ui.heading("No entity selected");
                         ui.label("Select an entity in the Hierarchy to view and edit its components.");
                     });
                 }
@@ -1026,7 +1041,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                         state.viewport_size = Vec2::new(size.x, size.y);
                         
                         // Camera Controls Overlay
-                        let overlay_text = "📷 RMB: Look | WASD: Move | MMB: Pan | Shift: Sprint | F: Focus";
+                        let overlay_text = "RMB: Look | WASD: Move | MMB: Pan | Shift: Sprint | F: Focus";
                         ui.painter().text(
                             response.rect.left_bottom() + egui::vec2(10.0, -10.0),
                             egui::Align2::LEFT_BOTTOM,
@@ -1145,7 +1160,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             let fill_rect = egui::Rect::from_min_size(hp_rect.min + egui::vec2(2.0, 2.0), egui::vec2((hp_rect.width() - 4.0) * hp_pct, hp_rect.height() - 4.0));
                             let hp_col = if hp_pct > 0.5 { egui::Color32::from_rgb(40, 210, 80) } else if hp_pct > 0.25 { egui::Color32::from_rgb(230, 160, 30) } else { egui::Color32::from_rgb(230, 40, 40) };
                             painter.rect_filled(fill_rect, 3.0, hp_col);
-                            painter.text(hp_rect.center(), egui::Align2::CENTER_CENTER, format!("❤️ {:.0} / {:.0} HP", player_hp, max_hp), egui::FontId::proportional(12.5), egui::Color32::WHITE);
+                            painter.text(hp_rect.center(), egui::Align2::CENTER_CENTER, format!("       {:.0} / {:.0} HP", player_hp, max_hp), egui::FontId::proportional(12.5), egui::Color32::WHITE);
 
                             // 3. Ammo Counter (Bottom-Right)
                             let mut mag_current = 0;
@@ -1157,7 +1172,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                 mag_reserve = mag.reserve;
                                 is_reloading = mag.is_reloading;
                             }
-                            let ammo_text = if is_reloading { "🔄 Reloading...".to_string() } else { format!("🔫 {} / {}", mag_current, mag_reserve) };
+                            let ammo_text = if is_reloading { "Reloading...".to_string() } else { format!("Ammo: {} / {}", mag_current, mag_reserve) };
                             let ammo_rect = egui::Rect::from_min_size(rect.right_bottom() + egui::vec2(-140.0, -42.0), egui::vec2(124.0, 24.0));
                             painter.rect_filled(ammo_rect, 4.0, egui::Color32::from_black_alpha(180));
                             painter.text(ammo_rect.center(), egui::Align2::CENTER_CENTER, ammo_text, egui::FontId::proportional(13.0), egui::Color32::WHITE);
@@ -1168,7 +1183,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             let secs = (match_state.elapsed_seconds % 60.0) as u32;
                             let obj_rect = egui::Rect::from_min_size(egui::pos2(rect.center().x - 130.0, rect.top() + 14.0), egui::vec2(260.0, 28.0));
                             painter.rect_filled(obj_rect, 4.0, egui::Color32::from_black_alpha(180));
-                            painter.text(obj_rect.center(), egui::Align2::CENTER_CENTER, format!("🎯 Targets: {}  |  ⏱️ {:02}:{:02}", match_state.targets_remaining, mins, secs), egui::FontId::proportional(13.0), egui::Color32::from_rgb(220, 235, 255));
+                            painter.text(obj_rect.center(), egui::Align2::CENTER_CENTER, format!("     Targets: {}  |         {:02}:{:02}", match_state.targets_remaining, mins, secs), egui::FontId::proportional(13.0), egui::Color32::from_rgb(220, 235, 255));
 
                             // 5. Win / Lose Overlay Modals
                             match match_state.status {
@@ -1180,13 +1195,13 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                     ui.scope_builder(egui::UiBuilder::new().max_rect(modal_rect), |ui| {
                                         ui.vertical_centered(|ui| {
                                             ui.add_space(14.0);
-                                            ui.heading(egui::RichText::new("🏆 VICTORY!").color(egui::Color32::from_rgb(255, 215, 0)).size(24.0).strong());
+                                            ui.heading(egui::RichText::new("     VICTORY!").color(egui::Color32::from_rgb(255, 215, 0)).size(24.0).strong());
                                             ui.add_space(4.0);
                                             ui.label(egui::RichText::new(&match_state.win_reason).color(egui::Color32::from_rgb(200, 255, 200)).size(13.0));
                                             ui.add_space(6.0);
-                                            ui.label(egui::RichText::new(format!("Score: {}  •  Time: {:02}:{:02}", match_state.score, mins, secs)).color(egui::Color32::WHITE).size(13.0));
+                                            ui.label(egui::RichText::new(format!("Score: {}  *  Time: {:02}:{:02}", match_state.score, mins, secs)).color(egui::Color32::WHITE).size(13.0));
                                             ui.add_space(16.0);
-                                            if ui.add_sized([160.0, 32.0], egui::Button::new("🔄 Restart Match")).clicked() {
+                                            if ui.add_sized([160.0, 32.0], egui::Button::new("Restart Match")).clicked() {
                                                 self.world.write_message(crate::gamemode::ResetMatchEvent);
                                             }
                                         });
@@ -1200,13 +1215,13 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                     ui.scope_builder(egui::UiBuilder::new().max_rect(modal_rect), |ui| {
                                         ui.vertical_centered(|ui| {
                                             ui.add_space(14.0);
-                                            ui.heading(egui::RichText::new("💀 DEFEAT").color(egui::Color32::from_rgb(255, 70, 70)).size(24.0).strong());
+                                            ui.heading(egui::RichText::new("DEFEAT").color(egui::Color32::from_rgb(255, 70, 70)).size(24.0).strong());
                                             ui.add_space(4.0);
                                             ui.label(egui::RichText::new(&match_state.lose_reason).color(egui::Color32::from_rgb(255, 180, 180)).size(13.0));
                                             ui.add_space(6.0);
-                                            ui.label(egui::RichText::new(format!("Kills: {}  •  Time: {:02}:{:02}", match_state.kills, mins, secs)).color(egui::Color32::WHITE).size(13.0));
+                                            ui.label(egui::RichText::new(format!("Kills: {}  *  Time: {:02}:{:02}", match_state.kills, mins, secs)).color(egui::Color32::WHITE).size(13.0));
                                             ui.add_space(16.0);
-                                            if ui.add_sized([160.0, 32.0], egui::Button::new("🔄 Respawn")).clicked() {
+                                            if ui.add_sized([160.0, 32.0], egui::Button::new("Respawn")).clicked() {
                                                 self.world.write_message(crate::gamemode::ResetMatchEvent);
                                             }
                                         });
@@ -1231,7 +1246,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
             "Assets" => {
                 ui.heading("Prefabs");
                 ui.horizontal_wrapped(|ui| {
-                    if ui.button("🗂  Empty Node").on_hover_text("Spawn an empty Transform node").clicked() {
+                    if ui.button("+ Empty Node").on_hover_text("Spawn an empty Transform node").clicked() {
                         self.world.write_message(super::serialization::EditorActionRequest::SpawnObject { 
                             id: rand::random::<u64>(),
                             object_type: "empty".to_string(), 
@@ -1239,7 +1254,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             transform: Transform::default() 
                         });
                     }
-                    if ui.button("🎯 Target Dummy (Cube)").on_hover_text("Spawn a physical target cube with health").clicked() {
+                    if ui.button("+ Target Dummy").on_hover_text("Spawn a physical target cube with health").clicked() {
                         self.world.write_message(super::serialization::EditorActionRequest::SpawnObject { 
                             id: rand::random::<u64>(),
                             object_type: "target_dummy".to_string(), 
@@ -1247,7 +1262,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             transform: Transform::from_xyz(0.0, 1.0, -4.0) 
                         });
                     }
-                    if ui.button("💡 Point Light").on_hover_text("Spawn a point light source").clicked() {
+                    if ui.button("[Light] Point Light").on_hover_text("Spawn a point light source").clicked() {
                         self.world.write_message(super::serialization::EditorActionRequest::SpawnObject { 
                             id: rand::random::<u64>(),
                             object_type: "light".to_string(), 
@@ -1255,7 +1270,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             transform: Transform::default() 
                         });
                     }
-                    if ui.button("🚩 Spawn Point").on_hover_text("Spawn a multiplayer player spawn point").clicked() {
+                    if ui.button("[Spawn] Spawn Point").on_hover_text("Spawn a multiplayer player spawn point").clicked() {
                         self.world.write_message(super::serialization::EditorActionRequest::SpawnObject { 
                             id: rand::random::<u64>(),
                             object_type: "spawn_point".to_string(), 
@@ -1263,7 +1278,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             transform: Transform::default() 
                         });
                     }
-                    if ui.button("🏁 Goal Zone").on_hover_text("Spawn an extraction/win goal zone").clicked() {
+                    if ui.button("     Goal Zone").on_hover_text("Spawn an extraction/win goal zone").clicked() {
                         self.world.write_message(super::serialization::EditorActionRequest::SpawnObject { 
                             id: rand::random::<u64>(),
                             object_type: "goal_zone".to_string(), 
@@ -1298,7 +1313,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                 }
                 
                 ui.horizontal(|ui| {
-                    if ui.button("🔙 Back").clicked() {
+                    if ui.button("<- Back").clicked() {
                         if let Some(parent) = browser.current_path.parent().map(|p| p.to_path_buf()) {
                             if parent.starts_with("assets") || parent.to_string_lossy() == "assets" {
                                 browser.current_path = parent;
@@ -1317,14 +1332,14 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                         for file in &browser.files {
                             let name = file.file_name().unwrap_or_default().to_string_lossy().to_string();
                             if file.is_dir() {
-                                if ui.button(format!("📁 {}", name)).clicked() {
+                                if ui.button(format!("     {}", name)).clicked() {
                                     clicked_dir = Some(file.clone());
                                 }
                             } else {
-                                let icon = if name.ends_with(".gltf") || name.ends_with(".glb") { "📦" }
-                                           else if name.ends_with(".png") || name.ends_with(".jpg") { "🖼️" }
-                                           else if name.ends_with(".ron") || name.ends_with(".rhai") { "📜" }
-                                           else { "📄" };
+                                let icon = if name.ends_with(".gltf") || name.ends_with(".glb") { "[Model]" }
+                                           else if name.ends_with(".png") || name.ends_with(".jpg") { "       " }
+                                           else if name.ends_with(".ron") || name.ends_with(".rhai") { "[Scene]" }
+                                           else { "[File]" };
                                 
                                 let path = file.strip_prefix("assets").unwrap_or(file).to_string_lossy().replace("\\", "/");
                                 let _item_id = ui.id().with(&path);
@@ -1493,16 +1508,16 @@ fn render_editor_ui(world: &mut World) {
     }
 
     if dialogs.show_new_scene_dialog {
-        egui::Window::new("📄 Create New Scene")
+        egui::Window::new("[File] Create New Scene")
             .collapsible(false)
             .resizable(false)
             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
             .show(&ctx, |ui| {
                 ui.label("Clear the current scene and start a fresh untitled scene?");
-                ui.label(egui::RichText::new("⚠️ Any unsaved changes in the current scene will be discarded.").color(egui::Color32::from_rgb(255, 180, 50)));
+                ui.label(egui::RichText::new("       Any unsaved changes in the current scene will be discarded.").color(egui::Color32::from_rgb(255, 180, 50)));
                 ui.add_space(8.0);
                 ui.horizontal(|ui| {
-                    if ui.button("📄 Clear & New Scene").clicked() {
+                    if ui.button("[File] Clear & New Scene").clicked() {
                         world.write_message(super::serialization::ClearSceneEvent);
                         dialogs.show_new_scene_dialog = false;
                     }
@@ -1514,7 +1529,7 @@ fn render_editor_ui(world: &mut World) {
     }
 
     if dialogs.show_save_as_dialog {
-        egui::Window::new("💾 Save Scene As")
+        egui::Window::new("Save Scene As")
             .collapsible(false)
             .resizable(false)
             .default_size([400.0, 160.0])
@@ -1530,12 +1545,12 @@ fn render_editor_ui(world: &mut World) {
                 });
                 ui.separator();
                 ui.horizontal(|ui| {
-                    if ui.button("📂 Browse OS Dialog...").clicked() {
+                    if ui.button("Browse OS Dialog...").clicked() {
                         if let Some(path) = save_file_dialog(&dialogs.modal_file_input) {
                             dialogs.modal_file_input = path;
                         }
                     }
-                    if ui.button("💾 Save").clicked() {
+                    if ui.button("Save").clicked() {
                         let mut path = dialogs.modal_file_input.trim().to_string();
                         if !path.is_empty() {
                             if !path.ends_with(".ron") && !path.ends_with(".scn") {
@@ -1554,7 +1569,7 @@ fn render_editor_ui(world: &mut World) {
     }
 
     if dialogs.show_open_dialog {
-        egui::Window::new("📂 Open Scene")
+        egui::Window::new("Open Scene")
             .collapsible(false)
             .resizable(true)
             .default_size([460.0, 320.0])
@@ -1583,7 +1598,7 @@ fn render_editor_ui(world: &mut World) {
                             let is_scene = name.ends_with(".ron") || name.ends_with(".scn.ron") || name.ends_with(".scn");
                             if (!dialogs.filter_scene_types_only || is_scene)
                                 && entry.path().is_file() {
-                                    let icon = if is_scene { "📜" } else { "📄" };
+                                    let icon = if is_scene { "[Scene]" } else { "[File]" };
                                     if ui.button(format!("{} {}", icon, name)).clicked() {
                                         picked_file = Some(name);
                                     }
@@ -1596,7 +1611,7 @@ fn render_editor_ui(world: &mut World) {
                             let is_scene = name.ends_with(".ron") || name.ends_with(".scn.ron") || name.ends_with(".scn");
                             if (!dialogs.filter_scene_types_only || is_scene)
                                 && entry.path().is_file() {
-                                    let icon = if is_scene { "📜" } else { "📄" };
+                                    let icon = if is_scene { "[Scene]" } else { "[File]" };
                                     if ui.button(format!("{} {}", icon, name)).clicked() {
                                         picked_file = Some(name);
                                     }
@@ -1609,7 +1624,7 @@ fn render_editor_ui(world: &mut World) {
                 });
                 ui.separator();
                 ui.horizontal(|ui| {
-                    if ui.button("📂 Open Selected Scene").clicked() {
+                    if ui.button("Open Selected Scene").clicked() {
                         let path = dialogs.modal_file_input.trim().to_string();
                         if !path.is_empty() {
                             world.write_message(super::serialization::LoadSceneEvent(path));
@@ -1673,7 +1688,7 @@ fn render_editor_ui(world: &mut World) {
 
     if dialogs.show_help_window {
         let mut open = dialogs.show_help_window;
-        egui::Window::new("📚 Code Blue Editor - Quick Start Guide")
+        egui::Window::new("Code Blue Editor - Quick Start Guide")
             .open(&mut open)
             .collapsible(false)
             .resizable(true)
@@ -1681,33 +1696,33 @@ fn render_editor_ui(world: &mut World) {
             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
             .show(&ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    ui.heading("🎥 Camera Navigation (Viewport)");
-                    ui.label("• Hold Right Mouse Button (RMB) to look around.");
-                    ui.label("• Use W, A, S, D, Q, E to fly while holding RMB.");
-                    ui.label("• Hold Shift for faster movement.");
-                    ui.label("• Hold Middle Mouse Button (MMB) to pan.");
-                    ui.label("• Press F to focus the camera on the selected entity.");
+                    ui.heading("Camera Navigation (Viewport)");
+                    ui.label("* Hold Right Mouse Button (RMB) to look around.");
+                    ui.label("* Use W, A, S, D, Q, E to fly while holding RMB.");
+                    ui.label("* Hold Shift for faster movement.");
+                    ui.label("* Hold Middle Mouse Button (MMB) to pan.");
+                    ui.label("* Press F to focus the camera on the selected entity.");
                     ui.separator();
                     
-                    ui.heading("🏗️ Scene Building & File Management");
-                    ui.label("• File -> Save Scene (Ctrl+S) / Save Scene As (Ctrl+Shift+S).");
-                    ui.label("• File -> Open Scene (Ctrl+O) with .ron scene type filtering.");
-                    ui.label("• File -> New Scene (Ctrl+N) to start fresh.");
-                    ui.label("• Use the Assets panel (bottom right) to browse for .gltf/.glb models.");
-                    ui.label("• Drag and drop a model from the Asset Browser into the Viewport to spawn it.");
-                    ui.label("• Select an entity in the Hierarchy to view its properties in the Inspector.");
-                    ui.label("• Use the Move (W), Rotate (E), and Scale (R) tools to adjust it.");
-                    ui.label("• Press Delete or Backspace to remove the selected entity.");
+                    ui.heading("        Scene Building & File Management");
+                    ui.label("* File -> Save Scene (Ctrl+S) / Save Scene As (Ctrl+Shift+S).");
+                    ui.label("* File -> Open Scene (Ctrl+O) with .ron scene type filtering.");
+                    ui.label("* File -> New Scene (Ctrl+N) to start fresh.");
+                    ui.label("* Use the Assets panel (bottom right) to browse for .gltf/.glb models.");
+                    ui.label("* Drag and drop a model from the Asset Browser into the Viewport to spawn it.");
+                    ui.label("* Select an entity in the Hierarchy to view its properties in the Inspector.");
+                    ui.label("* Use the Move (W), Rotate (E), and Scale (R) tools to adjust it.");
+                    ui.label("* Press Delete or Backspace to remove the selected entity.");
                     ui.separator();
 
-                    ui.heading("↶ Undo & Redo");
-                    ui.label("• Press Ctrl + Z to undo the last move, spawn, or delete action.");
-                    ui.label("• Press Ctrl + Y or Ctrl + Shift + Z to redo.");
+                    ui.heading("Undo & Redo");
+                    ui.label("* Press Ctrl + Z to undo the last move, spawn, or delete action.");
+                    ui.label("* Press Ctrl + Y or Ctrl + Shift + Z to redo.");
                     ui.separator();
                     
-                    ui.heading("🌐 Multiplayer & Play Mode");
-                    ui.label("• When one editor clicks Play, all connected editors will be invited to join the session.");
-                    ui.label("• Changes made in the Editor automatically sync across all connected users via the headless server.");
+                    ui.heading("     Multiplayer & Play Mode");
+                    ui.label("* When one editor clicks Play, all connected editors will be invited to join the session.");
+                    ui.label("* Changes made in the Editor automatically sync across all connected users via the headless server.");
                 });
             });
         dialogs.show_help_window = open;
@@ -1716,7 +1731,7 @@ fn render_editor_ui(world: &mut World) {
     if dialogs.show_about_dialog {
         let mut open = dialogs.show_about_dialog;
         let mut close_clicked = false;
-        egui::Window::new("ℹ️ About Code Blue")
+        egui::Window::new("       About Code Blue")
             .open(&mut open)
             .collapsible(false)
             .resizable(false)
@@ -1725,8 +1740,8 @@ fn render_editor_ui(world: &mut World) {
             .show(&ctx, |ui| {
                 ui.vertical_centered(|ui| {
                     ui.add_space(6.0);
-                    ui.heading(egui::RichText::new("🚀 Code Blue Engine").size(20.0).strong().color(egui::Color32::from_rgb(100, 180, 255)));
-                    ui.label(egui::RichText::new("Version 0.1.0 • Built in Rust").size(12.0).color(egui::Color32::GRAY));
+                    ui.heading(egui::RichText::new("Code Blue Engine").size(20.0).strong().color(egui::Color32::from_rgb(100, 180, 255)));
+                    ui.label(egui::RichText::new("Version 0.1.0 * Built in Rust").size(12.0).color(egui::Color32::GRAY));
                     ui.add_space(8.0);
                 });
 
@@ -1734,33 +1749,33 @@ fn render_editor_ui(world: &mut World) {
                 egui::Frame::group(ui.style())
                     .fill(egui::Color32::from_rgba_premultiplied(20, 30, 45, 200))
                     .show(ui, |ui| {
-                        ui.label(egui::RichText::new("❝ If they can't make their own game engine, they are not programmers. It's like a chef who can only make frozen pizza. ❞")
+                        ui.label(egui::RichText::new("    If they can't make their own game engine, they are not programmers. It's like a chef who can only make frozen pizza.    ")
                             .italics()
                             .color(egui::Color32::from_rgb(255, 215, 120))
                             .size(12.5));
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            ui.label(egui::RichText::new("— Markus \"Notch\" Persson").size(11.0).color(egui::Color32::from_rgb(180, 200, 220)));
+                            ui.label(egui::RichText::new("-- Markus \"Notch\" Persson").size(11.0).color(egui::Color32::from_rgb(180, 200, 220)));
                         });
                     });
 
                 ui.add_space(6.0);
-                ui.label(egui::RichText::new("Code Blue was built from first principles to explore the bleeding edge of modern game engine architecture — crafted in pure Rust and powered by Google's Antigravity.")
+                ui.label(egui::RichText::new("Code Blue was built from first principles to explore the bleeding edge of modern game engine architecture -- crafted in pure Rust and powered by Google's Antigravity.")
                     .color(egui::Color32::from_rgb(210, 220, 230))
                     .size(12.0));
 
                 ui.add_space(6.0);
                 ui.separator();
-                ui.label(egui::RichText::new("⚙️ Technical Architecture:").strong());
-                ui.label("• Data-Driven ECS: Bevy 0.16");
-                ui.label("• Physics: Avian3D (Parallel Rigid Body Simulation)");
-                ui.label("• Multiplayer Netcode: Lightyear 120Hz Client-Server Replication");
-                ui.label("• Scripting: Rhai AST Engine with Live Disk Hot-Reloading");
-                ui.label("• Visuals: First-Person Viewmodel with Dynamic Aim Lag & Sway");
+                ui.label(egui::RichText::new("       Technical Architecture:").strong());
+                ui.label("* Data-Driven ECS: Bevy 0.16");
+                ui.label("* Physics: Avian3D (Parallel Rigid Body Simulation)");
+                ui.label("* Multiplayer Netcode: Lightyear 120Hz Client-Server Replication");
+                ui.label("* Scripting: Rhai AST Engine with Live Disk Hot-Reloading");
+                ui.label("* Visuals: First-Person Viewmodel with Dynamic Aim Lag & Sway");
                 ui.separator();
 
                 ui.vertical_centered(|ui| {
                     ui.add_space(4.0);
-                    ui.label(egui::RichText::new("Created by Ruan Prinsloo • Powered by Google Antigravity").size(11.0).color(egui::Color32::from_rgb(140, 180, 240)).strong());
+                    ui.label(egui::RichText::new("Created by Ruan Prinsloo * Powered by Google Antigravity").size(11.0).color(egui::Color32::from_rgb(140, 180, 240)).strong());
                     ui.add_space(4.0);
                     if ui.button("Close").clicked() {
                         close_clicked = true;
@@ -1773,7 +1788,7 @@ fn render_editor_ui(world: &mut World) {
     if inspector_state.show_add_component_modal {
         let mut open = inspector_state.show_add_component_modal;
         let mut component_to_add = None;
-        egui::Window::new("➕ Add Component")
+        egui::Window::new("Add Component")
             .open(&mut open)
             .collapsible(false)
             .resizable(true)
@@ -1781,9 +1796,9 @@ fn render_editor_ui(world: &mut World) {
             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
             .show(&ctx, |ui| {
                 ui.horizontal(|ui| {
-                    ui.label("🔎");
+                    ui.label("Search:");
                     ui.text_edit_singleline(&mut inspector_state.component_search);
-                    if ui.button("✖").on_hover_text("Clear search").clicked() {
+                    if ui.button("X").on_hover_text("Clear search").clicked() {
                         inspector_state.component_search.clear();
                     }
                 });
@@ -1815,7 +1830,7 @@ fn render_editor_ui(world: &mut World) {
                             ui.horizontal(|ui| {
                                 ui.label(egui::RichText::new(format!("{} {}", meta.icon, meta.name)).strong().size(14.0));
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                    if ui.button("➕ Add").clicked() {
+                                    if ui.button("+ Add").clicked() {
                                         component_to_add = Some(meta.type_path);
                                     }
                                 });
@@ -1854,11 +1869,11 @@ fn render_editor_ui(world: &mut World) {
     egui::TopBottomPanel::top("editor_menu_bar").show(&ctx, |ui| {
         egui::menu::bar(ui, |ui| {
             ui.menu_button("File", |ui| {
-                if ui.button("📄 New Scene\tCtrl+N").clicked() {
+                if ui.button("[File] New Scene\tCtrl+N").clicked() {
                     dialogs.show_new_scene_dialog = true;
                     ui.close_menu();
                 }
-                if ui.button("📂 Open Scene...\tCtrl+O").clicked() {
+                if ui.button("Open Scene...\tCtrl+O").clicked() {
                     if let Some(path) = open_file_dialog() {
                         world.write_message(super::serialization::LoadSceneEvent(path));
                     } else {
@@ -1866,12 +1881,12 @@ fn render_editor_ui(world: &mut World) {
                     }
                     ui.close_menu();
                 }
-                if ui.button("📋 Open Scene (In-Editor)...").clicked() {
+                if ui.button("Open Scene (In-Editor)...").clicked() {
                     dialogs.show_open_dialog = true;
                     ui.close_menu();
                 }
                 ui.separator();
-                if ui.button("💾 Save Scene\tCtrl+S").clicked() {
+                if ui.button("Save Scene\tCtrl+S").clicked() {
                     let active_path = world.resource::<super::serialization::ActiveSceneState>().current_path.clone();
                     if let Some(path) = active_path {
                         world.write_message(super::serialization::SaveSceneEvent(path));
@@ -1885,7 +1900,7 @@ fn render_editor_ui(world: &mut World) {
                     }
                     ui.close_menu();
                 }
-                if ui.button("💾 Save Scene As...\tCtrl+Shift+S").clicked() {
+                if ui.button("Save Scene As...\tCtrl+Shift+S").clicked() {
                     let current_name = world.resource::<super::serialization::ActiveSceneState>().display_name();
                     if let Some(path) = save_file_dialog(&current_name) {
                         world.write_message(super::serialization::SaveSceneEvent(path.clone()));
@@ -1895,14 +1910,14 @@ fn render_editor_ui(world: &mut World) {
                     }
                     ui.close_menu();
                 }
-                if ui.button("📝 Save Scene As (In-Editor)...").clicked() {
+                if ui.button("     Save Scene As (In-Editor)...").clicked() {
                     dialogs.modal_file_input = world.resource::<super::serialization::ActiveSceneState>().display_name();
                     dialogs.show_save_as_dialog = true;
                     ui.close_menu();
                 }
             });
             ui.menu_button("Multi-Connect", |ui| {
-                if ui.button("🌐 Connect / Reconnect to Server").clicked() {
+                if ui.button("     Connect / Reconnect to Server").clicked() {
                     world.write_message(super::serialization::ConnectToServerEvent);
                     ui.close_menu();
                 }
@@ -1911,22 +1926,22 @@ fn render_editor_ui(world: &mut World) {
                 let can_undo = world.resource::<super::history::HistoryState>().can_undo();
                 let can_redo = world.resource::<super::history::HistoryState>().can_redo();
 
-                if ui.add_enabled(can_undo, egui::Button::new("↶ Undo\tCtrl+Z")).clicked() {
+                if ui.add_enabled(can_undo, egui::Button::new("Undo\tCtrl+Z")).clicked() {
                     world.write_message(super::history::UndoEvent);
                     ui.close_menu();
                 }
-                if ui.add_enabled(can_redo, egui::Button::new("↷ Redo\tCtrl+Y")).clicked() {
+                if ui.add_enabled(can_redo, egui::Button::new("Redo\tCtrl+Y")).clicked() {
                     world.write_message(super::history::RedoEvent);
                     ui.close_menu();
                 }
-                if ui.button("🗑 Clear History").clicked() {
+                if ui.button("Clear History").clicked() {
                     let mut history = world.resource_mut::<super::history::HistoryState>();
                     history.undo_stack.clear();
                     history.redo_stack.clear();
                     ui.close_menu();
                 }
                 ui.separator();
-                if ui.button("➕ Empty Node").clicked() {
+                if ui.button("+ Empty Node").clicked() {
                     let net_id = rand::random::<u64>();
                     world.resource_mut::<super::history::HistoryState>().record_action(super::history::EditorCommand::Spawn {
                         id: net_id,
@@ -1942,7 +1957,7 @@ fn render_editor_ui(world: &mut World) {
                         transform: Transform::default(),
                     });
                 }
-                if ui.button("📦 Spawn Cube").clicked() {
+                if ui.button("[Model] Spawn Cube").clicked() {
                     let net_id = rand::random::<u64>();
                     world.resource_mut::<super::history::HistoryState>().record_action(super::history::EditorCommand::Spawn {
                         id: net_id,
@@ -1959,19 +1974,49 @@ fn render_editor_ui(world: &mut World) {
                     });
                 }
                 ui.separator();
-                if ui.button("🏙 Generate Example City Map").clicked() {
+                if ui.button("     Generate Example City Map").clicked() {
                     world.write_message(super::serialization::GenerateCityEvent);
                     ui.close_menu();
                 }
             });
             
+            ui.menu_button("Window", |ui| {
+                ui.label(egui::RichText::new("Panels & Views").weak().size(11.0));
+                ui.separator();
+                for &(tab_id, desc) in ALL_TABS {
+                    let is_open = is_tab_open(&ui_state.tree, tab_id);
+                    let label = if is_open {
+                        format!("* {}  ({})", tab_id, desc)
+                    } else {
+                        format!("  {}  ({})", tab_id, desc)
+                    };
+                    if ui.selectable_label(is_open, label).on_hover_text(format!("Open or focus the {} panel", tab_id)).clicked() {
+                        open_or_focus_tab(&mut ui_state.tree, tab_id);
+                        ui.close_menu();
+                    }
+                }
+                ui.separator();
+                if ui.button("Open All Windows").on_hover_text("Open all 6 editor panels into the dock").clicked() {
+                    for &(tab_id, _) in ALL_TABS {
+                        if !is_tab_open(&ui_state.tree, tab_id) {
+                            open_or_focus_tab(&mut ui_state.tree, tab_id);
+                        }
+                    }
+                    ui.close_menu();
+                }
+                if ui.button("Reset Layout to Default").on_hover_text("Restore the default 4-way split layout").clicked() {
+                    reset_dock_layout(&mut ui_state.tree);
+                    ui.close_menu();
+                }
+            });
+
             ui.menu_button("Help", |ui| {
-                if ui.button("📖 Documentation & Quick Start").clicked() {
+                if ui.button("Documentation & Quick Start").clicked() {
                     dialogs.show_help_window = true;
                     ui.close_menu();
                 }
                 ui.separator();
-                if ui.button("ℹ️ About Code Blue...").clicked() {
+                if ui.button("       About Code Blue...").clicked() {
                     dialogs.show_about_dialog = true;
                     ui.close_menu();
                 }
@@ -2001,11 +2046,11 @@ fn render_editor_ui(world: &mut World) {
             // Play / Stop
             let current_state = *world.resource::<State<super::EngineState>>().get();
             if current_state == super::EngineState::Edit {
-                if ui.button("▶ Play").on_hover_text("Enter Play Mode and test your game").clicked() {
+                if ui.button("Play").on_hover_text("Enter Play Mode and test your game").clicked() {
                     dialogs.show_save_before_play = true;
                 }
             } else {
-                if ui.button("⏹ Stop").on_hover_text("Exit Play Mode and return to Editor").clicked() {
+                if ui.button("    Stop").on_hover_text("Exit Play Mode and return to Editor").clicked() {
                     world.resource_mut::<NextState<super::EngineState>>().set(super::EngineState::Edit);
                 }
             }
@@ -2014,7 +2059,7 @@ fn render_editor_ui(world: &mut World) {
             
             // Active Scene Display Badge
             let active_scene_name = world.resource::<super::serialization::ActiveSceneState>().display_name();
-            ui.label(egui::RichText::new(format!("📄 Scene: {}", active_scene_name)).strong().color(egui::Color32::from_rgb(180, 210, 255)));
+            ui.label(egui::RichText::new(format!("[File] Scene: {}", active_scene_name)).strong().color(egui::Color32::from_rgb(180, 210, 255)));
 
             // Live Connection Status & User ID Badge
             let session_client_id = world.resource::<super::serialization::LocalEditorSession>().client_id;
@@ -2024,9 +2069,9 @@ fn render_editor_ui(world: &mut World) {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 let user_col = super::user_color::get_user_color_egui(session_client_id);
                 if has_net_objects {
-                    ui.label(egui::RichText::new(format!("● Online | User #{:04}", session_client_id % 10000)).color(user_col).strong());
+                    ui.label(egui::RichText::new(format!("    Online | User #{:04}", session_client_id % 10000)).color(user_col).strong());
                 } else {
-                    ui.label(egui::RichText::new(format!("● Standalone | User #{:04}", session_client_id % 10000)).color(user_col));
+                    ui.label(egui::RichText::new(format!("    Standalone | User #{:04}", session_client_id % 10000)).color(user_col));
                 }
             });
         });
@@ -2061,6 +2106,39 @@ fn render_editor_ui(world: &mut World) {
     world.insert_resource(ui_state);
     world.insert_resource(dialogs);
     world.insert_resource(inspector_state);
+}
+
+pub const ALL_TABS: &[(&str, &str)] = &[
+    ("Viewport", "3D Scene Viewport"),
+    ("Game View", "Play / Game Camera"),
+    ("Hierarchy", "Scene Outliner & Hierarchy"),
+    ("Inspector", "Component Properties & Physics"),
+    ("Console", "Developer Console & Logs"),
+    ("Assets", "Asset Browser & Prefabs"),
+];
+
+pub fn is_tab_open(tree: &DockState<String>, name: &str) -> bool {
+    tree.find_tab(&name.to_string()).is_some()
+}
+
+pub fn open_or_focus_tab(tree: &mut DockState<String>, name: &str) {
+    if let Some((surface, node, tab)) = tree.find_tab(&name.to_string()) {
+        tree.set_active_tab((surface, node, tab));
+    } else {
+        tree.push_to_first_leaf(name.to_string());
+        if let Some((surface, node, tab)) = tree.find_tab(&name.to_string()) {
+            tree.set_active_tab((surface, node, tab));
+        }
+    }
+}
+
+pub fn reset_dock_layout(tree: &mut DockState<String>) {
+    let mut new_tree = DockState::new(vec!["Viewport".to_string(), "Game View".to_string()]);
+    let surface = new_tree.main_surface_mut();
+    let [vp, _inspector] = surface.split_right(NodeIndex::root(), 0.75, vec!["Inspector".to_string()]);
+    let [vp, _hierarchy] = surface.split_left(vp, 0.2, vec!["Hierarchy".to_string()]);
+    let [_vp, _console] = surface.split_below(vp, 0.7, vec!["Console".to_string(), "Assets".to_string()]);
+    *tree = new_tree;
 }
 
 pub fn focus_game_view_on_play(

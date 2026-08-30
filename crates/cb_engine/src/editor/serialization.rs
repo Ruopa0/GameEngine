@@ -23,6 +23,7 @@ impl Plugin for EditorSerializationPlugin {
     fn build(&self, app: &mut App) {
         // Register events that can be sent over the network
         app.add_message::<SaveSceneEvent>()
+           .add_message::<SceneSavedEvent>()
            .add_message::<LoadSceneEvent>()
            .add_message::<ClearSceneEvent>()
            .add_message::<ConnectToServerEvent>()
@@ -58,7 +59,7 @@ impl Plugin for EditorSerializationPlugin {
            .register_type::<TestComponent>()
            .register_type::<cb_weapons::components::Health>()
            .register_type::<cb_weapons::health::ImmortalPlayer>()
-           .register_type::<EditorColor>()
+           .register_type::<EditorColor>().register_type::<EditorMaterial>()
            .register_type::<EditorPointLight>()
            .register_type::<avian3d::prelude::RigidBody>()
            .register_type::<avian3d::prelude::Friction>()
@@ -67,14 +68,14 @@ impl Plugin for EditorSerializationPlugin {
            .register_type::<avian3d::prelude::Mass>()
            .add_message::<GenerateCityEvent>()
            .add_systems(Update, (
-                handle_save, 
-                handle_load, 
-                handle_clear_scene, 
+                (handle_generate_city, handle_clear_scene, handle_load).chain(),
+                ApplyDeferred,
+                handle_save,
                 restore_missing_visuals, 
                 apply_editor_color, 
+                apply_editor_material, 
                 apply_editor_pointlight,
-                handle_generate_city
-            ));
+            ).chain());
     }
 }
 
@@ -109,6 +110,9 @@ impl ActiveSceneState {
 
 #[derive(Message, Debug, Clone)]
 pub struct SaveSceneEvent(pub String);
+
+#[derive(Message, Debug, Clone)]
+pub struct SceneSavedEvent(pub String, pub String);
 
 #[derive(Message, Debug, Clone)]
 pub struct LoadSceneEvent(pub String);
@@ -257,6 +261,7 @@ pub struct NetworkId(pub u64);
 
 fn handle_save(
     world: &World,
+    mut commands: Commands,
     mut save_events: MessageReader<SaveSceneEvent>,
     q_objects: Query<Entity, With<SceneObject>>,
 ) {
@@ -268,10 +273,34 @@ fn handle_save(
     if let Some(path) = path_to_save {
         let type_registry = world.resource::<AppTypeRegistry>().read();
         let mut filter = bevy::scene::SceneFilter::deny_all();
-        for registration in type_registry.iter() {
-            if registration.data::<bevy::reflect::ReflectSerialize>().is_some() {
-                filter = filter.allow_by_id(registration.type_id());
-            }
+        
+        let allowed_types = [
+            std::any::TypeId::of::<SceneObject>(),
+            std::any::TypeId::of::<Name>(),
+            std::any::TypeId::of::<Transform>(),
+            std::any::TypeId::of::<EditorColor>(),
+            std::any::TypeId::of::<EditorMaterial>(),
+            std::any::TypeId::of::<EditorPointLight>(),
+            std::any::TypeId::of::<NetworkId>(),
+            std::any::TypeId::of::<crate::scripting::ScriptComponent>(),
+            std::any::TypeId::of::<crate::gamemode::TargetDummy>(),
+            std::any::TypeId::of::<crate::gamemode::GoalZone>(),
+            std::any::TypeId::of::<crate::gamemode_chest::WeaponChest>(),
+            std::any::TypeId::of::<cb_weapons::components::Health>(),
+            std::any::TypeId::of::<cb_weapons::health::ImmortalPlayer>(),
+            std::any::TypeId::of::<avian3d::prelude::RigidBody>(),
+            std::any::TypeId::of::<avian3d::prelude::Friction>(),
+            std::any::TypeId::of::<avian3d::prelude::Restitution>(),
+            std::any::TypeId::of::<avian3d::prelude::GravityScale>(),
+            std::any::TypeId::of::<avian3d::prelude::Mass>(),
+            std::any::TypeId::of::<avian3d::prelude::LinearVelocity>(),
+            std::any::TypeId::of::<avian3d::prelude::AngularVelocity>(),
+            std::any::TypeId::of::<avian3d::prelude::LinearDamping>(),
+            std::any::TypeId::of::<avian3d::prelude::AngularDamping>(),
+            std::any::TypeId::of::<avian3d::prelude::LockedAxes>(),
+        ];
+        for type_id in allowed_types {
+            filter = filter.allow_by_id(type_id);
         }
         
         let mut builder = bevy::scene::DynamicSceneBuilder::from_world(world);
@@ -287,10 +316,14 @@ fn handle_save(
                         let _ = fs::create_dir_all(parent);
                     }
                 }
-                if let Err(e) = fs::write(&path, serialized) {
+                if let Err(e) = fs::write(&path, &serialized) {
                     error!("Failed to write scene file: {}", e);
                 } else {
                     info!("Scene successfully saved to {}", path);
+                    let path_clone = path.clone();
+                    commands.queue(move |w: &mut World| {
+                        w.write_message(SceneSavedEvent(path_clone, serialized));
+                    });
                 }
             }
             Err(e) => error!("Failed to serialize scene: {}", e),
@@ -371,25 +404,37 @@ fn handle_clear_scene(
 
 pub fn restore_missing_visuals(
     mut commands: Commands,
-    q_objects: Query<(Entity, &SceneObject, Option<&EditorColor>), (Without<Mesh3d>, Without<EditorPointLight>, Without<SceneRoot>)>,
+    q_objects: Query<(Entity, &SceneObject, Option<&EditorColor>, Option<&EditorMaterial>), (Without<Mesh3d>, Without<EditorPointLight>, Without<SceneRoot>)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    for (entity, obj, color_opt) in q_objects.iter() {
+    for (entity, obj, color_opt, mat_opt) in q_objects.iter() {
         match obj.object_type.as_str() {
             "cube" => {
                 let mesh = meshes.add(Cuboid::default());
-                let material = materials.add(StandardMaterial::default());
+                let col = color_opt.map(|c| c.0).unwrap_or(Color::WHITE);
+                let roughness = mat_opt.map(|m| m.roughness).unwrap_or(0.5);
+                let metallic = mat_opt.map(|m| m.metallic).unwrap_or(0.0);
+                let material = materials.add(StandardMaterial {
+                    base_color: col,
+                    perceptual_roughness: roughness,
+                    metallic,
+                    ..default()
+                });
                 let mut e_cmds = commands.entity(entity);
                 e_cmds.insert((
                     Mesh3d(mesh),
                     MeshMaterial3d(material),
                     avian3d::prelude::RigidBody::Static,
                     avian3d::prelude::Collider::cuboid(1.0, 1.0, 1.0),
+                    avian3d::prelude::Friction::new(1.0),
                 ));
                 if color_opt.is_none() {
                     e_cmds.insert(EditorColor(Color::WHITE));
+                }
+                if mat_opt.is_none() {
+                    e_cmds.insert(EditorMaterial { roughness: 0.5, metallic: 0.0 });
                 }
             }
             "target_dummy" => {
@@ -447,6 +492,22 @@ pub fn restore_missing_visuals(
                     commands.entity(entity).insert(SceneRoot(scene));
                 }
             }
+            "weapon_chest" => {
+                let mesh = meshes.add(Cuboid::new(1.5, 1.0, 1.0));
+                let material = materials.add(StandardMaterial {
+                    base_color: Color::srgb(0.9, 0.7, 0.1),
+                    emissive: LinearRgba::new(0.9, 0.7, 0.1, 1.0),
+                    ..default()
+                });
+                commands.entity(entity).insert((
+                    Mesh3d(mesh),
+                    MeshMaterial3d(material),
+                    avian3d::prelude::RigidBody::Static,
+                    avian3d::prelude::Collider::cuboid(1.5, 1.0, 1.0),
+                    cb_weapons::components::Health::new(50.0),
+                    crate::gamemode_chest::WeaponChest,
+                ));
+            }
             _ => {}
         }
     }
@@ -496,15 +557,25 @@ impl Default for EditorPointLight {
 
 pub fn apply_editor_pointlight(
     mut commands: Commands,
-    mut q: Query<(Entity, &EditorPointLight, Option<&mut PointLight>), Changed<EditorPointLight>>,
+    mut q: Query<(Entity, &EditorPointLight, Option<&mut PointLight>)>,
 ) {
     for (entity, ed_light, light_opt) in q.iter_mut() {
         if let Some(mut light) = light_opt {
-            light.color = ed_light.color;
-            light.intensity = ed_light.intensity;
-            light.range = ed_light.range;
-            light.radius = ed_light.radius;
-            light.shadows_enabled = ed_light.shadows_enabled;
+            let mut needs_update = false;
+            if light.color != ed_light.color || 
+               (light.intensity - ed_light.intensity).abs() > 0.1 ||
+               (light.range - ed_light.range).abs() > 0.1 ||
+               (light.radius - ed_light.radius).abs() > 0.1 ||
+               light.shadows_enabled != ed_light.shadows_enabled {
+                needs_update = true;
+            }
+            if needs_update {
+                light.color = ed_light.color;
+                light.intensity = ed_light.intensity;
+                light.range = ed_light.range;
+                light.radius = ed_light.radius;
+                light.shadows_enabled = ed_light.shadows_enabled;
+            }
         } else {
             let mut light = PointLight::default();
             light.color = ed_light.color;
@@ -518,12 +589,20 @@ pub fn apply_editor_pointlight(
 }
 
 pub fn apply_editor_color(
-    q_colors: Query<(&EditorColor, &MeshMaterial3d<StandardMaterial>), Changed<EditorColor>>,
+    q_colors: Query<(&EditorColor, &MeshMaterial3d<StandardMaterial>)>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for (ed_color, mat_handle) in q_colors.iter() {
-        if let Some(mat) = materials.get_mut(&mat_handle.0) {
-            mat.base_color = ed_color.0;
+        let mut needs_update = false;
+        if let Some(mat) = materials.get(&mat_handle.0) {
+            if mat.base_color != ed_color.0 {
+                needs_update = true;
+            }
+        }
+        if needs_update {
+            if let Some(mat) = materials.get_mut(&mat_handle.0) {
+                mat.base_color = ed_color.0;
+            }
         }
     }
 }
@@ -532,6 +611,7 @@ fn handle_generate_city(
     mut events: MessageReader<GenerateCityEvent>,
     mut commands: Commands,
     mut active_state: ResMut<ActiveSceneState>,
+    mut save_events: MessageWriter<SaveSceneEvent>,
     q_existing: Query<Entity, With<SceneObject>>,
 ) {
     let mut generated = false;
@@ -543,31 +623,8 @@ fn handle_generate_city(
         for entity in q_existing.iter() {
             commands.entity(entity).despawn();
         }
-        
+
         let mut rng = fastrand::Rng::new();
-        
-        // Spawn 64-128 random colored buildings
-        for i in 0..100 {
-            let x = (rng.f32() * 200.0) - 100.0;
-            let z = (rng.f32() * 200.0) - 100.0;
-            let width = rng.f32() * 8.0 + 4.0;
-            let depth = rng.f32() * 8.0 + 4.0;
-            let height = rng.f32() * 30.0 + 10.0;
-            
-            let color = Color::srgb(rng.f32() * 0.8, rng.f32() * 0.8, rng.f32() * 0.8);
-            
-            commands.spawn((
-                Name::new(format!("Building_{}", i)),
-                SceneObject {
-                    object_type: "cube".to_string(),
-                    asset_path: None,
-                },
-                NetworkId(rand::random::<u64>()),
-                Transform::from_xyz(x, height / 2.0, z)
-                    .with_scale(Vec3::new(width, height, depth)),
-                EditorColor(color),
-            ));
-        }
 
         // Spawn a large grey concrete floor
         commands.spawn((
@@ -577,13 +634,121 @@ fn handle_generate_city(
                 asset_path: None,
             },
             NetworkId(rand::random::<u64>()),
-            Transform::from_xyz(0.0, -0.5, 0.0)
-                .with_scale(Vec3::new(250.0, 1.0, 250.0)),
+            Transform::from_xyz(0.0, -0.5, 0.0).with_scale(Vec3::new(300.0, 1.0, 300.0)),
             EditorColor(Color::srgb(0.3, 0.3, 0.32)),
+            EditorMaterial { roughness: 0.8, metallic: 0.1 },
         ));
 
-        active_state.current_path = Some("assets/scenes/exampleMap.ron".to_string());
-        active_state.is_dirty = true;
+        // Spawn a player spawn point
+        commands.spawn((
+            Name::new("PlayerSpawn"),
+            SceneObject {
+                object_type: "spawn_point".to_string(),
+                asset_path: None,
+            },
+            NetworkId(rand::random::<u64>()),
+            Transform::from_xyz(0.0, 1.0, 0.0),
+        ));
+
+        // City Layout Parameters
+        let grid_size = 6;
+        let block_width = 24.0;
+        let road_width = 12.0;
+        let offset = block_width + road_width;
+        let start_pos = -(grid_size as f32) * offset / 2.0;
+
+        let mut building_index = 0;
+        let mut chest_index = 0;
+
+        for x in 0..grid_size {
+            for z in 0..grid_size {
+                let center_x = start_pos + (x as f32) * offset;
+                let center_z = start_pos + (z as f32) * offset;
+
+                if x == grid_size / 2 && z == grid_size / 2 {
+                    continue; // Keep center intersection clear
+                }
+
+                if rng.f32() < 0.1 {
+                    continue; 
+                }
+
+                let subdivisions = rng.u32(1..=3);
+                
+                for _ in 0..subdivisions {
+                    let bx = center_x + (rng.f32() * 8.0 - 4.0);
+                    let bz = center_z + (rng.f32() * 8.0 - 4.0);
+                    
+                    let b_width = rng.f32() * 8.0 + 8.0;
+                    let b_depth = rng.f32() * 8.0 + 8.0;
+                    let b_height = rng.f32() * 35.0 + 10.0;
+
+                    let color = Color::srgb(
+                        0.2 + rng.f32() * 0.4,
+                        0.2 + rng.f32() * 0.4,
+                        0.2 + rng.f32() * 0.4,
+                    );
+
+                    commands.spawn((
+                        Name::new(format!("Building_{}", building_index)),
+                        SceneObject {
+                            object_type: "cube".to_string(),
+                            asset_path: None,
+                        },
+                        NetworkId(rand::random::<u64>()),
+                        Transform::from_xyz(bx, b_height / 2.0, bz).with_scale(Vec3::new(b_width, b_height, b_depth)),
+                        EditorColor(color),
+                        EditorMaterial { roughness: 0.7, metallic: 0.2 },
+                    ));
+                    building_index += 1;
+
+                    if rng.f32() < 0.25 {
+                        commands.spawn((
+                            Name::new(format!("WeaponChest_{}", chest_index)),
+                            SceneObject {
+                                object_type: "weapon_chest".to_string(),
+                                asset_path: None,
+                            },
+                            NetworkId(rand::random::<u64>()),
+                            Transform::from_xyz(bx, b_height + 0.5, bz),
+                        ));
+                        chest_index += 1;
+                    }
+                }
+            }
+        }
+
+        active_state.current_path = Some("level.ron".to_string());
+        active_state.is_dirty = false;
+        save_events.write(SaveSceneEvent("level.ron".to_string()));
+        info!("Generated city with {} buildings and {} weapon chests, saved to level.ron", building_index, chest_index);
     }
 }
 
+
+#[derive(Component, Reflect, Clone, Default)]
+#[reflect(Component)]
+pub struct EditorMaterial {
+    pub roughness: f32,
+    pub metallic: f32,
+}
+
+pub fn apply_editor_material(
+    q_mat: Query<(&EditorMaterial, &MeshMaterial3d<StandardMaterial>)>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for (ed_mat, handle) in q_mat.iter() {
+        let mut needs_update = false;
+        if let Some(mat) = materials.get(handle.id()) {
+            if (mat.perceptual_roughness - ed_mat.roughness).abs() > 0.001 || (mat.metallic - ed_mat.metallic).abs() > 0.001 {
+                needs_update = true;
+            }
+        }
+        if needs_update {
+            if let Some(mat) = materials.get_mut(handle.id()) {
+                mat.perceptual_roughness = ed_mat.roughness;
+                mat.metallic = ed_mat.metallic;
+            }
+        }
+    }
+}

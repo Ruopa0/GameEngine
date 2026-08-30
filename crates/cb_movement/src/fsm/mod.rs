@@ -1,9 +1,9 @@
-/// Movement state machine — state definitions and FSM update system.
+/// Movement state machine -- state definitions and FSM update system.
 ///
 /// The HFSM has three top-level groups:
-///   Grounded  →  Idle | Walk | Sprint | Crouch | Slide | Prone
-///   Airborne  →  Jump | Fall
-///   Interact  →  Vault | LedgeGrab | Mantle
+///   Grounded  ->  Idle | Walk | Sprint | Crouch | Slide | Prone
+///   Airborne  ->  Jump | Fall
+///   Interact  ->  Vault | LedgeGrab | Mantle
 
 use bevy::prelude::*;
 use crate::momentum::Momentum;
@@ -14,7 +14,7 @@ pub mod interaction;
 
 use serde::{Serialize, Deserialize};
 
-// ─── State Enum ──────────────────────────────────────────────────────────────
+// --- State Enum --------------------------------------------------------------
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Reflect, Serialize, Deserialize)]
 pub enum MovementState {
@@ -48,7 +48,7 @@ impl MovementState {
     }
 }
 
-// ─── Character State Component ──────────────────────────────────────────────
+// --- Character State Component ----------------------------------------------
 
 #[derive(Component, Reflect, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CharacterState {
@@ -105,7 +105,7 @@ impl Default for CharacterState {
 
 // Momentum is now imported from crate::momentum
 
-// ─── FSM Update System ──────────────────────────────────────────────────────
+// --- FSM Update System ------------------------------------------------------
 
 use crate::parkour::ParkourSense;
 use bevy_tnua::prelude::*;
@@ -149,13 +149,13 @@ pub fn update_fsm(
         let old_wishes_jump = cs.wishes_jump;
         cs.wishes_jump = logically_wishes_jump;
 
-        // ─── Double-tap C detection ──────────────────────────────────
-        // If C was just tapped and the timer is still active from a previous tap → double-tap!
+        // --- Double-tap C detection ----------------------------------
+        // If C was just tapped and the timer is still active from a previous tap -> double-tap!
         let double_tap_crouch = cs.wishes_crouch_tap && cs.crouch_tap_timer > 0.0;
 
         // Update the tap timer
         if cs.wishes_crouch_tap && !double_tap_crouch {
-            // First tap — start the window
+            // First tap -- start the window
             cs.crouch_tap_timer = 0.3;
         }
         cs.crouch_tap_timer = (cs.crouch_tap_timer - dt).max(0.0);

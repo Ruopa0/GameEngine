@@ -21,6 +21,7 @@ fn main() {
 
     // Add Engine Core (Schedule)
     app.add_plugins(cb_engine::EnginePlugin);
+    app.add_plugins(cb_engine::console::ConsolePlugin);
     
     // Add game logic plugins
     app.add_plugins((
@@ -40,11 +41,16 @@ fn main() {
     // Boot straight into Editor mode
     app.add_systems(Startup, setup_editor_state);
 
+
     app.run();
 }
 
 fn setup_editor_state(
     mut next_state: ResMut<NextState<cb_engine::editor::EngineState>>,
+    mut load_events: MessageWriter<cb_engine::editor::serialization::LoadSceneEvent>,
 ) {
     next_state.set(cb_engine::editor::EngineState::Edit);
+    load_events.write(cb_engine::editor::serialization::LoadSceneEvent("level.ron".to_string()));
 }
+
+

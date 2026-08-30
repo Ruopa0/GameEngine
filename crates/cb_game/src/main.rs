@@ -1,4 +1,4 @@
-// CodeBlue — Gray-box test harness
+// CodeBlue -- Gray-box test harness
 // Wires together: Physics | Tnua KCC | Movement FSM | FPS camera + input
 
 use bevy::{prelude::*, window::CursorGrabMode};
@@ -55,7 +55,7 @@ fn main() {
     } else {
         app.add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "CodeBlue — Editor".to_string(),
+                title: "CodeBlue -- Editor".to_string(),
                 ..default()
             }),
             ..default()
@@ -70,6 +70,7 @@ fn main() {
             cb_weapons::WeaponsPlugin,
         ));
 
+        app.add_plugins(cb_engine::editor::serialization::EditorSerializationPlugin);
         if cli.client {
             app.add_plugins((
                 cb_netcode::client::ClientNetPlugin,
@@ -84,32 +85,39 @@ fn main() {
         }
 
         app.add_plugins(cb_engine::player::PlayerPlugin);
+        app.add_plugins(bevy_egui::EguiPlugin::default());
+        app.add_plugins(cb_engine::console::ConsolePlugin);
         app.add_systems(Update, (toggle_cursor_grab, trigger_system));
     }
 
     app.run();
 }
 
-// ─── Startup ──────────────────────────────────────────────────────────────────
+// --- Startup ------------------------------------------------------------------
 
 fn setup_level(
+    mut load_events: MessageWriter<cb_engine::editor::serialization::LoadSceneEvent>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // --- Gray-box floor ---
-    commands.spawn((
-        Mesh3d(meshes.add(Plane3d::default().mesh().size(100.0, 100.0))),
-        MeshMaterial3d(materials.add(Color::srgb(0.25, 0.25, 0.28))),
-        Transform::from_xyz(0.0, -0.051, 0.0),
-        RigidBody::Static,
-        Collider::cuboid(100.0, 0.1, 100.0),
-    ));
+    load_events.write(cb_engine::editor::serialization::LoadSceneEvent("level.ron".to_string()));
+
+    // Fallback floor if scene is empty
+    if !std::path::Path::new("level.ron").exists() {
+        commands.spawn((
+            Mesh3d(meshes.add(Plane3d::default().mesh().size(100.0, 100.0))),
+            MeshMaterial3d(materials.add(Color::srgb(0.25, 0.25, 0.28))),
+            Transform::from_xyz(0.0, -0.051, 0.0),
+            RigidBody::Static,
+            Collider::cuboid(100.0, 0.1, 100.0),
+        ));
+    }
 
     // --- Test obstacles (jump/vault targets) ---
     let box_mat = materials.add(Color::srgb(0.45, 0.45, 0.5));
 
-    // Low box — speed vault candidate (~0.6 m tall)
+    // Low box -- speed vault candidate (~0.6 m tall)
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(3.0, 0.6, 2.0))),
         MeshMaterial3d(box_mat.clone()),
@@ -118,7 +126,7 @@ fn setup_level(
         Collider::cuboid(3.0, 0.6, 2.0),
     ));
 
-    // Mid box — mantle candidate (~1.2 m tall)
+    // Mid box -- mantle candidate (~1.2 m tall)
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(3.0, 1.2, 2.0))),
         MeshMaterial3d(box_mat.clone()),
@@ -127,7 +135,7 @@ fn setup_level(
         Collider::cuboid(3.0, 1.2, 2.0),
     ));
 
-    // Tall Wall — WallRun candidate
+    // Tall Wall -- WallRun candidate
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(1.0, 4.0, 8.0))),
         MeshMaterial3d(materials.add(Color::srgb(0.3, 0.5, 0.3))),
@@ -150,7 +158,7 @@ fn setup_level(
         Mesh3d(meshes.add(Cuboid::new(3.0, 0.1, 6.0))),
         MeshMaterial3d(materials.add(Color::srgb(0.5, 0.5, 0.35))),
         Transform::from_xyz(0.0, 1.0, -13.0)
-            .with_rotation(Quat::from_rotation_x(-0.32)), // ~18° slope
+            .with_rotation(Quat::from_rotation_x(-0.32)), // ~18 deg slope
         RigidBody::Static,
         Collider::cuboid(3.0, 0.1, 6.0),
     ));
@@ -187,7 +195,7 @@ fn setup_level(
 
     // --- HUD debug hint ---
     commands.spawn((
-        Text::new("WASD — Move  |  Space — Jump  |  Shift — Sprint  |  Esc — Release cursor"),
+        Text::new("WASD -- Move  |  Space -- Jump  |  Shift -- Sprint  |  Esc -- Release cursor"),
         TextFont {
             font_size: 16.0,
             ..default()
@@ -203,7 +211,7 @@ fn setup_level(
 }
 
 
-// ─── Cursor Grab ──────────────────────────────────────────────────────────────
+// --- Cursor Grab --------------------------------------------------------------
 
 fn toggle_cursor_grab(
     keyboard: Res<ButtonInput<KeyCode>>,

@@ -3,7 +3,7 @@ use lightyear::prelude::*;
 use cb_movement::fsm::CharacterState;
 use serde::{Deserialize, Serialize};
 
-// ─── Protocol Configuration ───────────────────────────────────────────────────
+// --- Protocol Configuration ---------------------------------------------------
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct PlayerInputs {
@@ -57,6 +57,10 @@ pub enum EditorAction {
     UnlockObject { id: u64, user_id: u64 },
     UpdateEditorCamera { user_id: u64, transform: Transform },
     UpdatePlayerTransform { user_id: u64, transform: Transform, pitch: f32 },
+    PlayerHit { victim_user_id: u64, attacker_user_id: u64, damage: f32, hit_point: Vec3, hit_normal: Vec3 },
+    DamageNetworkObject { id: u64, damage: f32, hit_point: Vec3, hit_normal: Vec3 },
+    PlayerFired { user_id: u64, origin: Vec3, direction: Vec3 },
+    PlayerRespawned { user_id: u64 },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Reflect)]

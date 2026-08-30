@@ -1,4 +1,4 @@
-/// Hitscan ballistics — reads ShotFiredEvent, raycasts server-side, applies damage.
+/// Hitscan ballistics -- reads ShotFiredEvent, raycasts server-side, applies damage.
 /// In multiplayer: server calls this with lag-compensated world snapshot positions.
 
 use bevy::prelude::*;
@@ -7,8 +7,8 @@ use avian3d::prelude::*;
 use crate::systems::ShotFiredEvent;
 use crate::components::WeaponConfig;
 
-/// Damage event — consumed by the game rules / health system
-#[derive(Message)]
+/// Damage event -- consumed by the game rules / health system
+#[derive(Message, Clone, Debug)]
 pub struct DamageEvent {
     pub target:  Entity,
     pub amount:  f32,
@@ -27,14 +27,18 @@ pub fn process_hitscan(
     mut commands: Commands,
     configs:    Query<&WeaponConfig>,
     mut shots:  MessageReader<ShotFiredEvent>,
-    q_combatants: Query<(), With<crate::components::PlayerCombatant>>,
+    q_health:   Query<&crate::components::Health>,
+    q_child_of: Query<&ChildOf>,
     mut damage: MessageWriter<DamageEvent>,
     mut vfx: MessageWriter<HitVfxEvent>,
     spatial:    SpatialQuery,
     time:       Res<Time>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    use bevy::ecs::relationship::Relationship;
     for shot in shots.read() {
-        let config = match configs.get(shot.shooter) {
+        let config = match configs.get(shot.weapon) {
             Ok(c)  => c,
             Err(_) => continue,
         };
@@ -44,8 +48,14 @@ pub fn process_hitscan(
         let dir = apply_spread(shot.direction, shot.spread_rad, seed);
 
         if let Some(speed) = config.projectile_speed {
-            // Projectile weapon — spawn a physics entity that flies
+            // Projectile weapon -- spawn a physics entity that flies
             commands.spawn((
+                Mesh3d(meshes.add(Sphere::new(0.08))),
+                MeshMaterial3d(materials.add(StandardMaterial {
+                    base_color: Color::srgb(5.0, 3.0, 0.0),
+                    emissive: LinearRgba::new(5.0, 3.0, 0.0, 1.0),
+                    ..default()
+                })),
                 Transform::from_translation(shot.origin),
                 crate::components::Projectile {
                     velocity: dir * speed,
@@ -53,16 +63,17 @@ pub fn process_hitscan(
                     penetration: config.penetration,
                     lifespan: config.range / speed,
                     owner: shot.shooter,
+                    is_local: shot.is_local,
                 },
             ));
         } else {
-            // Hitscan weapon — immediate raycast
+            // Hitscan weapon -- immediate raycast
             if let Some(hit) = spatial.cast_ray(
                 shot.origin,
                 Dir3::new(dir).unwrap_or(Dir3::NEG_Z),
                 config.range,
                 true,
-                &SpatialQueryFilter::default(),
+                &SpatialQueryFilter::from_excluded_entities([shot.shooter]),
             ) {
                 let hit_point = shot.origin + dir * hit.distance;
 
@@ -75,9 +86,18 @@ pub fn process_hitscan(
                     hit_entity: hit.entity,
                 });
 
-                if hit.entity != shot.shooter && q_combatants.contains(hit.entity) {
+                let mut target_entity = hit.entity;
+                if !q_health.contains(target_entity) {
+                    if let Ok(child_of) = q_child_of.get(target_entity) {
+                        if q_health.contains(child_of.get()) {
+                            target_entity = child_of.get();
+                        }
+                    }
+                }
+
+                if shot.is_local && target_entity != shot.shooter && q_health.contains(target_entity) {
                     damage.write(DamageEvent {
-                        target: hit.entity,
+                        target: target_entity,
                         amount: final_damage,
                         point:  hit_point,
                         normal: hit.normal,
@@ -91,12 +111,14 @@ pub fn process_hitscan(
 pub fn process_projectiles(
     mut commands: Commands,
     mut query: Query<(Entity, &mut Transform, &mut crate::components::Projectile)>,
-    q_combatants: Query<(), With<crate::components::PlayerCombatant>>,
+    q_health: Query<&crate::components::Health>,
+    q_child_of: Query<&ChildOf>,
     mut damage: MessageWriter<DamageEvent>,
     mut vfx: MessageWriter<HitVfxEvent>,
     spatial: SpatialQuery,
     time: Res<Time>,
 ) {
+    use bevy::ecs::relationship::Relationship;
     let dt = time.delta_secs();
     for (entity, mut transform, mut proj) in query.iter_mut() {
         proj.lifespan -= dt;
@@ -124,9 +146,18 @@ pub fn process_projectiles(
                 hit_entity: hit.entity,
             });
 
-            if q_combatants.contains(hit.entity) {
+            let mut target_entity = hit.entity;
+            if !q_health.contains(target_entity) {
+                if let Ok(child_of) = q_child_of.get(target_entity) {
+                    if q_health.contains(child_of.get()) {
+                        target_entity = child_of.get();
+                    }
+                }
+            }
+
+            if proj.is_local && target_entity != proj.owner && q_health.contains(target_entity) {
                 damage.write(DamageEvent {
-                    target: hit.entity,
+                    target: target_entity,
                     amount: proj.damage,
                     point:  hit_point,
                     normal: hit.normal,

@@ -1,10 +1,10 @@
-# 📘 Code Blue Editor — Complete User & Developer Manual
+﻿# ðŸ“˜ Code Blue Editor â€” Complete User & Developer Manual
 
 Welcome to the **Code Blue Collaborative 3D Scene Editor** (`cb_editor`). This manual provides a comprehensive, step-by-step guide to all editor capabilities, interface panels, tools, hotkeys, collaborative multiplayer workflows, scripting, and scene management.
 
 ---
 
-## 📑 Table of Contents
+## ðŸ“‘ Table of Contents
 1. [Editor Overview & Docking Layout](#1-editor-overview--docking-layout)
 2. [Top Menu Bar & Toolbar](#2-top-menu-bar--toolbar)
 3. [3D Viewport & Camera Navigation](#3-3d-viewport--camera-navigation)
@@ -27,18 +27,18 @@ Welcome to the **Code Blue Collaborative 3D Scene Editor** (`cb_editor`). This m
 Code Blue features a modular, dockable user interface powered by `egui_dock`. You can drag tab headers to rearrange panels, split views horizontally or vertically, or undock windows to tailor your workspace.
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ 📁 File  📦 Spawn  📖 Help  │  Move(W) Rotate(E) Scale(R)  │  ▶ Play  📄 Scene  ● Online │
-├──────────────┬──────────────────────────────────────────────┬───────────────┤
-│  Hierarchy   │  Viewport / Game View                        │  Inspector    │
-│              │                                              │               │
-│ • Root       │  [ 3D Interactive Scene View ]               │ • Simple Mode │
-│   ├─ Light   │                                              │ • Dev Mode    │
-│   └─ Cube    │  Teammate Frustums & Live Gizmos             │ • Properties  │
-│              │                                              │ • Add Comp    │
-├──────────────┴──────────────────────────────────────────────┴───────────────┤
-│  Console  |  Assets (Prefabs & File Browser)                                │
-└─────────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ ðŸ“ File  ðŸ“¦ Spawn  ðŸ“– Help  â”‚  Move(W) Rotate(E) Scale(R)  â”‚  â–¶ Play  ðŸ“„ Scene  â— Online â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Hierarchy   â”‚  Viewport / Game View                        â”‚  Inspector    â”‚
+â”‚              â”‚                                              â”‚               â”‚
+â”‚ â€¢ Root       â”‚  [ 3D Interactive Scene View ]               â”‚ â€¢ Simple Mode â”‚
+â”‚   â”œâ”€ Light   â”‚                                              â”‚ â€¢ Dev Mode    â”‚
+â”‚   â””â”€ Cube    â”‚  Teammate Frustums & Live Gizmos             â”‚ â€¢ Properties  â”‚
+â”‚              â”‚                                              â”‚ â€¢ Add Comp    â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  Console  |  Assets (Prefabs & File Browser)                                â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ---
@@ -47,32 +47,32 @@ Code Blue features a modular, dockable user interface powered by `egui_dock`. Yo
 
 The top bar gives one-click access to global engine operations:
 
-### 📁 `File` Menu
-* **📄 New Scene (`Ctrl + N`):** Clears the current world and resets the active scene to a clean default state.
-* **📂 Open Scene... (`Ctrl + O`):** Opens the native OS file picker (`rfd`) to load any `.ron` or `.scn` scene file.
-* **💾 Save Scene (`Ctrl + S`):** Saves current scene changes directly to the active file path.
-* **💾 Save Scene As... (`Ctrl + Shift + S`):** Prompts for a new file name to save the current world state as a new level.
+### ðŸ“ `File` Menu
+* **ðŸ“„ New Scene (`Ctrl + N`):** Clears the current world and resets the active scene to a clean default state.
+* **ðŸ“‚ Open Scene... (`Ctrl + O`):** Opens the native OS file picker (`rfd`) to load any `.ron` or `.scn` scene file.
+* **ðŸ’¾ Save Scene (`Ctrl + S`):** Saves current scene changes directly to the active file path.
+* **ðŸ’¾ Save Scene As... (`Ctrl + Shift + S`):** Prompts for a new file name to save the current world state as a new level.
 
-### 📦 `Spawn` Menu
-* **🗂 Empty Entity:** Instantiates a clean root `Transform` node.
-* **📦 Spawn Cube:** Spawns a physical 1×1×1 textured gray-box cube with rigid body physics.
+### ðŸ“¦ `Spawn` Menu
+* **ðŸ—‚ Empty Entity:** Instantiates a clean root `Transform` node.
+* **ðŸ“¦ Spawn Cube:** Spawns a physical 1Ã—1Ã—1 textured gray-box cube with rigid body physics.
 
-### 📖 `Help` Menu
-* **📖 Documentation & Quick Start:** Opens an in-editor cheatsheet with shortcuts, controls, and workflows.
-* **ℹ️ About Code Blue...:** Displays the engine credits, architecture summary, Google Antigravity attribution, and Notch's philosophical quote.
+### ðŸ“– `Help` Menu
+* **ðŸ“– Documentation & Quick Start:** Opens an in-editor cheatsheet with shortcuts, controls, and workflows.
+* **â„¹ï¸ About Code Blue...:** Displays the engine credits, architecture summary, Google Antigravity attribution, and Notch's philosophical quote.
 
-### 🛠️ Transform Gizmo Selector
+### ðŸ› ï¸ Transform Gizmo Selector
 * **Move (W):** Switches 3D gizmo to translation mode.
 * **Rotate (E):** Switches 3D gizmo to rotational arc mode.
 * **Scale (R):** Switches 3D gizmo to uniform / axis scale mode.
 
-### ▶ Play / ⏹ Stop Mode
-* **▶ Play:** Prompts to save the scene, snapshots world state into memory, spawns the local player avatar, and switches focus to the **Game View** with instant mouse grab.
-* **⏹ Stop:** Instantly restores the exact pre-play snapshot, cleans up temporary gameplay entities (bullets, debris), and switches back to the 3D **Viewport**.
+### â–¶ Play / â¹ Stop Mode
+* **â–¶ Play:** Prompts to save the scene, snapshots world state into memory, spawns the local player avatar, and switches focus to the **Game View** with instant mouse grab.
+* **â¹ Stop:** Instantly restores the exact pre-play snapshot, cleans up temporary gameplay entities (bullets, debris), and switches back to the 3D **Viewport**.
 
-### 🏷️ Status Badges
-* **📄 Scene Badge:** Displays the currently open scene file name (e.g., `📄 Scene: level.ron`).
-* **● User ID & Network Badge:** Displays real-time server connectivity and your assigned teammate color (e.g., `● Online | User #4812`).
+### ðŸ·ï¸ Status Badges
+* **ðŸ“„ Scene Badge:** Displays the currently open scene file name (e.g., `ðŸ“„ Scene: level.ron`).
+* **â— User ID & Network Badge:** Displays real-time server connectivity and your assigned teammate color (e.g., `â— Online | User #4812`).
 
 ---
 
@@ -88,19 +88,19 @@ The **Viewport** tab renders the scene into an off-screen render texture, suppor
   * `W / S`: Move forward / backward.
   * `A / D`: Strafe left / right.
   * `Q / E`: Ascend / descend.
-  * `Shift`: Boost camera speed (2.5×).
+  * `Shift`: Boost camera speed (2.5Ã—).
 * **Focus on Object (`F`):** Smoothly snaps and centers the editor camera on the currently selected entity.
 
 ---
 
 ## 4. 3D Transform Gizmos & Selection
 
-### 🎯 Picking & Object Selection
+### ðŸŽ¯ Picking & Object Selection
 * **Left-Click in Viewport:** Raycasts against 3D object bounding boxes and selects the clicked entity.
 * **Network Lock Arbitration:** Selecting an object automatically broadcasts an `EditorActionRequest::LockObject` to the server. Other connected peers will see a bounding box tinted with your user color and cannot accidentally overwrite your transform!
 * **Deselection:** Clicking on empty space deselects and unlocks the object.
 
-### 📐 Transform Manipulation
+### ðŸ“ Transform Manipulation
 * **Translate Handle (`W`):** Red (X), Green (Y), Blue (Z) arrows for axis-constrained movement.
 * **Rotate Handle (`E`):** Concentric Euler rotation rings for pitch, yaw, and roll manipulation.
 * **Scale Handle (`R`):** Bounding cube handles for precise sizing.
@@ -112,7 +112,7 @@ The **Viewport** tab renders the scene into an off-screen render texture, suppor
 
 The **Hierarchy** panel displays a live tree view of every entity currently in the level:
 
-* **Entity Labels:** Shows the object type (e.g., `Cube`, `Light`, `SpawnPoint`), human-readable name, network ID badge (`[🌐 Net #1234]`), and lock owner (`[🔒 You]` or teammate color badge).
+* **Entity Labels:** Shows the object type (e.g., `Cube`, `Light`, `SpawnPoint`), human-readable name, network ID badge (`[ðŸŒ Net #1234]`), and lock owner (`[ðŸ”’ You]` or teammate color badge).
 * **Search & Filter:** Type to quickly find entities by name or type.
 * **Drag-and-Drop Reparenting:** Drag any entity onto another entity to create a parent-child relationship. Drag onto the root area to unparent.
 * **Drag-and-Drop Script Attachment:** Drag `.rhai` files from the Asset Browser directly onto any entity in the Hierarchy to attach a behavior script!
@@ -124,13 +124,13 @@ The **Hierarchy** panel displays a live tree view of every entity currently in t
 
 The **Inspector** panel provides property editing tailored to all experience levels:
 
-### 🌟 Simple Mode (Friendly / Accessible)
+### ðŸŒŸ Simple Mode (Friendly / Accessible)
 * **Transform Cards:** Visual sliders and numeric inputs with reset buttons.
 * **Physics Card:** Easy radio selectors for Body Type (*Dynamic, Static, Kinematic*) and gravity slider.
 * **Visuals & Color Picker:** Interactive color palette picker and metallic/roughness sliders.
-* **Scripting Card:** Displays the attached `.rhai` script with an **"✏️ Open in VS Code"** button and live reload indicator.
+* **Scripting Card:** Displays the attached `.rhai` script with an **"âœï¸ Open in VS Code"** button and live reload indicator.
 
-### 🛠️ Developer Mode (Deep Systems Inspection)
+### ðŸ› ï¸ Developer Mode (Deep Systems Inspection)
 * **Full ECS Reflection Tree:** Inspects every low-level Bevy ECS component attached to the entity.
 * **Raw Component Editing:** Modify raw values, struct fields, and internal metadata.
 * **Quick Remove:** One-click removal of any attached component.
@@ -139,15 +139,15 @@ The **Inspector** panel provides property editing tailored to all experience lev
 
 ## 7. Component Catalog & Adding Components
 
-Click **"➕ Add Component"** at the bottom of the Inspector to open the **Searchable Component Catalog**:
+Click **"âž• Add Component"** at the bottom of the Inspector to open the **Searchable Component Catalog**:
 
 * **Live Fuzzy Search:** Type names, keywords, or descriptions (e.g., `"physics"`, `"light"`, `"rhai"`, `"box"`, `"mass"`).
 * **Organized Categories:**
-  * **⚡ Physics & Motion:** `RigidBody`, `GravityScale`, `Collider (Box)`, `Collider (Sphere)`, `Collider (Capsule)`, `LockedAxes`.
-  * **🎨 Visuals & Rendering:** `MeshMaterial3d (PBR Material)`, `PointLight`.
-  * **📜 Gameplay & Scripting:** `RhaiScript (Behavior Script)`.
-  * **🏷️ General & Identity:** `Entity Name`, `Transform`.
-* **Instant Application:** Click **"➕ Add"** to immediately attach the component, register reflection, and sync across the network.
+  * **âš¡ Physics & Motion:** `RigidBody`, `GravityScale`, `Collider (Box)`, `Collider (Sphere)`, `Collider (Capsule)`, `LockedAxes`.
+  * **ðŸŽ¨ Visuals & Rendering:** `MeshMaterial3d (PBR Material)`, `PointLight`.
+  * **ðŸ“œ Gameplay & Scripting:** `RhaiScript (Behavior Script)`.
+  * **ðŸ·ï¸ General & Identity:** `Entity Name`, `Transform`.
+* **Instant Application:** Click **"âž• Add"** to immediately attach the component, register reflection, and sync across the network.
 
 ---
 
@@ -155,15 +155,15 @@ Click **"➕ Add Component"** at the bottom of the Inspector to open the **Searc
 
 The bottom **Assets** tab houses the built-in Prefabs and Project File Browser:
 
-### 📦 Quick Prefab Spawners
-* **🗂 Empty Node:** Spawns a clean transform anchor.
-* **🎯 Target Dummy (Cube):** Spawns a physics-enabled target cube with 50 HP and `TargetDummy` component.
-* **💡 Point Light:** Spawns an omnidirectional light source with gizmo visualization.
-* **🚩 Spawn Point:** Spawns a multiplayer player start position.
-* **🏁 Goal Zone:** Spawns an extraction goal volume with cylinder sensor collider.
+### ðŸ“¦ Quick Prefab Spawners
+* **ðŸ—‚ Empty Node:** Spawns a clean transform anchor.
+* **ðŸŽ¯ Target Dummy (Cube):** Spawns a physics-enabled target cube with 50 HP and `TargetDummy` component.
+* **ðŸ’¡ Point Light:** Spawns an omnidirectional light source with gizmo visualization.
+* **ðŸš© Spawn Point:** Spawns a multiplayer player start position.
+* **ðŸ Goal Zone:** Spawns an extraction goal volume with cylinder sensor collider.
 
-### 📁 Project Asset Browser
-* **Folder Navigation:** Click folders to navigate; click **"🔙 Back"** to traverse up.
+### ðŸ“ Project Asset Browser
+* **Folder Navigation:** Click folders to navigate; click **"ðŸ”™ Back"** to traverse up.
 * **Drag-and-Drop 3D Models:** Drag `.gltf` or `.glb` files directly into the 3D Viewport to spawn the model into the scene.
 * **One-Click Script Editing:** Click any `.rhai` script to open it in **VS Code** (or default editor).
 * **Model Import Dialog:** Import external 3D meshes with relative asset path resolution.
@@ -175,11 +175,11 @@ The bottom **Assets** tab houses the built-in Prefabs and Project File Browser:
 Code Blue includes an embedded, high-performance **Rhai AST Scripting Runtime**:
 
 ```
-┌─────────────────┐       Auto Disk Watcher       ┌───────────────────┐
-│   VS Code /     │ ────────────────────────────> │  Code Blue Engine │
-│   Text Editor   │   File Timestamp Change (<1s) │  Hot-Reloads AST  │
-│  (edit .rhai)   │                               │  Preserves State  │
-└─────────────────┘                               └───────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       Auto Disk Watcher       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚   VS Code /     â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€> â”‚  Code Blue Engine â”‚
+â”‚   Text Editor   â”‚   File Timestamp Change (<1s) â”‚  Hot-Reloads AST  â”‚
+â”‚  (edit .rhai)   â”‚                               â”‚  Preserves State  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                               â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### Writing a Script
@@ -199,7 +199,7 @@ fn on_update() {
 ### Hot-Reload Workflow:
 1. Select any entity in the Hierarchy.
 2. In the Inspector, attach a `.rhai` script or select an existing one.
-3. Click **"✏️ Open in VS Code"**.
+3. Click **"âœï¸ Open in VS Code"**.
 4. Edit rotation speed, variables, or behavior logic, then press **`Ctrl + S`** in VS Code.
 5. **Code Blue instantly re-compiles and hot-reloads the script in real-time** without dropping frames or restarting!
 
@@ -215,7 +215,7 @@ Code Blue's editor was engineered from the ground up for simultaneous multi-user
 * **Lock Arbitration:** Prevents conflicting simultaneous edits while allowing teammates to build adjacent structures together in real-time.
 * **Bidirectional Component Sync:** Physics properties, PBR material colors, lights, and scripts stream live to all teammates with 0% desync.
 * **Hierarchy Reparenting Sync:** Dragging and dropping entities in the Hierarchy tree syncs the scene graph across all connected peers.
-* **Multiplayer Play-Testing Invites:** When one developer clicks **▶ Play**, all connected peers receive an instant prompt: *"Another user has started Play Mode. Would you like to join?"*.
+* **Multiplayer Play-Testing Invites:** When one developer clicks **â–¶ Play**, all connected peers receive an instant prompt: *"Another user has started Play Mode. Would you like to join?"*.
 
 ---
 
@@ -233,7 +233,7 @@ Scenes are serialized into human-readable, version-control-friendly **RON (Rusty
 
 Test your level mechanics instantly with native FPS controls and authoritative game rules:
 
-* **Auto-Focus Game View:** Pressing **▶ Play** switches the dock tab to **Game View** and immediately locks the OS cursor.
+* **Auto-Focus Game View:** Pressing **â–¶ Play** switches the dock tab to **Game View** and immediately locks the OS cursor.
   * `WASD`: Dynamic movement with Tnua Kinematic Character Controller.
   * `Space`: Jump.
   * `Shift`: Sprint.
@@ -250,22 +250,33 @@ Test your level mechanics instantly with native FPS controls and authoritative g
   * **Center Reticle Crosshair (`+`)**: Clean aiming reticle.
   * **Health Bar (Bottom-Left)**: Real-time color-coded health (`100 / 100 HP`).
   * **Ammo Counter (Bottom-Right)**: Current magazine and reserve ammo (`15 / 60`).
-  * **Objective & Timer HUD (Top-Center)**: Remaining target count and match clock (`🎯 Targets: 3 | ⏱️ 01:45`).
+  * **Objective & Timer HUD (Top-Center)**: Remaining target count and match clock (`ðŸŽ¯ Targets: 3 | â±ï¸ 01:45`).
 * **Win & Lose Conditions:**
-  * **🏆 Victory:** Eliminating all target dummies or stepping onto a `GoalZone` extraction area triggers the Victory modal.
-  * **💀 Defeat:** Dropping to `0 HP` or falling below the level void threshold (`y < -25.0`) triggers Defeat.
-  * **Respawn & Reset:** Press **"🔄 Respawn / Restart"** in the overlay modal to reset health and teleport back to the spawn point.
+  * **ðŸ† Victory:** Eliminating all target dummies or stepping onto a `GoalZone` extraction area triggers the Victory modal.
+  * **ðŸ’€ Defeat:** Dropping to `0 HP` or falling below the level void threshold (`y < -25.0`) triggers Defeat.
+  * **Respawn & Reset:** Press **"ðŸ”„ Respawn / Restart"** in the overlay modal to reset health and teleport back to the spawn point.
 * **Multiplayer Play Sync:** Connected peers in Play Mode appear as 3D avatars with synchronized pitch aiming and unique assigned user colors.
 * **Release Cursor:** Press `Escape` to unlock the cursor; click anywhere on the Game View to jump back into gameplay.
 
 ---
 
-## 13. Console & Diagnostic Logs
+## 13. Developer Console
 
-* **Bottom Dock Tab:** Displays real-time engine events, asset loading notifications, netcode connection drops/reconnects, and script print statements.
-* **Toggle Console Hotkey:** Press **`~` (Backquote)** anytime to immediately focus the Console tab.
+The **Developer Console** is an interactive command-line interface overlay for debugging, runtime configuration, and executing cheat commands. 
 
----
+* **Toggle Console Hotkey:** Press **`~` (Backquote)** anytime to toggle the Developer Console overlay.
+* **Command History:** Use the input field to type commands. The console output history persists during the session.
+
+### Available Commands
+- **`help`**: Lists all available commands directly in the console.
+- **`clear`**: Clears the console output history buffer.
+- **`show_fps <0|1>`**: Toggles a high-visibility FPS overlay in the top-right corner.
+- **`fps_max <limit>`**: Sets a strict maximum frame rate ceiling (e.g., `fps_max 144`). Set to `0` for unlimited.
+- **`show_physics <0|1>`**: Toggles the Avian3D Physics Debug Renderer, allowing you to visually inspect all rigid bodies, colliders, raycasts, and triggers in the scene.
+- **`god_mode <0|1>`**: Grants the player an `ImmortalPlayer` component, preventing death from damage.
+- **`heal <amount>`**: Instantly adds the specified amount of health to the player.
+- **`noclip <0|1>`**: Toggles player collision layers, allowing you to fly freely through walls and geometry.
+- **`spawn_bot`**: Spawns a shootable target dummy exactly 5 meters in front of the player's current location and looking direction.
 
 ## 14. Keyboard Shortcuts Quick Reference
 
@@ -289,4 +300,4 @@ Test your level mechanics instantly with native FPS controls and authoritative g
 | **`Escape`** | Release Cursor from Game View | Play Mode |
 
 ---
-*Code Blue Engine — Crafted in Rust • Powered by Google Antigravity*
+*Code Blue Engine â€” Crafted in Rust â€¢ Powered by Google Antigravity*

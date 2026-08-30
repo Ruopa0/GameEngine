@@ -1,4 +1,1620 @@
 (
     resources: {},
-    entities: {},
+    entities: {
+        4294967143: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_14",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (70.762764, 32.00894, 71.0577),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2450255060529872727),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967144: (
+            components: {
+                "bevy_ecs::name::Name": "Building_53",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (70.762764, 15.75447, 71.0577),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (13.703711, 31.50894, 13.088871),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5245086,
+                    green: 0.2723248,
+                    blue: 0.47938985,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (301147664223070073),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967145: (
+            components: {
+                "bevy_ecs::name::Name": "Building_52",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (72.51029, 7.821996, 34.5574),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (11.036366, 15.643992, 15.50323),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.3320547,
+                    green: 0.4867217,
+                    blue: 0.38975,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (18424948041920163871),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967146: (
+            components: {
+                "bevy_ecs::name::Name": "Building_51",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (74.38624, 12.615092, -0.34964895),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.725271, 25.230185, 8.458264),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.44832718,
+                    green: 0.56226087,
+                    blue: 0.20985621,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (12007176626931196124),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967147: (
+            components: {
+                "bevy_ecs::name::Name": "Building_50",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (75.43901, 22.440882, 1.798214),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.315266, 44.881763, 8.237856),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5764,
+                    green: 0.4165271,
+                    blue: 0.5157413,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (14667255834988939590),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967148: (
+            components: {
+                "bevy_ecs::name::Name": "Building_49",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (73.945885, 20.578186, -35.249023),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.787832, 41.156372, 12.481808),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.30769593,
+                    green: 0.4600038,
+                    blue: 0.3426339,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (16752535586217386403),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967149: (
+            components: {
+                "bevy_ecs::name::Name": "Building_48",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (74.84215, 22.144331, -36.65356),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.8529415, 44.288662, 13.503849),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5784466,
+                    green: 0.5311654,
+                    blue: 0.41205433,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2489766433999653891),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967150: (
+            components: {
+                "bevy_ecs::name::Name": "Building_47",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (69.93368, 8.700744, -37.920715),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.130402, 17.401487, 8.645147),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5605012,
+                    green: 0.3066354,
+                    blue: 0.5636573,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2547756022039560419),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967151: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_13",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (69.824936, 10.5379095, -70.88255),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (4362259422954776159),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967152: (
+            components: {
+                "bevy_ecs::name::Name": "Building_46",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (69.824936, 5.0189548, -70.88255),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.379042, 10.0379095, 13.334304),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.36466032,
+                    green: 0.4615054,
+                    blue: 0.2881198,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (1768245949953313544),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967153: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_12",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (72.37651, 26.85783, -75.20046),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (11938328969202904677),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967154: (
+            components: {
+                "bevy_ecs::name::Name": "Building_45",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (72.37651, 13.178915, -75.20046),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (13.696474, 26.35783, 13.525768),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.3732903,
+                    green: 0.38765097,
+                    blue: 0.3181204,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (3696178203378156904),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967155: (
+            components: {
+                "bevy_ecs::name::Name": "Building_44",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (70.19759, 19.707855, -108.14225),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.165879, 39.41571, 13.59037),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.30055654,
+                    green: 0.27892312,
+                    blue: 0.27590725,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (12752620185848039748),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967156: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_11",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (70.66423, 24.076313, -107.325645),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2438744478598181369),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967157: (
+            components: {
+                "bevy_ecs::name::Name": "Building_43",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (70.66423, 11.7881565, -107.325645),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (9.648051, 23.576313, 8.827494),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5764176,
+                    green: 0.57730883,
+                    blue: 0.2673545,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2000180359417604409),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967158: (
+            components: {
+                "bevy_ecs::name::Name": "Building_42",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (32.60193, 20.182022, 73.5983),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (15.61918, 40.364044, 12.77762),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5706125,
+                    green: 0.51015097,
+                    blue: 0.5440041,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (15255391802757103946),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967159: (
+            components: {
+                "bevy_ecs::name::Name": "Building_41",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (33.018524, 15.4311905, 74.718025),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.379397, 30.862381, 10.850517),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.20486157,
+                    green: 0.35939908,
+                    blue: 0.55971295,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (3520096545239496973),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967160: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_10",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (37.429337, 25.89314, 34.328384),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (3898753629756604376),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967161: (
+            components: {
+                "bevy_ecs::name::Name": "Building_40",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (37.429337, 12.69657, 34.328384),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.872577, 25.39314, 10.981626),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.44813707,
+                    green: 0.35349154,
+                    blue: 0.2805383,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (10671153110420880831),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967162: (
+            components: {
+                "bevy_ecs::name::Name": "Building_39",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (34.021965, 21.481256, 36.890793),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (11.1616745, 42.962513, 14.499062),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.21161999,
+                    green: 0.38374412,
+                    blue: 0.27464885,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2651905899400494982),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967163: (
+            components: {
+                "bevy_ecs::name::Name": "Building_38",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (33.87843, 17.689932, 38.43939),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (12.754785, 35.379864, 8.483394),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.2612336,
+                    green: 0.538224,
+                    blue: 0.37008992,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (13646734255763263583),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967164: (
+            components: {
+                "bevy_ecs::name::Name": "Building_37",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (39.143166, 5.619032, -2.3913865),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.464758, 11.238064, 12.520739),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.24368915,
+                    green: 0.28010422,
+                    blue: 0.4942397,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2651966383347927258),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967165: (
+            components: {
+                "bevy_ecs::name::Name": "Building_36",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (38.13069, 15.601709, -33.25107),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.098264, 31.203419, 8.082541),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.37037557,
+                    green: 0.56632525,
+                    blue: 0.44891816,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (10576555062641892198),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967166: (
+            components: {
+                "bevy_ecs::name::Name": "Building_35",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (38.782448, 19.82035, -73.8579),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (8.872254, 39.6407, 11.058527),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.55981535,
+                    green: 0.49248433,
+                    blue: 0.23964281,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (13140430400361168718),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967167: (
+            components: {
+                "bevy_ecs::name::Name": "Building_34",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (39.07052, 13.074998, -68.24213),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (12.7425785, 26.149996, 8.064595),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.3226567,
+                    green: 0.5367385,
+                    blue: 0.2397329,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (4796356362551863833),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967168: (
+            components: {
+                "bevy_ecs::name::Name": "Building_33",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (38.155308, 22.016407, -72.75762),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (13.60899, 44.032814, 13.224723),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.3229032,
+                    green: 0.49574518,
+                    blue: 0.47696275,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (18396484070778245552),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967169: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_9",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (34.36769, 37.833973, -104.91381),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (4638583721894951914),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967170: (
+            components: {
+                "bevy_ecs::name::Name": "Building_32",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (34.36769, 18.666986, -104.91381),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (12.293833, 37.333973, 9.751848),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.30917263,
+                    green: 0.48250967,
+                    blue: 0.5163282,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (9840933580440450058),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967171: (
+            components: {
+                "bevy_ecs::name::Name": "Building_31",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (34.73146, 9.66814, -110.6085),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (9.119356, 19.33628, 13.926732),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.3383857,
+                    green: 0.5747275,
+                    blue: 0.5934829,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (7778321456920996888),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967172: (
+            components: {
+                "bevy_ecs::name::Name": "Building_30",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (0.13982534, 5.786231, 72.428825),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (15.3966465, 11.572462, 8.430795),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.2997799,
+                    green: 0.54555917,
+                    blue: 0.24258146,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (16860089307762983239),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967173: (
+            components: {
+                "bevy_ecs::name::Name": "Building_29",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-3.6867387, 19.333078, 70.888374),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.852745, 38.666157, 12.322381),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.31402847,
+                    green: 0.2998494,
+                    blue: 0.38297057,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (7101881902990085506),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967174: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_8",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-2.4828796, 36.85982, 33.312874),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (1082888107988426270),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967175: (
+            components: {
+                "bevy_ecs::name::Name": "Building_28",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-2.4828796, 18.17991, 33.312874),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (8.16075, 36.35982, 13.14026),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.22517492,
+                    green: 0.23395075,
+                    blue: 0.5461512,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (12069777631768057842),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967176: (
+            components: {
+                "bevy_ecs::name::Name": "Building_27",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (0.23969412, 20.418041, 33.041664),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.206988, 40.836082, 11.474773),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.59627575,
+                    green: 0.3624821,
+                    blue: 0.44172922,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (8491199261329639454),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967177: (
+            components: {
+                "bevy_ecs::name::Name": "Building_26",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (1.9228086, 14.984296, -36.28181),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.808384, 29.968592, 11.651574),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.47797292,
+                    green: 0.5014132,
+                    blue: 0.28885826,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (4204606821236241032),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967178: (
+            components: {
+                "bevy_ecs::name::Name": "Building_25",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (1.6852431, 20.30459, -72.485435),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (11.339912, 40.60918, 12.390821),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5996354,
+                    green: 0.276068,
+                    blue: 0.30718786,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (12331515721183261293),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967179: (
+            components: {
+                "bevy_ecs::name::Name": "Building_24",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-1.9491057, 9.249174, -73.7351),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (11.446893, 18.498348, 9.608134),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.34267092,
+                    green: 0.2607119,
+                    blue: 0.23135969,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (5790374169882407160),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967180: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_7",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (2.9195018, 17.4552, -110.76934),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (14113067547684750967),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967181: (
+            components: {
+                "bevy_ecs::name::Name": "Building_23",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (2.9195018, 8.4776, -110.76934),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (9.438261, 16.9552, 13.962652),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.29081273,
+                    green: 0.53471994,
+                    blue: 0.46044457,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (9791346634561538665),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967182: (
+            components: {
+                "bevy_ecs::name::Name": "Building_22",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-33.176853, 21.69969, 74.33573),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (9.669302, 43.39938, 14.232208),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5600429,
+                    green: 0.20819758,
+                    blue: 0.4414053,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (7801611914941948764),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967183: (
+            components: {
+                "bevy_ecs::name::Name": "Building_21",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-34.863632, 19.393124, -36.047565),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (12.865049, 38.786247, 15.710997),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.4827569,
+                    green: 0.49008006,
+                    blue: 0.32863557,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (16276307535923004457),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967184: (
+            components: {
+                "bevy_ecs::name::Name": "Building_20",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-32.287605, 11.179535, -73.199425),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (15.525977, 22.35907, 12.77435),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.25966638,
+                    green: 0.5918924,
+                    blue: 0.27635404,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (8156844029539487604),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967185: (
+            components: {
+                "bevy_ecs::name::Name": "Building_19",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-38.788445, 10.543947, -110.10957),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.867324, 21.087894, 11.858939),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.20717031,
+                    green: 0.3166182,
+                    blue: 0.4681062,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (13433320077859002568),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967186: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_6",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-38.67054, 11.169089, -111.52548),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (14655165751844590731),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967187: (
+            components: {
+                "bevy_ecs::name::Name": "Building_18",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-38.67054, 5.3345447, -111.52548),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.876426, 10.669089, 13.279466),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.20094772,
+                    green: 0.41345847,
+                    blue: 0.3608584,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (13834293625466756743),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967188: (
+            components: {
+                "bevy_ecs::name::Name": "Building_17",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-38.28421, 12.3003025, -108.6072),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.992192, 24.600605, 10.16088),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.3943001,
+                    green: 0.3432616,
+                    blue: 0.27275386,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (5024154600439013549),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967189: (
+            components: {
+                "bevy_ecs::name::Name": "Building_16",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-73.13704, 6.484198, 75.293205),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.024361, 12.968396, 12.015987),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.33557284,
+                    green: 0.45817846,
+                    blue: 0.57866234,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (18030610385274902914),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967190: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_5",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-69.88183, 43.709846, 69.40156),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (17220672679826769651),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967191: (
+            components: {
+                "bevy_ecs::name::Name": "Building_15",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-69.88183, 21.604923, 69.40156),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (11.795274, 43.209846, 11.858944),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.4698615,
+                    green: 0.53447115,
+                    blue: 0.5491294,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (15638742115588178733),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967192: (
+            components: {
+                "bevy_ecs::name::Name": "Building_14",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-70.54084, 16.277214, 68.12014),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.056232, 32.55443, 15.906179),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.21567085,
+                    green: 0.31433314,
+                    blue: 0.42945075,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (9936188085502620871),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967193: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_4",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-69.76204, 18.224579, 35.574837),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (91645363001725065),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967194: (
+            components: {
+                "bevy_ecs::name::Name": "Building_13",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-69.76204, 8.862289, 35.574837),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (11.404411, 17.724579, 10.158753),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.48498553,
+                    green: 0.2964782,
+                    blue: 0.23598598,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (3413681473305004442),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967195: (
+            components: {
+                "bevy_ecs::name::Name": "Building_12",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-70.43021, 14.294359, -3.3054008),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (8.503745, 28.588718, 10.805292),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.37115026,
+                    green: 0.38470173,
+                    blue: 0.36294115,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (10331300038432372294),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967196: (
+            components: {
+                "bevy_ecs::name::Name": "Building_11",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-71.51714, 6.6136823, -3.775208),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.8586445, 13.227365, 14.069042),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.43055266,
+                    green: 0.5420204,
+                    blue: 0.24674535,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (3338495849694552640),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967197: (
+            components: {
+                "bevy_ecs::name::Name": "Building_10",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-71.93017, 22.048044, 1.8337917),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (8.126884, 44.09609, 14.367973),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.36593673,
+                    green: 0.25460836,
+                    blue: 0.28387693,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (13094199883158006102),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967198: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_3",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-73.491745, 36.226875, -32.85024),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (11492840803501539471),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967199: (
+            components: {
+                "bevy_ecs::name::Name": "Building_9",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-73.491745, 17.863438, -32.85024),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (14.206537, 35.726875, 11.41298),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.34359443,
+                    green: 0.24338757,
+                    blue: 0.46958548,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (12255448281437293212),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967200: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_2",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-106.76035, 42.69694, 36.444347),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (14094885177014115562),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967201: (
+            components: {
+                "bevy_ecs::name::Name": "Building_8",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-106.76035, 21.09847, 36.444347),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (11.939193, 42.19694, 8.594567),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.30373517,
+                    green: 0.578607,
+                    blue: 0.2796345,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (9798229573125573224),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967202: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_1",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-110.14788, 36.881744, 35.647404),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (7164884135461763452),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967203: (
+            components: {
+                "bevy_ecs::name::Name": "Building_7",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-110.14788, 18.190872, 35.647404),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (13.218529, 36.381744, 12.219404),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.23143208,
+                    green: 0.38497195,
+                    blue: 0.50220644,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (5710457426555728288),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967204: (
+            components: {
+                "bevy_ecs::name::Name": "Building_6",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-111.89554, 10.086206, 36.638462),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (13.360622, 20.172413, 12.709188),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.26082173,
+                    green: 0.23692665,
+                    blue: 0.30553105,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2810271811709892411),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967205: (
+            components: {
+                "bevy_ecs::name::Name": "Building_5",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-105.10123, 9.424229, -3.6427543),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (12.3927555, 18.848457, 11.1323805),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.57661766,
+                    green: 0.45921487,
+                    blue: 0.43860856,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (16499572007865850955),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967206: (
+            components: {
+                "bevy_ecs::name::Name": "Building_4",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-104.33105, 14.813031, 1.0088854),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (13.02989, 29.626062, 9.176504),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.5234668,
+                    green: 0.52204317,
+                    blue: 0.21060005,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (1999438007563270529),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967207: (
+            components: {
+                "bevy_ecs::name::Name": "Building_3",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-108.985886, 11.441327, -35.731667),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (10.746847, 22.882654, 9.988543),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.22778821,
+                    green: 0.30433077,
+                    blue: 0.585592,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (747350717133366729),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967208: (
+            components: {
+                "bevy_ecs::name::Name": "Building_2",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-109.08441, 14.835807, -74.06163),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (12.942262, 29.671614, 13.442364),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.3733229,
+                    green: 0.21309584,
+                    blue: 0.21748096,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (360960989214992440),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967209: (
+            components: {
+                "bevy_ecs::name::Name": "Building_1",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-109.97305, 16.615177, -68.50653),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (13.402807, 33.230354, 8.132563),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.23421103,
+                    green: 0.35808697,
+                    blue: 0.5262288,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (2234251210139827790),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967210: (
+            components: {
+                "bevy_ecs::name::Name": "WeaponChest_0",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-107.357735, 14.139637, -109.284744),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (8664408176770321738),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "weapon_chest",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967211: (
+            components: {
+                "bevy_ecs::name::Name": "Building_0",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (-107.357735, 6.8198185, -109.284744),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (12.464868, 13.639637, 8.571009),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.4226848,
+                    green: 0.22977293,
+                    blue: 0.39718193,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.7,
+                    metallic: 0.2,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (16899500801075203803),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967212: (
+            components: {
+                "bevy_ecs::name::Name": "PlayerSpawn",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (0.0, 1.0, 0.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "cb_engine::editor::serialization::NetworkId": (12360841943862755317),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "spawn_point",
+                    asset_path: None,
+                ),
+            },
+        ),
+        4294967213: (
+            components: {
+                "bevy_ecs::name::Name": "CityFloor",
+                "bevy_transform::components::transform::Transform": (
+                    translation: (0.0, -0.5, 0.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (300.0, 1.0, 300.0),
+                ),
+                "cb_engine::editor::serialization::EditorColor": (Srgba((
+                    red: 0.3,
+                    green: 0.3,
+                    blue: 0.32,
+                    alpha: 1.0,
+                ))),
+                "cb_engine::editor::serialization::EditorMaterial": (
+                    roughness: 0.8,
+                    metallic: 0.1,
+                ),
+                "cb_engine::editor::serialization::NetworkId": (7029780356404846527),
+                "cb_engine::editor::serialization::SceneObject": (
+                    object_type: "cube",
+                    asset_path: None,
+                ),
+            },
+        ),
+    },
 )

@@ -1,6 +1,6 @@
+use crate::editor::serialization::EditorColor;
 use bevy::prelude::*;
 use cb_weapons::ballistics::HitVfxEvent;
-use crate::editor::serialization::EditorColor;
 
 #[derive(Component)]
 pub struct Particle {
@@ -13,7 +13,8 @@ pub struct VfxPlugin;
 
 impl Plugin for VfxPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (spawn_hit_particles, update_particles));
+        app.add_message::<HitVfxEvent>()
+           .add_systems(Update, (spawn_hit_particles, update_particles));
     }
 }
 
@@ -28,7 +29,8 @@ fn spawn_hit_particles(
 
     for ev in events.read() {
         // Try to get the color of the hit object
-        let hit_color = q_colors.get(ev.hit_entity)
+        let hit_color = q_colors
+            .get(ev.hit_entity)
             .map(|c| c.0)
             .unwrap_or(Color::srgb(0.8, 0.8, 0.8));
 
@@ -50,11 +52,12 @@ fn spawn_hit_particles(
                 rng.f32() * 2.0 - 1.0,
                 rng.f32() * 2.0 - 1.0,
                 rng.f32() * 2.0 - 1.0,
-            ).normalize_or_zero();
-            
+            )
+            .normalize_or_zero();
+
             let dir = (ev.normal * 2.0 + random_dir).normalize_or_zero();
             let speed = rng.f32() * 5.0 + 2.0;
-            
+
             commands.spawn((
                 Mesh3d(mesh.clone()),
                 MeshMaterial3d(material.clone()),
@@ -84,7 +87,7 @@ fn update_particles(
 
         transform.translation += particle.velocity * dt;
         particle.velocity.y -= 9.81 * dt; // gravity
-        
+
         let scale = (particle.lifetime / particle.start_lifetime).max(0.0);
         transform.scale = Vec3::splat(scale);
     }

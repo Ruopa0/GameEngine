@@ -29,7 +29,7 @@ impl Plugin for SchedulePlugin {
                 EngineSet::WeaponProcess,
                 EngineSet::GameRules,
             )
-            .chain(),
+                .chain(),
         );
     }
 }

@@ -1,17 +1,19 @@
-use bevy::prelude::*;
-use super::EngineState;
 use super::camera::EditorCamera;
-use super::EditorSet;
 use super::serialization::SceneObject;
+use super::EditorSet;
+use super::EngineState;
+use bevy::prelude::*;
 
 pub struct EditorIconsPlugin;
 
 impl Plugin for EditorIconsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (
-            spawn_light_icons,
-            billboard_icons,
-        ).run_if(in_state(EngineState::Edit)).in_set(EditorSet::GizmoUpdate));
+        app.add_systems(
+            Update,
+            (spawn_light_icons, billboard_icons)
+                .run_if(in_state(EngineState::Edit))
+                .in_set(EditorSet::GizmoUpdate),
+        );
     }
 }
 
@@ -39,13 +41,15 @@ fn spawn_light_icons(
             ..default()
         });
 
-        let icon = commands.spawn((
-            Mesh3d(mesh),
-            MeshMaterial3d(material),
-            Transform::default(),
-            EditorIcon,
-        )).id();
-        
+        let icon = commands
+            .spawn((
+                Mesh3d(mesh),
+                MeshMaterial3d(material),
+                Transform::default(),
+                EditorIcon,
+            ))
+            .id();
+
         commands.entity(entity).insert(HasEditorIcon); // Mark parent so we don't spawn again
         commands.entity(entity).add_child(icon);
     }
@@ -55,17 +59,19 @@ fn billboard_icons(
     q_camera: Query<&GlobalTransform, With<EditorCamera>>,
     mut q_icons: Query<(&GlobalTransform, &mut Transform), With<EditorIcon>>,
 ) {
-    let Ok(camera_transform) = q_camera.single() else { return };
+    let Ok(camera_transform) = q_camera.single() else {
+        return;
+    };
     let camera_pos = camera_transform.translation();
-    
+
     for (global_transform, mut transform) in q_icons.iter_mut() {
         let icon_pos = global_transform.translation();
         let direction = (camera_pos - icon_pos).normalize_or_zero();
-        
+
         if direction != Vec3::ZERO {
-            // Need to look at the camera in global space. 
+            // Need to look at the camera in global space.
             // Sprite is a child, so we just set its local rotation to counteract the parent's and face the camera.
-            // Wait, Sprite renders based on GlobalTransform. 
+            // Wait, Sprite renders based on GlobalTransform.
             // Actually Sprite in Bevy 3D needs to be rotated to face camera.
             transform.look_to(direction, Vec3::Y);
         }

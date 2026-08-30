@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default, Reflect, Serialize, Deserialize)]
 pub enum MatchStatus {
@@ -61,33 +61,37 @@ pub struct GameModePlugin;
 impl Plugin for GameModePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<MatchState>()
-           .register_type::<MatchState>()
-           .register_type::<TargetDummy>()
-           .register_type::<GoalZone>()
-           .add_message::<TargetDestroyedEvent>()
-           .add_message::<ResetMatchEvent>()
-           .add_systems(Update, (
-               update_match_timer,
-               check_player_death_and_void,
-               check_target_count,
-               handle_target_destroyed,
-               check_goal_zone_collision,
-               handle_reset_match,
-           ).run_if(in_state(crate::editor::EngineState::Play)));
+            .register_type::<MatchState>()
+            .register_type::<TargetDummy>()
+            .register_type::<GoalZone>()
+            .add_message::<TargetDestroyedEvent>()
+            .add_message::<ResetMatchEvent>()
+            .add_systems(
+                Update,
+                (
+                    update_match_timer,
+                    check_player_death_and_void,
+                    check_target_count,
+                    handle_target_destroyed,
+                    check_goal_zone_collision,
+                    handle_reset_match,
+                )
+                    .run_if(in_state(crate::editor::EngineState::Play)),
+            );
     }
 }
 
-fn update_match_timer(
-    time: Res<Time>,
-    mut match_state: ResMut<MatchState>,
-) {
+fn update_match_timer(time: Res<Time>, mut match_state: ResMut<MatchState>) {
     if match_state.status == MatchStatus::InProgress {
         match_state.elapsed_seconds += time.delta_secs();
     }
 }
 
 fn check_player_death_and_void(
-    q_player: Query<(&Transform, Option<&cb_weapons::components::Health>), With<crate::player::Player>>,
+    q_player: Query<
+        (&Transform, Option<&cb_weapons::components::Health>),
+        With<crate::player::Player>,
+    >,
     mut match_state: ResMut<MatchState>,
 ) {
     if match_state.status != MatchStatus::InProgress {
@@ -120,7 +124,8 @@ fn check_target_count(
     if count > match_state.total_targets {
         match_state.total_targets = count;
     }
-    if match_state.total_targets > 0 && count == 0 && match_state.status == MatchStatus::InProgress {
+    if match_state.total_targets > 0 && count == 0 && match_state.status == MatchStatus::InProgress
+    {
         match_state.status = MatchStatus::Victory;
         match_state.win_reason = "All target dummies eliminated!".to_string();
     }
@@ -164,17 +169,30 @@ fn handle_target_destroyed(
 fn handle_reset_match(
     mut events: MessageReader<ResetMatchEvent>,
     mut match_state: ResMut<MatchState>,
-    mut q_player: Query<(&mut Transform, Option<&mut cb_weapons::components::Health>), With<crate::player::Player>>,
-    q_spawn_points: Query<&Transform, (With<crate::editor::serialization::SceneObject>, Without<crate::player::Player>)>,
+    mut q_player: Query<
+        (&mut Transform, Option<&mut cb_weapons::components::Health>),
+        With<crate::player::Player>,
+    >,
+    q_spawn_points: Query<
+        &Transform,
+        (
+            With<crate::editor::serialization::SceneObject>,
+            Without<crate::player::Player>,
+        ),
+    >,
 ) {
     for _ in events.read() {
         match_state.status = MatchStatus::InProgress;
         match_state.elapsed_seconds = 0.0;
         match_state.score = 0;
         match_state.kills = 0;
-        
-        let spawn_pos = q_spawn_points.iter().next().map(|t| t.translation + Vec3::Y * 1.5).unwrap_or(Vec3::new(0.0, 2.0, 0.0));
-        
+
+        let spawn_pos = q_spawn_points
+            .iter()
+            .next()
+            .map(|t| t.translation + Vec3::Y * 1.5)
+            .unwrap_or(Vec3::new(0.0, 2.0, 0.0));
+
         for (mut tf, health_opt) in q_player.iter_mut() {
             tf.translation = spawn_pos;
             tf.rotation = Quat::IDENTITY;

@@ -1,16 +1,16 @@
-/// Parkour Detection — runs raycasts each FixedUpdate tick to detect
+/// Parkour Detection -- runs raycasts each FixedUpdate tick to detect
 /// vault and mantle surfaces. Results are written into ParkourSense
 /// so the FSM can make transitions.
 ///
 /// Detection Grid (every tick while airborne or sprinting):
-///   Forward shapeCast → vault / mantle candidate
-///   Foot / head rayCasts → obstacle height classification
+///   Forward shapeCast -> vault / mantle candidate
+///   Foot / head rayCasts -> obstacle height classification
 
 use bevy::prelude::*;
 use avian3d::prelude::*;
 use crate::fsm::{CharacterState, MovementState};
 
-/// Results written from detection → FSM reads these next tick
+/// Results written from detection -> FSM reads these next tick
 #[derive(Component, Default)]
 pub struct ParkourSense {
     pub vault_target:    Option<Vec3>,   // world-space snap point for vault
@@ -40,10 +40,10 @@ pub fn detect_parkour(
 
         if !should_check { continue; }
 
-        // ─── Forward obstacle detection ──────────────────────────────
+        // --- Forward obstacle detection ------------------------------
         // Three rays at foot, waist, and head height classify obstacle
         let ray_origins = [
-            pos + Vec3::Y * 0.3,   // foot — low obstacles
+            pos + Vec3::Y * 0.3,   // foot -- low obstacles
             pos + Vec3::Y * 1.0,   // waist
             pos + Vec3::Y * 1.8,   // head
         ];
@@ -71,11 +71,11 @@ pub fn detect_parkour(
         }
 
         // Classify obstacle:
-        //   foot only            → step (auto-stepped by tnua)
-        //   foot + waist         → vault candidate (< ~1.2 m)
-        //   foot + waist + head  → mantle / ledge grab (> 1.2 m)
+        //   foot only            -> step (auto-stepped by tnua)
+        //   foot + waist         -> vault candidate (< ~1.2 m)
+        //   foot + waist + head  -> mantle / ledge grab (> 1.2 m)
         if hit_foot && hit_waist && !hit_head {
-            // Vault — snap point is the top of the obstacle
+            // Vault -- snap point is the top of the obstacle
             sense.vault_target = Some(pos + fwd * 1.1 + Vec3::Y * 1.1);
         } else if hit_foot && hit_waist && hit_head {
             // Mantle / ledge grab
@@ -84,7 +84,7 @@ pub fn detect_parkour(
     }
 }
 
-// ─── Extension trait so CharacterState can query airborne cleanly ────────────
+// --- Extension trait so CharacterState can query airborne cleanly ------------
 impl CharacterState {
     pub fn is_airborne(&self) -> bool { self.current.is_airborne() }
 }

@@ -9,13 +9,13 @@ use bevy::prelude::*;
 // ---------------------------------------------------------------------------------
 
 pub mod camera;
-pub mod ui;
-pub mod picking;
-pub mod gizmos;
-pub mod serialization;
 pub mod console;
-pub mod icons;
+pub mod gizmos;
 pub mod history;
+pub mod icons;
+pub mod picking;
+pub mod serialization;
+pub mod ui;
 pub mod user_color;
 
 /// The central State machine for the engine.
@@ -49,10 +49,8 @@ impl Plugin for EditorPlugin {
             // When we transition between Edit and Play modes, these systems will run ONCE
             .add_systems(OnEnter(EngineState::Play), on_enter_play_mode)
             .add_systems(OnEnter(EngineState::Edit), on_exit_play_mode)
-
             // 2. Configure System Ordering
             .configure_sets(Update, EditorSet::GizmoUpdate.before(EditorSet::Picking))
-            
             // 3. Add Sub-Plugins
             .add_plugins((
                 bevy_inspector_egui::DefaultInspectorConfigPlugin,
@@ -65,35 +63,46 @@ impl Plugin for EditorPlugin {
                 icons::EditorIconsPlugin,
                 history::EditorHistoryPlugin,
             ))
-            
             // 4. Run setup logic on Startup (when the engine first boots)
-            .add_systems(Startup, |input_enabled: Option<ResMut<cb_input::InputEnabled>>, app_type_registry: Res<AppTypeRegistry>| {
-                // We use bevy_inspector_egui to auto-generate UI for our components.
-                // However, Bevy's default Transform UI takes up a lot of space.
-                // Here, we override the default UI rendering for Transforms with our own custom layout.
-                let mut registry = app_type_registry.write();
-                if let Some(registration) = registry.get_mut(std::any::TypeId::of::<Transform>()) {
-                    registration.insert(bevy_inspector_egui::inspector_egui_impls::InspectorEguiImpl::new(
-                        ui::transform_ui,
-                        ui::transform_ui_readonly,
-                        ui::transform_ui_many,
-                    ));
-                }
-                
-                // Do the same override for GlobalTransform.
-                if let Some(registration) = registry.get_mut(std::any::TypeId::of::<GlobalTransform>()) {
-                    registration.insert(bevy_inspector_egui::inspector_egui_impls::InspectorEguiImpl::new(
-                        ui::global_transform_ui,
-                        ui::global_transform_ui_readonly,
-                        ui::global_transform_ui_many,
-                    ));
-                }
+            .add_systems(
+                Startup,
+                |input_enabled: Option<ResMut<cb_input::InputEnabled>>,
+                 app_type_registry: Res<AppTypeRegistry>| {
+                    // We use bevy_inspector_egui to auto-generate UI for our components.
+                    // However, Bevy's default Transform UI takes up a lot of space.
+                    // Here, we override the default UI rendering for Transforms with our own custom layout.
+                    let mut registry = app_type_registry.write();
+                    if let Some(registration) =
+                        registry.get_mut(std::any::TypeId::of::<Transform>())
+                    {
+                        registration.insert(
+                            bevy_inspector_egui::inspector_egui_impls::InspectorEguiImpl::new(
+                                ui::transform_ui,
+                                ui::transform_ui_readonly,
+                                ui::transform_ui_many,
+                            ),
+                        );
+                    }
 
-                // Disable player input when starting the editor (since we default to Edit mode)
-                if let Some(mut ie) = input_enabled {
-                    ie.0 = false;
-                }
-            });
+                    // Do the same override for GlobalTransform.
+                    if let Some(registration) =
+                        registry.get_mut(std::any::TypeId::of::<GlobalTransform>())
+                    {
+                        registration.insert(
+                            bevy_inspector_egui::inspector_egui_impls::InspectorEguiImpl::new(
+                                ui::global_transform_ui,
+                                ui::global_transform_ui_readonly,
+                                ui::global_transform_ui_many,
+                            ),
+                        );
+                    }
+
+                    // Disable player input when starting the editor (since we default to Edit mode)
+                    if let Some(mut ie) = input_enabled {
+                        ie.0 = false;
+                    }
+                },
+            );
     }
 }
 
@@ -110,33 +119,37 @@ pub struct KeepOnStop;
 fn on_enter_play_mode(
     world: &World,
     mut commands: Commands,
-    q_objects: Query<(Entity, &Transform, &serialization::SceneObject)>,
+    q_objects: Query<(Entity, &Transform, &serialization::SceneObject, Option<&Name>)>,
     q_all: Query<Entity>,
 ) {
     // 1. Snapshot the world
     let type_registry = world.resource::<AppTypeRegistry>().read();
     let mut filter = bevy::scene::SceneFilter::deny_all();
     for registration in type_registry.iter() {
-        if registration.data::<bevy::reflect::ReflectSerialize>().is_some() {
+        if registration
+            .data::<bevy::reflect::ReflectSerialize>()
+            .is_some()
+        {
             filter = filter.allow_by_id(registration.type_id());
         }
     }
-    
+
     let mut builder = bevy::scene::DynamicSceneBuilder::from_world(world);
     builder = builder.with_component_filter(filter);
-    
-    let entities: Vec<Entity> = q_objects.iter().map(|(e, _, _)| e).collect();
+
+    let entities: Vec<Entity> = q_objects.iter().map(|(e, _, _, _)| e).collect();
     let scene = builder.extract_entities(entities.into_iter()).build();
     let serializer = bevy::scene::serde::SceneSerializer::new(&scene, &type_registry);
-    
-    let snapshot = match ron::ser::to_string_pretty(&serializer, ron::ser::PrettyConfig::default()) {
+
+    let snapshot = match ron::ser::to_string_pretty(&serializer, ron::ser::PrettyConfig::default())
+    {
         Ok(s) => s,
         Err(e) => {
             warn!("Failed to serialize scene snapshot: {:?}", e);
             String::new()
         }
     };
-    
+
     commands.insert_resource(PlayModeSnapshot(Some(snapshot)));
 
     for e in q_all.iter() {
@@ -145,10 +158,19 @@ fn on_enter_play_mode(
 
     // 2. Spawn player
     let mut spawn_pos = Transform::from_xyz(0.0, 2.0, 5.0);
-    for (_, transform, obj) in q_objects.iter() {
+    let mut found_any = false;
+    for (_, transform, obj, name_opt) in q_objects.iter() {
         if obj.object_type == "spawn_point" {
-            spawn_pos = *transform;
-            break;
+            if let Some(name) = name_opt {
+                if name.as_str().to_lowercase().contains("start") {
+                    spawn_pos = *transform;
+                    break;
+                }
+            }
+            if !found_any {
+                spawn_pos = *transform;
+                found_any = true;
+            }
         }
     }
     crate::player::spawn_player(&mut commands, spawn_pos);
@@ -156,7 +178,15 @@ fn on_enter_play_mode(
 
 fn on_exit_play_mode(
     mut commands: Commands,
-    q_temporary: Query<Entity, (Without<KeepOnStop>, Without<serialization::SceneObject>, Without<Window>, Without<Camera>)>,
+    q_temporary: Query<
+        Entity,
+        (
+            Without<KeepOnStop>,
+            Without<serialization::SceneObject>,
+            Without<Window>,
+            Without<Camera>,
+        ),
+    >,
     q_objects: Query<Entity, With<serialization::SceneObject>>,
     q_kept: Query<Entity, With<KeepOnStop>>,
     mut snapshot: ResMut<PlayModeSnapshot>,
@@ -174,7 +204,7 @@ fn on_exit_play_mode(
     for entity in q_temporary.iter() {
         commands.entity(entity).despawn();
     }
-    
+
     // Despawn current scene objects to load clean snapshot
     for entity in q_objects.iter() {
         commands.entity(entity).despawn();
@@ -184,20 +214,23 @@ fn on_exit_play_mode(
     for entity in q_kept.iter() {
         commands.entity(entity).remove::<KeepOnStop>();
     }
-    
+
     if ron_str.is_empty() {
         return;
     }
 
     let mut deserializer = match ron::de::Deserializer::from_str(&ron_str) {
         Ok(d) => d,
-        Err(e) => { error!("Failed to parse memory snapshot: {}", e); return; }
+        Err(e) => {
+            error!("Failed to parse memory snapshot: {}", e);
+            return;
+        }
     };
-    
+
     let scene_deserializer = bevy::scene::serde::SceneDeserializer {
         type_registry: &type_registry.read(),
     };
-    
+
     use serde::de::DeserializeSeed;
     match scene_deserializer.deserialize(&mut deserializer) {
         Ok(scene) => {

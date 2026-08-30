@@ -27,6 +27,9 @@ pub struct PlayerInput {
     pub prone: bool,
     pub prone_just_pressed: bool,
     pub tac_sprint: bool,
+    pub interact_just: bool,
+    pub swap_prev: bool,
+    pub swap_next: bool,
 }
 
 #[derive(Resource)]
@@ -42,7 +45,7 @@ fn gather_input(
     mut is_tac_sprinting: Local<bool>,
     cursor_options: Query<&bevy::window::CursorOptions, With<Window>>,
 ) {
-    let is_cursor_grabbed = cursor_options.iter().next().map_or(false, |c| c.grab_mode != bevy::window::CursorGrabMode::None);
+    let is_cursor_grabbed = cursor_options.iter().next().is_some_and(|c| c.grab_mode != bevy::window::CursorGrabMode::None);
 
     if !enabled.0 || !is_cursor_grabbed {
         *input = PlayerInput::default();
@@ -81,6 +84,9 @@ fn gather_input(
     input.fire_held = mouse_buttons.pressed(MouseButton::Left);
     input.fire_just = mouse_buttons.just_pressed(MouseButton::Left);
     input.reload = keyboard.just_pressed(KeyCode::KeyR);
+    input.interact_just = keyboard.just_pressed(KeyCode::KeyF);
+    input.swap_prev = keyboard.just_pressed(KeyCode::Digit1);
+    input.swap_next = keyboard.just_pressed(KeyCode::Digit2);
 }
 
 

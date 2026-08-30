@@ -1,11 +1,11 @@
-/// Weapon ECS components — all data-only, no logic.
+/// Weapon ECS components -- all data-only, no logic.
 
 use bevy::prelude::*;
 
 
 
 
-// ─── Fire Mode ────────────────────────────────────────────────────────────────
+// --- Fire Mode ----------------------------------------------------------------
 
 #[derive(Component, Reflect, Default)]
 #[reflect(Component, Default)]
@@ -19,9 +19,9 @@ pub enum FireMode {
     Burst(u8),
 }
 
-// ─── Weapon Config (static, shared via Handle<WeaponData>) ────────────────────
+// --- Weapon Config (static, shared via Handle<WeaponData>) --------------------
 
-/// Static weapon definition — treated as a shared asset (clone-cheap)
+/// Static weapon definition -- treated as a shared asset (clone-cheap)
 #[derive(Component, Reflect, Clone)]
 pub struct WeaponConfig {
     pub name:            &'static str,
@@ -45,9 +45,9 @@ impl Default for WeaponConfig {
     }
 }
 
-// ─── Fire Rate ────────────────────────────────────────────────────────────────
+// --- Fire Rate ----------------------------------------------------------------
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Clone)]
 pub struct FireRate {
     pub rpm:             f32,     // rounds per minute
     pub cooldown:        f32,     // time between shots = 60/rpm
@@ -74,9 +74,9 @@ impl Default for FireRate {
     fn default() -> Self { Self::new(600.0) } // 600 RPM baseline
 }
 
-// ─── Magazine ─────────────────────────────────────────────────────────────────
+// --- Magazine -----------------------------------------------------------------
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Clone)]
 pub struct Magazine {
     pub current:      u32,
     pub max:          u32,
@@ -123,13 +123,13 @@ impl Default for Magazine {
     fn default() -> Self { Self::new(30, 90, 2.2) }
 }
 
-// ─── Spread / Bloom ───────────────────────────────────────────────────────────
+// --- Spread / Bloom -----------------------------------------------------------
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Clone)]
 pub struct Spread {
     /// Base accuracy cone (radians) when standing still and ADS
     pub base:          f32,
-    /// Current spread — grows with each shot
+    /// Current spread -- grows with each shot
     pub current:       f32,
     /// Max spread cap
     pub max:           f32,
@@ -151,17 +151,17 @@ impl Default for Spread {
     }
 }
 
-// ─── Recoil Pattern ───────────────────────────────────────────────────────────
+// --- Recoil Pattern -----------------------------------------------------------
 
-/// COD-style pattern-based recoil — each shot advances the index through a
+/// COD-style pattern-based recoil -- each shot advances the index through a
 /// fixed Vec2 sequence (yaw, pitch offsets). Player can counter-strafe to reset.
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Clone)]
 pub struct RecoilPattern {
     /// Per-shot (yaw, pitch) deltas in radians
     pub pattern: Vec<Vec2>,
     /// Current position in the pattern (resets on stop-fire)
     pub index:   usize,
-    /// Visual-only kick (separate from actual aim vector — client cosmetic)
+    /// Visual-only kick (separate from actual aim vector -- client cosmetic)
     pub kick:    Vec2,
     /// Recovery lerp speed when not firing
     pub recovery: f32,
@@ -190,9 +190,8 @@ impl Default for RecoilPattern {
     }
 }
 
-// ─── Bundles ─────────────────────────────────────────────────────────────────
+// --- Bundles -----------------------------------------------------------------
 
-/// Full weapon bundle — spawn this as a child of a player entity
 #[derive(Bundle, Default)]
 pub struct WeaponBundle {
     pub config:  WeaponConfig,
@@ -202,7 +201,26 @@ pub struct WeaponBundle {
     pub recoil:  RecoilPattern,
 }
 
-// ─── Health ──────────────────────────────────────────────────────────────────
+impl WeaponBundle {
+    pub fn clone_components(&self) -> Self {
+        Self {
+            config: self.config.clone(),
+            fire: self.fire.clone(),
+            mag: self.mag.clone(),
+            spread: self.spread.clone(),
+            recoil: self.recoil.clone(),
+        }
+    }
+}
+
+#[derive(Component, Default)]
+pub struct WeaponInventory {
+    pub primary: Option<WeaponBundle>,
+    pub secondary: Option<WeaponBundle>,
+    pub active_slot: u8, // 1 for primary, 2 for secondary
+}
+
+// --- Health ------------------------------------------------------------------
 
 #[derive(Component, Reflect)]
 pub struct Health {
@@ -222,7 +240,7 @@ impl Default for Health {
     }
 }
 
-// ─── Projectile ──────────────────────────────────────────────────────────────
+// --- Projectile --------------------------------------------------------------
 
 #[derive(Component, Reflect)]
 pub struct Projectile {
@@ -231,7 +249,5 @@ pub struct Projectile {
     pub penetration: f32,
     pub lifespan:    f32,
     pub owner:       Entity,
+    pub is_local:    bool,
 }
-
-
-

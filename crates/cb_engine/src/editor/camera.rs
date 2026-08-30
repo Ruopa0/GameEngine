@@ -1,7 +1,7 @@
-use bevy::prelude::*;
+use bevy::camera::{ImageRenderTarget, RenderTarget};
 use bevy::input::mouse::MouseMotion;
+use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages};
-use bevy::camera::{RenderTarget, ImageRenderTarget};
 use bevy_egui::EguiContexts;
 
 use super::EngineState;
@@ -26,15 +26,41 @@ impl Plugin for EditorCameraPlugin {
     fn build(&self, app: &mut App) {
         // Startup: create the off-screen textures
         app.add_systems(Startup, setup_viewport_textures)
-           // Update: handle movement and resizing every frame
-           .add_systems(Update, (
-               spawn_or_enable_editor_camera,
-               force_camera_render_targets,
-               editor_camera_movement.run_if(in_state(EngineState::Edit)),
-               focus_on_selected.run_if(in_state(EngineState::Edit)),
-               register_egui_textures,
-               resize_viewport_textures,
-           ));
+            // Update: handle movement and resizing every frame
+            .add_systems(
+                Update,
+                (
+                    spawn_or_enable_editor_camera,
+                    force_camera_render_targets,
+                    editor_camera_movement.run_if(in_state(EngineState::Edit)),
+                    focus_on_selected.run_if(in_state(EngineState::Edit)),
+                    register_egui_textures,
+                    resize_viewport_textures,
+                    setup_remote_camera_visuals,
+                ),
+            );
+    }
+}
+
+pub fn setup_remote_camera_visuals(
+    mut commands: Commands,
+    q_new_cams: Query<(Entity, &super::serialization::RemoteEditorCamera), Added<super::serialization::RemoteEditorCamera>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for (entity, remote_cam) in q_new_cams.iter() {
+        let user_col = super::user_color::get_user_color_bevy(remote_cam.user_id);
+        let mat = materials.add(StandardMaterial {
+            base_color: user_col,
+            emissive: LinearRgba::from(user_col) * 2.0,
+            unlit: true,
+            ..default()
+        });
+        let mesh = meshes.add(Sphere::new(0.3));
+        commands.entity(entity).insert((
+            Mesh3d(mesh),
+            MeshMaterial3d(mat),
+        ));
     }
 }
 
@@ -55,8 +81,12 @@ pub struct EditorCamera {
 }
 
 fn setup_viewport_textures(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
-    let size = Extent3d { width: 1280, height: 720, depth_or_array_layers: 1 };
-    
+    let size = Extent3d {
+        width: 1280,
+        height: 720,
+        depth_or_array_layers: 1,
+    };
+
     let mut editor_image = Image {
         texture_descriptor: bevy::render::render_resource::TextureDescriptor {
             label: Some("editor_viewport"),
@@ -65,7 +95,9 @@ fn setup_viewport_textures(mut commands: Commands, mut images: ResMut<Assets<Ima
             format: TextureFormat::Bgra8UnormSrgb,
             mip_level_count: 1,
             sample_count: 1,
-            usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::RENDER_ATTACHMENT,
+            usage: TextureUsages::TEXTURE_BINDING
+                | TextureUsages::COPY_DST
+                | TextureUsages::RENDER_ATTACHMENT,
             view_formats: &[],
         },
         ..default()
@@ -81,7 +113,9 @@ fn setup_viewport_textures(mut commands: Commands, mut images: ResMut<Assets<Ima
             format: TextureFormat::Bgra8UnormSrgb,
             mip_level_count: 1,
             sample_count: 1,
-            usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::RENDER_ATTACHMENT,
+            usage: TextureUsages::TEXTURE_BINDING
+                | TextureUsages::COPY_DST
+                | TextureUsages::RENDER_ATTACHMENT,
             view_formats: &[],
         },
         ..default()
@@ -97,22 +131,30 @@ fn setup_viewport_textures(mut commands: Commands, mut images: ResMut<Assets<Ima
     });
 }
 
-fn register_egui_textures(
-    mut contexts: EguiContexts,
-    mut textures: ResMut<ViewportTextures>,
-) {
+fn register_egui_textures(mut contexts: EguiContexts, mut textures: ResMut<ViewportTextures>) {
     if textures.editor_egui_id.is_none() {
-        textures.editor_egui_id = Some(contexts.add_image(bevy_egui::EguiTextureHandle::Strong(textures.editor_view.clone())));
+        textures.editor_egui_id = Some(contexts.add_image(bevy_egui::EguiTextureHandle::Strong(
+            textures.editor_view.clone(),
+        )));
     }
     if textures.game_egui_id.is_none() {
-        textures.game_egui_id = Some(contexts.add_image(bevy_egui::EguiTextureHandle::Strong(textures.game_view.clone())));
+        textures.game_egui_id = Some(contexts.add_image(bevy_egui::EguiTextureHandle::Strong(
+            textures.game_view.clone(),
+        )));
     }
 }
 
 fn force_camera_render_targets(
     textures: Res<ViewportTextures>,
     mut q_editor_cam: Query<&mut RenderTarget, With<EditorCamera>>,
-    mut q_other_cams: Query<&mut RenderTarget, (With<Camera>, Without<EditorCamera>, Without<crate::editor::ui::UiCamera>)>,
+    mut q_other_cams: Query<
+        &mut RenderTarget,
+        (
+            With<Camera>,
+            Without<EditorCamera>,
+            Without<crate::editor::ui::UiCamera>,
+        ),
+    >,
 ) {
     for mut target in q_editor_cam.iter_mut() {
         if let RenderTarget::Image(_) = &*target {
@@ -149,7 +191,7 @@ fn spawn_or_enable_editor_camera(
         let yaw = 0.5;
         let rotation = Quat::from_axis_angle(Vec3::Y, yaw) * Quat::from_axis_angle(Vec3::X, pitch);
         let translation = focus + rotation * Vec3::Z * radius;
-        
+
         commands.spawn((
             Camera3d::default(),
             Camera {
@@ -179,7 +221,9 @@ fn editor_camera_movement(
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     mut q_cam: Query<(&mut Transform, &mut EditorCamera)>,
 ) {
-    let Ok((mut transform, mut state)) = q_cam.single_mut() else { return };
+    let Ok((mut transform, mut state)) = q_cam.single_mut() else {
+        return;
+    };
 
     let mut mouse_delta = Vec2::ZERO;
     for event in mouse_motion.read() {
@@ -197,18 +241,26 @@ fn editor_camera_movement(
         // Orbit around focus
         state.yaw -= mouse_delta.x * sensitivity;
         state.pitch -= mouse_delta.y * sensitivity;
-        state.pitch = state.pitch.clamp(-std::f32::consts::FRAC_PI_2 + 0.01, std::f32::consts::FRAC_PI_2 - 0.01);
-        
-        let rotation = Quat::from_axis_angle(Vec3::Y, state.yaw) * Quat::from_axis_angle(Vec3::X, state.pitch);
+        state.pitch = state.pitch.clamp(
+            -std::f32::consts::FRAC_PI_2 + 0.01,
+            std::f32::consts::FRAC_PI_2 - 0.01,
+        );
+
+        let rotation =
+            Quat::from_axis_angle(Vec3::Y, state.yaw) * Quat::from_axis_angle(Vec3::X, state.pitch);
         transform.rotation = rotation;
         transform.translation = state.focus + rotation * Vec3::Z * state.radius;
     } else if right_pressed {
         // Look around (FPS style)
         state.yaw -= mouse_delta.x * sensitivity;
         state.pitch -= mouse_delta.y * sensitivity;
-        state.pitch = state.pitch.clamp(-std::f32::consts::FRAC_PI_2 + 0.01, std::f32::consts::FRAC_PI_2 - 0.01);
+        state.pitch = state.pitch.clamp(
+            -std::f32::consts::FRAC_PI_2 + 0.01,
+            std::f32::consts::FRAC_PI_2 - 0.01,
+        );
 
-        let rotation = Quat::from_axis_angle(Vec3::Y, state.yaw) * Quat::from_axis_angle(Vec3::X, state.pitch);
+        let rotation =
+            Quat::from_axis_angle(Vec3::Y, state.yaw) * Quat::from_axis_angle(Vec3::X, state.pitch);
         transform.rotation = rotation;
     } else if middle_pressed {
         // Pan
@@ -229,26 +281,44 @@ fn editor_camera_movement(
     let can_move = (is_orbit && left_pressed) || right_pressed || middle_pressed;
 
     if can_move {
-        if keys.pressed(KeyCode::KeyW) { velocity += *forward; }
-        if keys.pressed(KeyCode::KeyS) { velocity -= *forward; }
-        if keys.pressed(KeyCode::KeyD) { velocity += *right; }
-        if keys.pressed(KeyCode::KeyA) { velocity -= *right; }
-        if keys.pressed(KeyCode::KeyE) { velocity += up; }
-        if keys.pressed(KeyCode::KeyQ) { velocity -= up; }
+        if keys.pressed(KeyCode::KeyW) {
+            velocity += *forward;
+        }
+        if keys.pressed(KeyCode::KeyS) {
+            velocity -= *forward;
+        }
+        if keys.pressed(KeyCode::KeyD) {
+            velocity += *right;
+        }
+        if keys.pressed(KeyCode::KeyA) {
+            velocity -= *right;
+        }
+        if keys.pressed(KeyCode::KeyE) {
+            velocity += up;
+        }
+        if keys.pressed(KeyCode::KeyQ) {
+            velocity -= up;
+        }
     }
 
-    let speed = if keys.pressed(KeyCode::ShiftLeft) { 20.0 } else { 5.0 };
-    
+    let speed = if keys.pressed(KeyCode::ShiftLeft) {
+        20.0
+    } else {
+        5.0
+    };
+
     if velocity.length_squared() > 0.0 {
         velocity = velocity.normalize() * speed;
         transform.translation += velocity * time.delta_secs();
-        
+
         // Update focus point when moving
-        let rotation = Quat::from_axis_angle(Vec3::Y, state.yaw) * Quat::from_axis_angle(Vec3::X, state.pitch);
+        let rotation =
+            Quat::from_axis_angle(Vec3::Y, state.yaw) * Quat::from_axis_angle(Vec3::X, state.pitch);
         state.focus = transform.translation - rotation * Vec3::Z * state.radius;
     } else if right_pressed && mouse_delta.length_squared() > 0.0 {
         // Update focus point when looking around
-        let rotation = Quat::from_axis_angle(Vec3::Y, state.yaw) * Quat::from_axis_angle(Vec3::X, state.pitch);
+        let rotation =
+            Quat::from_axis_angle(Vec3::Y, state.yaw) * Quat::from_axis_angle(Vec3::X, state.pitch);
         state.focus = transform.translation - rotation * Vec3::Z * state.radius;
     }
 }
@@ -262,27 +332,30 @@ fn focus_on_selected(
         return;
     }
 
-    let Ok(selected_transform) = q_selected.single() else { return };
-    let Ok((mut transform, mut state)) = q_cam.single_mut() else { return };
+    let Ok(selected_transform) = q_selected.single() else {
+        return;
+    };
+    let Ok((mut transform, mut state)) = q_cam.single_mut() else {
+        return;
+    };
 
     let target_pos = selected_transform.translation();
-    
+
     // Offset the camera 10 units away along its current backward vector
     let offset = transform.back() * 10.0;
     transform.translation = target_pos + offset;
-    
+
     // Make camera look at target
     transform.look_at(target_pos, Vec3::Y);
-    
+
     // Update EditorCamera internal pitch and yaw to match new rotation
     let (yaw, pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
     state.yaw = yaw;
     state.pitch = pitch;
-    
+
     state.focus = target_pos;
     state.radius = 10.0;
 }
-
 
 fn resize_viewport_textures(
     viewport_state: Res<super::ui::EditorViewportState>,
@@ -295,20 +368,27 @@ fn resize_viewport_textures(
             let height = viewport_state.viewport_size.y as u32;
             let current_size = image.texture_descriptor.size;
             if current_size.width != width || current_size.height != height {
-                image.resize(Extent3d { width, height, depth_or_array_layers: 1 });
+                image.resize(Extent3d {
+                    width,
+                    height,
+                    depth_or_array_layers: 1,
+                });
             }
         }
     }
-    
+
     if viewport_state.game_view_size.x > 0.0 && viewport_state.game_view_size.y > 0.0 {
         if let Some(image) = images.get_mut(&textures.game_view) {
             let width = viewport_state.game_view_size.x as u32;
             let height = viewport_state.game_view_size.y as u32;
             let current_size = image.texture_descriptor.size;
             if current_size.width != width || current_size.height != height {
-                image.resize(Extent3d { width, height, depth_or_array_layers: 1 });
+                image.resize(Extent3d {
+                    width,
+                    height,
+                    depth_or_array_layers: 1,
+                });
             }
         }
     }
 }
-

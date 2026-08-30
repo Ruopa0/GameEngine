@@ -2,14 +2,14 @@ use bevy::prelude::*;
 use bevy_egui::egui;
 
 const PALETTE: &[(u8, u8, u8)] = &[
-    (60, 220, 120),  // Emerald Green
-    (40, 160, 255),  // Sky Blue
-    (255, 150, 20),  // Amber Orange
-    (180, 80, 255),  // Electric Purple
-    (255, 60, 120),  // Hot Pink / Crimson
-    (255, 215, 30),  // Sunshine Gold
-    (20, 225, 210),  // Mint Cyan
-    (255, 110, 50),  // Coral Red
+    (60, 220, 120), // Emerald Green
+    (40, 160, 255), // Sky Blue
+    (255, 150, 20), // Amber Orange
+    (180, 80, 255), // Electric Purple
+    (255, 60, 120), // Hot Pink / Crimson
+    (255, 215, 30), // Sunshine Gold
+    (20, 225, 210), // Mint Cyan
+    (255, 110, 50), // Coral Red
 ];
 
 pub fn get_user_color_rgb(user_id: u64) -> (u8, u8, u8) {
