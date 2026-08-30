@@ -29,17 +29,17 @@ pub fn apply_movement(
         controller.initiate_action_feeding();
         // --- Speed from state ----------------------------------------
         let base_speed: f32 = match state.current {
-            MovementState::TacSprint => 1.875,
-            MovementState::Sprint => 1.125,
-            MovementState::Walk => 0.625,
-            MovementState::Slide => 0.875,
-            MovementState::Crouch => 0.15625,
-            MovementState::Prone => 0.2,
+            MovementState::TacSprint => 15.0,
+            MovementState::Sprint => 9.0,
+            MovementState::Walk => 5.0,
+            MovementState::Slide => 7.0,
+            MovementState::Crouch => 1.25,
+            MovementState::Prone => 1.6,
             MovementState::Idle => 0.0,
-            MovementState::Vault => 0.4375,
-            MovementState::Mantle => 0.25,
+            MovementState::Vault => 3.5,
+            MovementState::Mantle => 2.0,
             MovementState::LedgeGrab => 0.0,
-            _ => 0.34375,
+            _ => 2.75,
         };
 
         let flow_bonus = (state.momentum.flow * 2.0) / 16.0;
