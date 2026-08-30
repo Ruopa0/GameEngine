@@ -38,7 +38,6 @@ pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
                 Player,
                 transform,
                 Visibility::default(),
-                IsDead,
             ),
             (
                 // Physics
