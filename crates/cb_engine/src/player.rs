@@ -61,6 +61,7 @@ pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
                 cb_weapons::components::Health::new(100.0),
                 cb_weapons::health::ImmortalPlayer,
                 cb_weapons::components::PlayerCombatant,
+                starting_weapon.clone_components(),
                 cb_weapons::components::WeaponInventory {
                     primary: Some(starting_weapon.clone_components()),
                     secondary: None,
@@ -368,17 +369,23 @@ pub fn update_remote_player_gun_visibility(
 
 pub fn player_input(
     input_opt: Option<Res<cb_input::PlayerInput>>,
-    mut query: Query<(&mut cb_movement::fsm::CharacterState, &Transform, &mut cb_weapons::components::WeaponInventory, Option<&IsDead>), With<Player>>,
-    mut q_weapon: Query<(
+    mut query: Query<(
+        &mut cb_movement::fsm::CharacterState, 
+        &Transform, 
+        &mut cb_weapons::components::WeaponInventory, 
+        Option<&IsDead>,
         &mut cb_weapons::components::WeaponConfig,
         &mut cb_weapons::components::FireRate,
         &mut cb_weapons::components::Magazine,
         &mut cb_weapons::components::Spread,
         &mut cb_weapons::components::RecoilPattern,
-    )>,
+    ), With<Player>>,
 ) {
     let Some(input) = input_opt else { return };
-    let Ok((mut state, transform, mut inventory, is_dead)) = query.single_mut() else { return };
+    let Ok((
+        mut state, transform, mut inventory, is_dead,
+        mut w_config, mut w_fire, mut w_mag, mut w_spread, mut w_recoil
+    )) = query.single_mut() else { return };
 
     if is_dead.is_some() {
         state.desired_direction = Vec3::ZERO;
@@ -412,14 +419,6 @@ pub fn player_input(
         if inventory.active_slot != desired_slot {
             let can_swap = if desired_slot == 1 { inventory.primary.is_some() } else { inventory.secondary.is_some() };
             if can_swap {
-                if let Ok((
-                    mut w_config,
-                    mut w_fire,
-                    mut w_mag,
-                    mut w_spread,
-                    mut w_recoil,
-                )) = q_weapon.single_mut() {
-                    
                     // Save current to active slot
                     let active_bundle = cb_weapons::components::WeaponBundle {
                         config: w_config.clone(),
@@ -446,20 +445,17 @@ pub fn player_input(
                     *w_recoil = target_bundle.recoil.clone();
                     
                     info!("Swapped to weapon slot {}", desired_slot);
-                }
             }
         }
     }
 
-    if let Ok((_, mut fire_rate, mut mag, _, _)) = q_weapon.single_mut() {
-        fire_rate.trigger_held = input.fire_held;
-        if input.fire_just {
-            fire_rate.trigger_just = true;
-        }
-        
-        if input.reload {
-            mag.start_reload();
-        }
+    w_fire.trigger_held = input.fire_held;
+    if input.fire_just {
+        w_fire.trigger_just = true;
+    }
+    
+    if input.reload {
+        w_mag.start_reload();
     }
 }
 

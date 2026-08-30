@@ -17,6 +17,7 @@ pub fn auto_add_player_components(
         commands.entity(entity).insert((
             ParkourSense::default(),
             avian3d::prelude::SleepingDisabled,
+            bevy_tnua::prelude::TnuaController::<cb_movement::kcc::CharacterScheme>::default(),
             TnuaConfig::<cb_movement::kcc::CharacterScheme>(handle),
         ));
     }
