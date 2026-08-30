@@ -214,6 +214,7 @@ pub fn update_player_respawn(
 
             commands.entity(entity)
                 .remove::<IsDead>()
+                .insert(avian3d::prelude::Collider::capsule(0.35, 1.0))
                 .insert(LockedAxes::ROTATION_LOCKED)
                 .insert(AngularVelocity::ZERO);
 
@@ -457,7 +458,7 @@ pub fn camera_look(
     mut mouse_events: MessageReader<bevy::input::mouse::MouseMotion>,
     mouse_buttons: Res<ButtonInput<MouseButton>>,
     cursor_options: Query<&bevy::window::CursorOptions, With<Window>>,
-    mut q_player: Query<&mut Transform, (With<Player>, Without<PlayerCamera>)>,
+    mut q_player: Query<(&mut Transform, Option<&mut avian3d::prelude::Rotation>), (With<Player>, Without<PlayerCamera>)>,
     mut q_camera: Query<&mut Transform, With<PlayerCamera>>,
 ) {
     if mouse_buttons.pressed(MouseButton::Right) { return; }
@@ -466,7 +467,7 @@ pub fn camera_look(
     let Ok(cursor) = cursor_options.single() else { return };
     if cursor.grab_mode == bevy::window::CursorGrabMode::None { return; }
 
-    let Ok(mut player_tf) = q_player.single_mut() else { return };
+    let Ok((mut player_tf, player_rot_opt)) = q_player.single_mut() else { return };
     let Ok(mut cam_tf)    = q_camera.single_mut()  else { return };
 
     let mut total_delta = Vec2::ZERO;
@@ -479,6 +480,9 @@ pub fn camera_look(
 
     // Yaw   " rotate player entity around Y
     player_tf.rotate_y(-total_delta.x * sensitivity);
+    if let Some(mut player_rot) = player_rot_opt {
+        player_rot.0 = player_tf.rotation;
+    }
 
     // Pitch   " rotate camera child around X, clamped
     let current_pitch = cam_tf.rotation.to_euler(EulerRot::YXZ).1;
