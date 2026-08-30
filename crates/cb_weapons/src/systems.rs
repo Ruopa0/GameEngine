@@ -31,6 +31,7 @@ pub fn weapon_fire_system(
         &GlobalTransform,
         Option<&ChildOf>,
     )>,
+    q_viewmodel: Query<(&GlobalTransform, &ChildOf), With<crate::viewmodel::FirstPersonWeapon>>,
     mut ev_shot: MessageWriter<ShotFiredEvent>,
 ) {
     let dt = time.delta_secs();
@@ -72,13 +73,18 @@ pub fn weapon_fire_system(
             // Grow spread
             spread.current = (spread.current + spread.per_shot).min(spread.max);
 
-            // Compute gun muzzle origin (aligned with the first-person gun muzzle tip at center-bottom)
-            let forward = gtf.forward();
-            let up = gtf.up();
-            let muzzle_origin = gtf.translation() + (*up * -0.21) + (*forward * 0.74);
+            // Find the actual viewmodel to get true muzzle position, fallback to camera-relative if not found
+            let mut muzzle_origin = gtf.translation() + (*gtf.up() * -0.21) + (*gtf.forward() * 0.74);
+            for (vm_gtf, vm_parent) in q_viewmodel.iter() {
+                if vm_parent.get() == entity {
+                    // The gun mesh faces Z-, so forward is -Z. We want to go to the tip.
+                    muzzle_origin = vm_gtf.translation() + *vm_gtf.forward() * 0.6; // ~60cm down the barrel
+                    break;
+                }
+            }
 
-            // Compute shot direction aiming toward the crosshair focal point (100m ahead)
-            let crosshair_focal_point = gtf.translation() + *forward * 100.0;
+            // Compute shot direction aiming toward the crosshair focal point (100m ahead of camera)
+            let crosshair_focal_point = gtf.translation() + *gtf.forward() * 100.0;
             let shot_direction = (crosshair_focal_point - muzzle_origin).normalize_or_zero();
 
             let shooter_entity = parent.map(|p| p.get()).unwrap_or(entity);

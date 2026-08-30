@@ -603,10 +603,17 @@ pub fn handle_remote_editor_actions(
                                     }
                                 }
 
+                                let mut actual_origin = origin;
+                                if final_gun != shooter {
+                                    if let Some(gtf) = world.get::<GlobalTransform>(final_gun) {
+                                        actual_origin = gtf.translation() + *gtf.forward() * 0.4;
+                                    }
+                                }
+
                                 world.write_message(cb_weapons::systems::ShotFiredEvent {
                                     shooter,
                                     weapon: final_gun,
-                                    origin,
+                                    origin: actual_origin,
                                     direction,
                                     spread_rad: 0.0,
                                     is_local: false,
