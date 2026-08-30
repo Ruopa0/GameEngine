@@ -268,9 +268,9 @@ pub fn handle_editor_actions(
                         sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdateEditorCamera { user_id, transform });
                     }
                 },
-                crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch } => {
+                crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch, active_weapon } => {
                     for (_sender_entity, mut sender) in senders.iter_mut() {
-                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch });
+                        sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch, active_weapon });
                     }
                 },
                 crate::protocol::EditorAction::PlayerHit { victim_user_id, attacker_user_id, damage, hit_point, hit_normal } => {

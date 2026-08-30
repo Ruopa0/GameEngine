@@ -1,4 +1,4 @@
-﻿#![allow(
+#![allow(
     clippy::type_complexity,
     clippy::too_many_arguments,
     clippy::empty_line_after_doc_comments,
@@ -11,6 +11,7 @@ pub mod gamemode;
 pub mod gamemode_chest;
 pub mod player;
 pub mod player_init;
+pub mod interactables;
 pub mod schedule;
 pub mod scripting;
 pub mod vfx;

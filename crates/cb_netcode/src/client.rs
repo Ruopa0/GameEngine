@@ -473,7 +473,7 @@ pub fn handle_remote_editor_actions(
                         });
                     }
                 }
-                crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch } => {
+                crate::protocol::EditorAction::UpdatePlayerTransform { user_id, transform, pitch, active_weapon } => {
                     if user_id != session.client_id {
                         commands.queue(move |world: &mut World| {
                             let mut target = None;
@@ -481,6 +481,7 @@ pub fn handle_remote_editor_actions(
                             for (e, mut rp) in q.iter_mut(world) {
                                 if rp.user_id == user_id {
                                     rp.pitch = pitch;
+                                    rp.active_weapon = active_weapon;
                                     target = Some(e);
                                     break;
                                 }
@@ -497,7 +498,7 @@ pub fn handle_remote_editor_actions(
                                 }
                             } else {
                                 world.spawn((
-                                    cb_engine::player::RemotePlayer { user_id, pitch },
+                                    cb_engine::player::RemotePlayer { user_id, pitch, active_weapon },
                                     transform,
                                     GlobalTransform::default(),
                                 ));
@@ -666,21 +667,27 @@ pub fn broadcast_local_editor_camera(
 
 pub fn broadcast_local_player_transform(
     session: Res<cb_engine::editor::serialization::LocalEditorSession>,
-    q_player: Query<&Transform, With<cb_engine::player::Player>>,
+    q_player: Query<(&Transform, Option<&cb_weapons::components::WeaponInventory>), With<cb_engine::player::Player>>,
     q_camera: Query<&Transform, With<cb_engine::player::PlayerCamera>>,
     mut senders: Query<&mut MessageSender<crate::protocol::EditorAction>>,
 ) {
-    if let Ok(player_tf) = q_player.single() {
+    if let Ok((player_tf, inventory_opt)) = q_player.single() {
         let pitch = if let Ok(cam_tf) = q_camera.single() {
             cam_tf.rotation.to_euler(EulerRot::YXZ).1
         } else {
             0.0
         };
+        let active_weapon = if let Some(inventory) = inventory_opt {
+            inventory.active_slot
+        } else {
+            1
+        };
         for mut sender in senders.iter_mut() {
-            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform {
+            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform {
                 user_id: session.client_id,
                 transform: *player_tf,
                 pitch,
+                active_weapon,
             });
         }
     }

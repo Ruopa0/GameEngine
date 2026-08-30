@@ -486,6 +486,9 @@ pub fn restore_missing_visuals(
                     crate::gamemode::GoalZone,
                 ));
             }
+            "weapon_crate" => {
+                crate::interactables::populate_crate_entity(&mut commands, entity, &mut meshes, &mut materials);
+            }
             "gltf" => {
                 if let Some(ref path) = obj.asset_path {
                     let scene = asset_server.load(format!("{}#Scene0", path));

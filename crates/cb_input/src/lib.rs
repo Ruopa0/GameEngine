@@ -24,6 +24,7 @@ pub struct PlayerInput {
     pub fire_held: bool,
     pub fire_just: bool,
     pub reload: bool,
+    pub interact: bool,
     pub prone: bool,
     pub prone_just_pressed: bool,
     pub tac_sprint: bool,
@@ -84,6 +85,7 @@ fn gather_input(
     input.fire_held = mouse_buttons.pressed(MouseButton::Left);
     input.fire_just = mouse_buttons.just_pressed(MouseButton::Left);
     input.reload = keyboard.just_pressed(KeyCode::KeyR);
+    input.interact = keyboard.just_pressed(KeyCode::KeyF);
     input.interact_just = keyboard.just_pressed(KeyCode::KeyF);
     input.swap_prev = keyboard.just_pressed(KeyCode::Digit1);
     input.swap_next = keyboard.just_pressed(KeyCode::Digit2);

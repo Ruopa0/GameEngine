@@ -217,7 +217,8 @@ impl WeaponBundle {
 pub struct WeaponInventory {
     pub primary: Option<WeaponBundle>,
     pub secondary: Option<WeaponBundle>,
-    pub active_slot: u8, // 1 for primary, 2 for secondary
+    pub active_slot: u8,
+    pub pending_slot: Option<u8>, // 1 for primary, 2 for secondary
 }
 
 // --- Health ------------------------------------------------------------------

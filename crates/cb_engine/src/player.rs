@@ -63,6 +63,7 @@ pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
                 cb_weapons::components::PlayerCombatant,
                 starting_weapon.clone_components(),
                 cb_weapons::components::WeaponInventory {
+                    pending_slot: None,
                     primary: Some(starting_weapon.clone_components()),
                     secondary: None,
                     active_slot: 1,
@@ -87,6 +88,7 @@ pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
 pub struct RemotePlayer {
     pub user_id: u64,
     pub pitch: f32,
+    pub active_weapon: u8,
 }
 
 #[derive(Component)]
@@ -119,6 +121,7 @@ impl Plugin for PlayerPlugin {
                     setup_remote_player_mesh,
                     update_remote_player_pitch,
                     update_remote_player_gun_visibility,
+                    update_weapon_visuals,
                     handle_player_death,
                     update_player_respawn,
                     player_input,
@@ -408,15 +411,18 @@ pub fn player_input(
     state.wishes_tac_sprint = input.tac_sprint;
     state.wishes_crouch = input.crouch;
 
-    // Handle weapon swap
-    if input.swap_prev || input.swap_next {
-        let desired_slot = if input.swap_next {
+    let mut desired_slot = inventory.active_slot;
+    if let Some(pending) = inventory.pending_slot.take() {
+        desired_slot = pending;
+    } else if input.swap_prev || input.swap_next {
+        desired_slot = if input.swap_next {
             if inventory.active_slot == 1 { 2 } else { 1 }
         } else {
             if inventory.active_slot == 2 { 1 } else { 2 }
         };
-        
-        if inventory.active_slot != desired_slot {
+    }
+    
+    if inventory.active_slot != desired_slot {
             let can_swap = if desired_slot == 1 { inventory.primary.is_some() } else { inventory.secondary.is_some() };
             if can_swap {
                     // Save current to active slot
@@ -447,7 +453,6 @@ pub fn player_input(
                     info!("Swapped to weapon slot {}", desired_slot);
             }
         }
-    }
 
     w_fire.trigger_held = input.fire_held;
     if input.fire_just {
@@ -495,5 +500,40 @@ pub fn camera_look(
     let new_pitch = (current_pitch - total_delta.y * sensitivity)
         .clamp(-1.48, 1.48); // ~85  deg
     cam_tf.rotation = Quat::from_axis_angle(Vec3::X, new_pitch);
+}
+
+
+pub fn update_weapon_visuals(
+    q_inventory: Query<&cb_weapons::components::WeaponInventory, With<Player>>,
+    mut q_fp_weapon: Query<&mut Transform, With<cb_weapons::viewmodel::FirstPersonWeapon>>,
+    q_remote: Query<(&RemotePlayer, &Children)>,
+    q_heads: Query<&Children, With<RemotePlayerHead>>,
+    mut q_remote_guns: Query<&mut Transform, (With<RemotePlayerGun>, Without<cb_weapons::viewmodel::FirstPersonWeapon>)>,
+) {
+    if let Ok(inventory) = q_inventory.single() {
+        if let Ok(mut fp_tf) = q_fp_weapon.single_mut() {
+            if inventory.active_slot == 2 {
+                fp_tf.scale = Vec3::new(1.0, 1.0, 2.0);
+            } else {
+                fp_tf.scale = Vec3::ONE;
+            }
+        }
+    }
+
+    for (remote, children) in q_remote.iter() {
+        for child in children.iter() {
+            if let Ok(head_children) = q_heads.get(child) {
+                for head_child in head_children.iter() {
+                    if let Ok(mut gun_tf) = q_remote_guns.get_mut(head_child) {
+                        if remote.active_weapon == 2 {
+                            gun_tf.scale = Vec3::new(1.0, 1.0, 2.0);
+                        } else {
+                            gun_tf.scale = Vec3::ONE;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 

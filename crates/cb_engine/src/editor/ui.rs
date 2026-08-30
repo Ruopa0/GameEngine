@@ -206,6 +206,54 @@ pub const COMPONENT_CATALOG: &[ComponentMeta] = &[
         description: "Custom test component for experimentation.",
         keywords: &["test", "debug", "dummy"],
     },
+    ComponentMeta {
+        type_path: "cb_engine::editor::serialization::EditorColor",
+        name: "Material Color",
+        icon: "[Color]",
+        category: "Visuals & Lights",
+        description: "Sets the solid base color of the 3D model material.",
+        keywords: &["color", "material", "paint", "texture"],
+    },
+    ComponentMeta {
+        type_path: "cb_engine::editor::serialization::EditorMaterial",
+        name: "Material Properties",
+        icon: "[Mat]",
+        category: "Visuals & Lights",
+        description: "Adjust the roughness (matte/glossy) and metallic surface values.",
+        keywords: &["material", "roughness", "metallic", "gloss", "shine"],
+    },
+    ComponentMeta {
+        type_path: "cb_weapons::components::Health",
+        name: "Health Points",
+        icon: "[HP]",
+        category: "Gameplay & Combat",
+        description: "Gives this entity a life pool, allowing it to take damage.",
+        keywords: &["health", "hp", "life", "damage", "destructible"],
+    },
+    ComponentMeta {
+        type_path: "crate::gamemode::TargetDummy",
+        name: "Target Dummy Logic",
+        icon: "[Dummy]",
+        category: "Gameplay & Combat",
+        description: "Registers this object as a target dummy for hit-markers and points.",
+        keywords: &["target", "dummy", "aim", "shoot"],
+    },
+    ComponentMeta {
+        type_path: "crate::gamemode::GoalZone",
+        name: "Goal Zone (Win Area)",
+        icon: "[Goal]",
+        category: "Gameplay & Combat",
+        description: "A trigger volume that players can enter to score points or win.",
+        keywords: &["goal", "zone", "win", "area", "trigger"],
+    },
+    ComponentMeta {
+        type_path: "cb_weapons::health::ImmortalPlayer",
+        name: "God Mode",
+        icon: "[God]",
+        category: "Gameplay & Combat",
+        description: "Prevents this entity from ever dying or taking damage.",
+        keywords: &["god", "immortal", "invincible"],
+    },
 ];
 
 pub fn open_in_vscode(path: &str) {
@@ -1286,6 +1334,14 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             transform: Transform::from_xyz(0.0, 0.05, -12.0) 
                         });
                     }
+                    if ui.button("[Crate] Weapon Crate").on_hover_text("Spawn an interactable weapon crate").clicked() {
+                        self.world.write_message(super::serialization::EditorActionRequest::SpawnObject { 
+                            id: rand::random::<u64>(),
+                            object_type: "weapon_crate".to_string(), 
+                            asset_path: None, 
+                            transform: Transform::default() 
+                        });
+                    }
                 });
                 
                 ui.separator();
@@ -2303,6 +2359,8 @@ pub fn global_transform_ui_many(
 ) -> bool {
     false
 }
+
+
 
 
 
