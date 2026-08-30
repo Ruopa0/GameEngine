@@ -5,3 +5,4 @@ Cargo-RuMSI.toml
 crates/**/Cargo-RuMSI.toml
 .DS_Store
 Thumbs.db
+test_ron/target/

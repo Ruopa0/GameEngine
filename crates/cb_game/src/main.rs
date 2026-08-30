@@ -62,8 +62,8 @@ fn main() {
         }))
         .add_plugins((
             PhysicsPlugins::default(),
-            TnuaControllerPlugin::<cb_movement::kcc::CharacterScheme>::new(Update),
-            TnuaAvian3dPlugin::new(Update),
+            TnuaControllerPlugin::<cb_movement::kcc::CharacterScheme>::new(FixedUpdate),
+            TnuaAvian3dPlugin::new(FixedUpdate),
             cb_engine::EnginePlugin,
             cb_input::InputPlugin,
             cb_movement::MovementPlugin,

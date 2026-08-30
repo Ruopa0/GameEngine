@@ -26,7 +26,7 @@ impl Plugin for MovementPlugin {
             // FSM ticks every FixedUpdate -- deterministic, prediction-safe
             .add_systems(FixedUpdate, fsm::update_fsm)
             // KCC must run in TnuaUserControlsSystemSet -- that's tnua's contract
-            .add_systems(Update, kcc::apply_movement.in_set(TnuaUserControlsSystems))
+            .add_systems(FixedUpdate, kcc::apply_movement.in_set(TnuaUserControlsSystems))
             // Parkour detection (raycasts) runs in FixedUpdate before FSM
             .add_systems(FixedUpdate, parkour::detect_parkour.before(fsm::update_fsm));
     }

@@ -25,8 +25,8 @@ fn main() {
     
     // Add game logic plugins
     app.add_plugins((
-        bevy_tnua::prelude::TnuaControllerPlugin::<cb_movement::kcc::CharacterScheme>::new(Update),
-        bevy_tnua_avian3d::TnuaAvian3dPlugin::new(Update),
+        bevy_tnua::prelude::TnuaControllerPlugin::<cb_movement::kcc::CharacterScheme>::new(FixedUpdate),
+        bevy_tnua_avian3d::TnuaAvian3dPlugin::new(FixedUpdate),
         cb_input::InputPlugin,
         cb_movement::MovementPlugin,
         cb_weapons::WeaponsPlugin,

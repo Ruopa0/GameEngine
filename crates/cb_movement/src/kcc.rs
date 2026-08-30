@@ -53,12 +53,12 @@ pub fn apply_movement(
         let mut free_fall_gravity = 3.5;
         gravity.0 = 0.5;
 
-        let mut float_height = 1.5;
+        let mut float_height = 0.85;
         if state.current == MovementState::Crouch || state.current == MovementState::Slide {
-            float_height = 0.75;
+            float_height = 0.45;
         }
         if state.current == MovementState::Prone {
-            float_height = 0.25; // very low -- flat on the ground
+            float_height = 0.15; // flat on the ground
         }
 
         if state.current == MovementState::Slide {
