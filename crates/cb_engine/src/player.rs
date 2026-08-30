@@ -178,6 +178,15 @@ pub fn update_player_respawn(
                 }
             });
 
+        if !clicked_respawn {
+            if let Ok(mut cursor) = cursor_options.single_mut() {
+                if cursor.grab_mode != bevy::window::CursorGrabMode::None {
+                    cursor.grab_mode = bevy::window::CursorGrabMode::None;
+                    cursor.visible = true;
+                }
+            }
+        }
+
         if clicked_respawn {
             info!("Player clicked respawn! Restoring player at spawn point.");
             health.current = health.max;

@@ -68,9 +68,9 @@ fn main() {
             cb_input::InputPlugin,
             cb_movement::MovementPlugin,
             cb_weapons::WeaponsPlugin,
+            cb_engine::editor::serialization::EditorSerializationPlugin,
         ));
 
-        app.add_plugins(cb_engine::editor::serialization::EditorSerializationPlugin);
         if cli.client {
             app.add_plugins((
                 cb_netcode::client::ClientNetPlugin,
@@ -83,6 +83,11 @@ fn main() {
             // Standalone mode
             app.add_systems(Startup, setup_level);
         }
+
+        // Force cb_game into Play mode so inputs work
+        app.add_systems(Startup, |mut next_state: ResMut<NextState<cb_engine::editor::EngineState>>| {
+            next_state.set(cb_engine::editor::EngineState::Play);
+        });
 
         app.add_plugins(cb_engine::player::PlayerPlugin);
         app.add_plugins(bevy_egui::EguiPlugin::default());
@@ -215,12 +220,20 @@ fn setup_level(
 
 fn toggle_cursor_grab(
     keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
     mut cursor_options: Query<&mut bevy::window::CursorOptions, With<Window>>,
 ) {
     let Ok(mut cursor) = cursor_options.single_mut() else { return };
-    // Only handle releasing the cursor. The Editor handles grabbing when clicking the game view.
+    
     if keyboard.just_pressed(KeyCode::Escape) {
         cursor.grab_mode = CursorGrabMode::None;
         cursor.visible = true;
     }
+
+    if mouse.just_pressed(MouseButton::Left) && cursor.grab_mode == CursorGrabMode::None {
+        cursor.grab_mode = CursorGrabMode::Locked;
+        cursor.visible = false;
+    }
 }
+
+
