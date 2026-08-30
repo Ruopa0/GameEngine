@@ -84,12 +84,7 @@ fn main() {
             app.add_systems(Startup, setup_level);
         }
 
-        // Force cb_game into Play mode so inputs work
-        app.add_systems(Startup, |mut next_state: ResMut<NextState<cb_engine::editor::EngineState>>| {
-            next_state.set(cb_engine::editor::EngineState::Play);
-        });
-
-        app.add_plugins(cb_engine::player::PlayerPlugin);
+        app.add_plugins(cb_engine::player::PlayerPlugin); 
         app.add_plugins(bevy_egui::EguiPlugin::default());
         app.add_plugins(cb_engine::console::ConsolePlugin);
         app.add_systems(Update, (toggle_cursor_grab, trigger_system));
@@ -235,5 +230,8 @@ fn toggle_cursor_grab(
         cursor.visible = false;
     }
 }
+
+
+
 
 

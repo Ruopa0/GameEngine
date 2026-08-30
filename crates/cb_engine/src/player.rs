@@ -223,6 +223,7 @@ pub fn update_player_respawn(
 
             commands.entity(entity)
                 .remove::<IsDead>()
+                .remove::<avian3d::prelude::Sleeping>()
                 .insert(avian3d::prelude::Collider::capsule(0.35, 1.0))
                 .insert(LockedAxes::ROTATION_LOCKED)
                 .insert(AngularVelocity::ZERO);
