@@ -62,8 +62,8 @@ pub fn apply_movement(
             capsule_height = 0.2;
         }
         if state.current == MovementState::Prone {
-            float_height = 0.15; // flat on the ground
-            capsule_height = 0.01;
+            capsule_height = 0.0; // Acts as a sphere of radius 0.35
+            float_height = 0.35; // Exactly the radius, so it touches the ground
         }
         
         // Update physical collider size on state change
