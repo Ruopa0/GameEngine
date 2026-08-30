@@ -16,6 +16,7 @@ pub struct ShotFiredEvent {
     pub direction:  Vec3,
     pub spread_rad: f32,
     pub is_local:   bool,
+    pub projectile_speed: Option<f32>,
 }
 
 pub fn weapon_fire_system(
@@ -88,6 +89,7 @@ pub fn weapon_fire_system(
                 direction: shot_direction,
                 spread_rad: spread.current,
                 is_local:  true,
+                projectile_speed: weapon_cfg.projectile_speed,
             });
         }
 

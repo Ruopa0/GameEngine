@@ -59,7 +59,7 @@ pub enum EditorAction {
     UpdatePlayerTransform { user_id: u64, transform: Transform, pitch: f32 },
     PlayerHit { victim_user_id: u64, attacker_user_id: u64, damage: f32, hit_point: Vec3, hit_normal: Vec3 },
     DamageNetworkObject { id: u64, damage: f32, hit_point: Vec3, hit_normal: Vec3 },
-    PlayerFired { user_id: u64, origin: Vec3, direction: Vec3 },
+    PlayerFired { user_id: u64, origin: Vec3, direction: Vec3, projectile_speed: Option<f32> },
     PlayerRespawned { user_id: u64 },
 }
 

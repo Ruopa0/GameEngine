@@ -296,12 +296,13 @@ pub fn handle_editor_actions(
                         });
                     }
                 },
-                crate::protocol::EditorAction::PlayerFired { user_id, origin, direction } => {
+                crate::protocol::EditorAction::PlayerFired { user_id, origin, direction, projectile_speed } => {
                     for (_sender_entity, mut sender) in senders.iter_mut() {
                         sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::PlayerFired {
                             user_id,
                             origin,
                             direction,
+                            projectile_speed,
                         });
                     }
                 },

@@ -47,7 +47,8 @@ pub fn process_hitscan(
         let seed = (time.elapsed().as_millis() as u64).wrapping_add(shot.shooter.to_bits());
         let dir = apply_spread(shot.direction, shot.spread_rad, seed);
 
-        if let Some(speed) = config.projectile_speed {
+        let proj_speed = shot.projectile_speed.or(config.projectile_speed);
+        if let Some(speed) = proj_speed {
             // Projectile weapon -- spawn a physics entity that flies
             commands.spawn((
                 Mesh3d(meshes.add(Sphere::new(0.08))),

@@ -575,7 +575,7 @@ pub fn handle_remote_editor_actions(
                         }
                     });
                 }
-                crate::protocol::EditorAction::PlayerFired { user_id, origin, direction } => {
+                crate::protocol::EditorAction::PlayerFired { user_id, origin, direction, projectile_speed } => {
                     if user_id != session.client_id {
                         commands.queue(move |world: &mut World| {
                             let mut target_player = None;
@@ -610,6 +610,7 @@ pub fn handle_remote_editor_actions(
                                     direction,
                                     spread_rad: 0.0,
                                     is_local: false,
+                                    projectile_speed,
                                 });
                             }
                         });
@@ -748,6 +749,7 @@ pub fn broadcast_shot_events(
                     user_id: session.client_id,
                     origin: ev.origin,
                     direction: ev.direction,
+                    projectile_speed: ev.projectile_speed,
                 });
             }
         }
