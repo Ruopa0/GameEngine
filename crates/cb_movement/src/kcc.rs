@@ -22,10 +22,11 @@ pub fn apply_movement(
         &mut TnuaController<CharacterScheme>,
         &TnuaConfig<CharacterScheme>,
         &mut GravityScale,
+        &mut avian3d::prelude::Collider,
     )>,
     mut configs: ResMut<Assets<CharacterSchemeConfig>>,
 ) {
-    for (state, sense, mut controller, config_handle, mut gravity) in query.iter_mut() {
+    for (state, sense, mut controller, config_handle, mut gravity, mut collider) in query.iter_mut() {
         controller.initiate_action_feeding();
         // --- Speed from state ----------------------------------------
         let base_speed: f32 = match state.current {
@@ -54,11 +55,20 @@ pub fn apply_movement(
         gravity.0 = 0.5;
 
         let mut float_height = 0.85;
+        let mut capsule_height = 1.0;
+        
         if state.current == MovementState::Crouch || state.current == MovementState::Slide {
             float_height = 0.45;
+            capsule_height = 0.2;
         }
         if state.current == MovementState::Prone {
             float_height = 0.15; // flat on the ground
+            capsule_height = 0.01;
+        }
+        
+        // Update physical collider size on state change
+        if state.current != state.previous {
+            *collider = avian3d::prelude::Collider::capsule(0.35, capsule_height);
         }
 
         if state.current == MovementState::Slide {
