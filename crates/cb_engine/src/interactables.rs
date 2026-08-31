@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cb_weapons::components::{WeaponBundle, WeaponConfig, FireRate, Magazine, Spread, RecoilPattern, FireMode};
+use cb_shared::components::{WeaponBundle, WeaponConfig, FireRate, Magazine, Spread, RecoilPattern, FireMode};
 use avian3d::prelude::*;
 
 #[derive(Component)]
@@ -70,7 +70,7 @@ pub fn populate_crate_entity(commands: &mut Commands, entity: Entity, meshes: &m
 
 fn handle_crate_interactions(
     input_opt: Option<Res<cb_input::PlayerInput>>,
-    mut q_player: Query<(&Transform, &mut cb_weapons::components::WeaponInventory), With<crate::player::Player>>,
+    mut q_player: Query<(&Transform, &mut cb_shared::components::WeaponInventory), With<crate::player::Player>>,
     mut q_crates: Query<(&mut WeaponCrate, &Transform, &Children)>,
     mut q_lids: Query<&mut Transform, (With<CrateLid>, Without<crate::player::Player>, Without<WeaponCrate>)>,
 ) {

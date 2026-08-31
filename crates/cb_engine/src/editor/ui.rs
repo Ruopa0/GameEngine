@@ -223,7 +223,7 @@ pub const COMPONENT_CATALOG: &[ComponentMeta] = &[
         keywords: &["material", "roughness", "metallic", "gloss", "shine"],
     },
     ComponentMeta {
-        type_path: "cb_weapons::components::Health",
+        type_path: "cb_shared::components::Health",
         name: "Health Points",
         icon: "[HP]",
         category: "Gameplay & Combat",
@@ -247,7 +247,7 @@ pub const COMPONENT_CATALOG: &[ComponentMeta] = &[
         keywords: &["goal", "zone", "win", "area", "trigger"],
     },
     ComponentMeta {
-        type_path: "cb_weapons::health::ImmortalPlayer",
+        type_path: "cb_shared::components::ImmortalPlayer",
         name: "God Mode",
         icon: "[God]",
         category: "Gameplay & Combat",
@@ -992,8 +992,14 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                         });
                                         
                                         if color_changed {
-                                            let new_col = super::serialization::EditorColor(Color::srgb(current_color[0], current_color[1], current_color[2]));
+                                            let srgb_col = Color::srgb(current_color[0], current_color[1], current_color[2]);
+                                            let new_col = super::serialization::EditorColor(srgb_col);
                                             self.world.entity_mut(entity).insert(new_col);
+                                            if let Some(mut materials) = self.world.get_resource_mut::<Assets<StandardMaterial>>() {
+                                                if let Some(mat) = materials.get_mut(&mat_handle) {
+                                                    mat.base_color = srgb_col;
+                                                }
+                                            }
                                             if ui.input(|i| i.pointer.any_released()) {
                                                 sync_component_to_network(self.world, entity, new_col);
                                             }
@@ -1005,6 +1011,12 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                                                 metallic: current_metallic,
                                             };
                                             self.world.entity_mut(entity).insert(new_mat.clone());
+                                            if let Some(mut materials) = self.world.get_resource_mut::<Assets<StandardMaterial>>() {
+                                                if let Some(mat) = materials.get_mut(&mat_handle) {
+                                                    mat.perceptual_roughness = current_roughness;
+                                                    mat.metallic = current_metallic;
+                                                }
+                                            }
                                             if ui.input(|i| i.pointer.any_released()) {
                                                 sync_component_to_network(self.world, entity, new_mat);
                                             }
@@ -1197,12 +1209,12 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             // 2. Health Bar (Bottom-Left)
                             let mut player_hp = 100.0;
                             let mut max_hp = 100.0;
-                            let mut player_query = self.world.query_filtered::<&cb_weapons::components::Health, With<crate::player::Player>>();
+                            let mut player_query = self.world.query_filtered::<&cb_shared::components::Health, With<crate::player::Player>>();
                             if let Some(hp) = player_query.iter(self.world).next() {
                                 player_hp = hp.current.max(0.0);
                                 max_hp = hp.max;
                             }
-                            let hp_pct = (player_hp / max_hp).clamp(0.0, 1.0);
+                            let hp_pct = (player_hp / max_hp).max(0.0).min(1.0);
                             let hp_rect = egui::Rect::from_min_size(rect.left_bottom() + egui::vec2(16.0, -42.0), egui::vec2(180.0, 24.0));
                             painter.rect_filled(hp_rect, 4.0, egui::Color32::from_black_alpha(180));
                             let fill_rect = egui::Rect::from_min_size(hp_rect.min + egui::vec2(2.0, 2.0), egui::vec2((hp_rect.width() - 4.0) * hp_pct, hp_rect.height() - 4.0));
@@ -1214,7 +1226,7 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                             let mut mag_current = 0;
                             let mut mag_reserve = 0;
                             let mut is_reloading = false;
-                            let mut weapon_query = self.world.query::<&cb_weapons::components::Magazine>();
+                            let mut weapon_query = self.world.query::<&cb_shared::components::Magazine>();
                             if let Some(mag) = weapon_query.iter(self.world).next() {
                                 mag_current = mag.current;
                                 mag_reserve = mag.reserve;
@@ -1284,12 +1296,47 @@ impl<'a> egui_dock::TabViewer for TabViewer<'a> {
                 }
             }
             "Console" => {
-                let logs = self.world.resource::<ConsoleState>().logs.clone();
-                egui::ScrollArea::vertical().show(ui, |ui| {
-                    for log in logs {
-                        ui.label(log);
-                    }
-                });
+                let mut cmd_to_execute = None;
+                if let Some(mut state) = self.world.get_resource_mut::<ConsoleState>() {
+                    let total_h = ui.available_height();
+                    egui::ScrollArea::vertical()
+                        .max_height(total_h - 36.0)
+                        .stick_to_bottom(true)
+                        .show(ui, |ui| {
+                            for log in &state.logs {
+                                if log.starts_with('>') {
+                                    ui.label(egui::RichText::new(log).strong().color(egui::Color32::from_rgb(100, 220, 255)));
+                                } else {
+                                    ui.label(log);
+                                }
+                            }
+                        });
+
+                    ui.separator();
+                    ui.horizontal(|ui| {
+                        ui.label(egui::RichText::new(">").strong().color(egui::Color32::from_rgb(100, 200, 255)));
+                        let text_edit = egui::TextEdit::singleline(&mut state.input)
+                            .hint_text("Type command (e.g. 'help', 'fps 1', 'clear')...")
+                            .desired_width(ui.available_width() - 65.0);
+                        let response = ui.add(text_edit);
+                        let send_clicked = ui.button("Send").clicked();
+                        let enter_pressed = response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter))
+                            || (response.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)));
+
+                        if send_clicked || enter_pressed {
+                            let cmd = state.input.clone();
+                            if !cmd.trim().is_empty() {
+                                state.logs.push(format!("> {}", cmd));
+                                cmd_to_execute = Some(cmd);
+                            }
+                            state.input.clear();
+                            response.request_focus();
+                        }
+                    });
+                }
+                if let Some(cmd) = cmd_to_execute {
+                    self.world.write_message(crate::console::ConsoleCommandEvent(cmd));
+                }
             }
             "Assets" => {
                 ui.heading("Prefabs");
@@ -1518,7 +1565,7 @@ fn render_editor_ui(world: &mut World) {
     let mut inspector_state = world.remove_resource::<InspectorState>().unwrap_or_default();
 
     // Keyboard shortcuts
-    let (key_n, key_o, key_s, key_shift_s) = {
+    let (key_n, key_o, key_s, key_shift_s, key_f5) = {
         let keys = world.resource::<ButtonInput<KeyCode>>();
         let ctrl = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
         let shift = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
@@ -1527,6 +1574,7 @@ fn render_editor_ui(world: &mut World) {
             ctrl && !shift && keys.just_pressed(KeyCode::KeyO),
             ctrl && !shift && keys.just_pressed(KeyCode::KeyS),
             ctrl && shift && keys.just_pressed(KeyCode::KeyS),
+            keys.just_pressed(KeyCode::F5),
         )
     };
 
@@ -1554,12 +1602,23 @@ fn render_editor_ui(world: &mut World) {
         }
     }
     if key_shift_s {
-        let current_name = world.resource::<super::serialization::ActiveSceneState>().display_name();
-        if let Some(path) = save_file_dialog(&current_name) {
-            world.write_message(super::serialization::SaveSceneEvent(path.clone()));
-            world.resource_mut::<super::serialization::ActiveSceneState>().current_path = Some(path);
-        } else {
-            dialogs.show_save_as_dialog = true;
+        // Ctrl+Shift+S: Save All (saves all entities and prefabs to level.ron and syncs)
+        let path = world.resource::<super::serialization::ActiveSceneState>().current_path.clone()
+            .unwrap_or_else(|| "level.ron".to_string());
+        world.write_message(super::serialization::SaveSceneEvent(path.clone()));
+        world.resource_mut::<super::serialization::ActiveSceneState>().current_path = Some(path.clone());
+        world.resource_mut::<super::serialization::ActiveSceneState>().is_dirty = false;
+        if let Some(mut console) = world.get_resource_mut::<super::console::ConsoleState>() {
+            console.push_log(format!("[Save All] Saved all scene entities and prefabs to '{}'", path));
+        }
+    }
+    if key_f5 {
+        // F5: Hot Reload Level from disk
+        let path = world.resource::<super::serialization::ActiveSceneState>().current_path.clone()
+            .unwrap_or_else(|| "level.ron".to_string());
+        world.write_message(super::serialization::LoadSceneEvent(path.clone()));
+        if let Some(mut console) = world.get_resource_mut::<super::console::ConsoleState>() {
+            console.push_log(format!("[Hot Reload] Reloaded scene from '{}'", path));
         }
     }
 
@@ -1787,53 +1846,54 @@ fn render_editor_ui(world: &mut World) {
     if dialogs.show_about_dialog {
         let mut open = dialogs.show_about_dialog;
         let mut close_clicked = false;
-        egui::Window::new("       About Code Blue")
+        egui::Window::new("About Code Blue")
             .open(&mut open)
             .collapsible(false)
-            .resizable(false)
-            .default_size([460.0, 360.0])
+            .resizable(true)
+            .default_size([380.0, 280.0])
+            .max_size([420.0, 320.0])
             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
             .show(&ctx, |ui| {
-                ui.vertical_centered(|ui| {
-                    ui.add_space(6.0);
-                    ui.heading(egui::RichText::new("Code Blue Engine").size(20.0).strong().color(egui::Color32::from_rgb(100, 180, 255)));
-                    ui.label(egui::RichText::new("Version 0.1.0 * Built in Rust").size(12.0).color(egui::Color32::GRAY));
-                    ui.add_space(8.0);
-                });
-
-                // Philosophy Quote Frame
-                egui::Frame::group(ui.style())
-                    .fill(egui::Color32::from_rgba_premultiplied(20, 30, 45, 200))
+                egui::ScrollArea::vertical()
+                    .max_height(220.0)
                     .show(ui, |ui| {
-                        ui.label(egui::RichText::new("    If they can't make their own game engine, they are not programmers. It's like a chef who can only make frozen pizza.    ")
-                            .italics()
-                            .color(egui::Color32::from_rgb(255, 215, 120))
-                            .size(12.5));
-                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            ui.label(egui::RichText::new("-- Markus \"Notch\" Persson").size(11.0).color(egui::Color32::from_rgb(180, 200, 220)));
+                        ui.vertical_centered(|ui| {
+                            ui.heading(egui::RichText::new("Code Blue Engine").size(17.0).strong().color(egui::Color32::from_rgb(100, 180, 255)));
+                            ui.label(egui::RichText::new("Version 0.1.0 * Built in Rust").size(11.0).color(egui::Color32::GRAY));
+                            ui.add_space(4.0);
                         });
+
+                        // Philosophy Quote Frame
+                        egui::Frame::group(ui.style())
+                            .fill(egui::Color32::from_rgba_premultiplied(20, 30, 45, 200))
+                            .show(ui, |ui| {
+                                ui.label(egui::RichText::new("\"If they can't make their own game engine, they are not programmers.\"")
+                                    .italics()
+                                    .color(egui::Color32::from_rgb(255, 215, 120))
+                                    .size(11.5));
+                                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                    ui.label(egui::RichText::new("-- Markus \"Notch\" Persson").size(10.5).color(egui::Color32::from_rgb(180, 200, 220)));
+                                });
+                            });
+
+                        ui.add_space(4.0);
+                        ui.label(egui::RichText::new("Code Blue engine architecture -- crafted in pure Rust and powered by Google Antigravity.")
+                            .color(egui::Color32::from_rgb(210, 220, 230))
+                            .size(11.0));
+
+                        ui.separator();
+                        ui.label(egui::RichText::new("Technical Architecture:").strong().size(11.5));
+                        ui.label("* ECS: Bevy 0.16");
+                        ui.label("* Physics: Avian3D");
+                        ui.label("* Netcode: Lightyear 120Hz");
+                        ui.label("* Scripting: Rhai AST");
+                        ui.separator();
+                        ui.label(egui::RichText::new("Created by Ruan Prinsloo").size(10.5).color(egui::Color32::from_rgb(140, 180, 240)));
                     });
 
                 ui.add_space(6.0);
-                ui.label(egui::RichText::new("Code Blue was built from first principles to explore the bleeding edge of modern game engine architecture -- crafted in pure Rust and powered by Google's Antigravity.")
-                    .color(egui::Color32::from_rgb(210, 220, 230))
-                    .size(12.0));
-
-                ui.add_space(6.0);
-                ui.separator();
-                ui.label(egui::RichText::new("       Technical Architecture:").strong());
-                ui.label("* Data-Driven ECS: Bevy 0.16");
-                ui.label("* Physics: Avian3D (Parallel Rigid Body Simulation)");
-                ui.label("* Multiplayer Netcode: Lightyear 120Hz Client-Server Replication");
-                ui.label("* Scripting: Rhai AST Engine with Live Disk Hot-Reloading");
-                ui.label("* Visuals: First-Person Viewmodel with Dynamic Aim Lag & Sway");
-                ui.separator();
-
                 ui.vertical_centered(|ui| {
-                    ui.add_space(4.0);
-                    ui.label(egui::RichText::new("Created by Ruan Prinsloo * Powered by Google Antigravity").size(11.0).color(egui::Color32::from_rgb(140, 180, 240)).strong());
-                    ui.add_space(4.0);
-                    if ui.button("Close").clicked() {
+                    if ui.button(egui::RichText::new("  Close  ").strong()).clicked() {
                         close_clicked = true;
                     }
                 });
@@ -1956,7 +2016,28 @@ fn render_editor_ui(world: &mut World) {
                     }
                     ui.close_menu();
                 }
-                if ui.button("Save Scene As...\tCtrl+Shift+S").clicked() {
+                if ui.button("Save All\tCtrl+Shift+S").clicked() {
+                    let path = world.resource::<super::serialization::ActiveSceneState>().current_path.clone()
+                        .unwrap_or_else(|| "level.ron".to_string());
+                    world.write_message(super::serialization::SaveSceneEvent(path.clone()));
+                    world.resource_mut::<super::serialization::ActiveSceneState>().current_path = Some(path.clone());
+                    world.resource_mut::<super::serialization::ActiveSceneState>().is_dirty = false;
+                    if let Some(mut console) = world.get_resource_mut::<super::console::ConsoleState>() {
+                        console.push_log(format!("[Save All] Saved all scene entities and prefabs to '{}'", path));
+                    }
+                    ui.close_menu();
+                }
+                if ui.button("Hot Reload Level\tF5").clicked() {
+                    let path = world.resource::<super::serialization::ActiveSceneState>().current_path.clone()
+                        .unwrap_or_else(|| "level.ron".to_string());
+                    world.write_message(super::serialization::LoadSceneEvent(path.clone()));
+                    if let Some(mut console) = world.get_resource_mut::<super::console::ConsoleState>() {
+                        console.push_log(format!("[Hot Reload] Reloaded scene from '{}'", path));
+                    }
+                    ui.close_menu();
+                }
+                ui.separator();
+                if ui.button("Save Scene As...").clicked() {
                     let current_name = world.resource::<super::serialization::ActiveSceneState>().display_name();
                     if let Some(path) = save_file_dialog(&current_name) {
                         world.write_message(super::serialization::SaveSceneEvent(path.clone()));

@@ -1,8 +1,8 @@
-﻿use bevy::prelude::*;
+use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_framepace::{FramepacePlugin, FramepaceSettings, Limiter};
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
-use cb_weapons::health::ImmortalPlayer;
+use cb_shared::components::ImmortalPlayer;
 
 pub struct ConsolePlugin;
 
@@ -70,18 +70,30 @@ fn draw_console(
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical()
                     .auto_shrink([false, false])
-                    .max_height(ui.available_height() - 30.0)
+                    .max_height(ui.available_height() - 40.0)
                     .stick_to_bottom(true)
                     .show(ui, |ui| {
                         for line in &state.history {
-                            ui.label(line);
+                            if line.starts_with('>') {
+                                ui.label(egui::RichText::new(line).strong().color(egui::Color32::from_rgb(100, 220, 255)));
+                            } else {
+                                ui.label(line);
+                            }
                         }
                     });
 
+                ui.separator();
                 ui.horizontal(|ui| {
-                    ui.label(">");
-                    let response = ui.text_edit_singleline(&mut state.input);
-                    if response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                    ui.label(egui::RichText::new(">").strong().color(egui::Color32::from_rgb(100, 200, 255)));
+                    let text_edit = egui::TextEdit::singleline(&mut state.input)
+                        .hint_text("Type command (e.g. 'help', 'fps 1', 'maxfps 144')...")
+                        .desired_width(ui.available_width() - 65.0);
+                    let response = ui.add(text_edit);
+                    let send_clicked = ui.button("Send").clicked();
+                    let enter_pressed = response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter))
+                        || (response.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)));
+
+                    if send_clicked || enter_pressed {
                         let cmd = state.input.clone();
                         if !cmd.trim().is_empty() {
                             state.history.push(format!("> {}", cmd));
@@ -126,7 +138,7 @@ fn handle_commands(
     mut events: MessageReader<ConsoleCommandEvent>,
     mut state: ResMut<ConsoleState>,
     mut framepace: ResMut<FramepaceSettings>,
-    mut q_player: Query<(Entity, &mut cb_weapons::components::Health, Option<&ImmortalPlayer>, &Transform), With<crate::player::Player>>,
+    mut q_player: Query<(Entity, &mut cb_shared::components::Health, Option<&ImmortalPlayer>, &Transform), With<crate::player::Player>>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -231,7 +243,7 @@ fn handle_commands(
                         Transform::from_translation(pos),
                         avian3d::prelude::RigidBody::Static,
                         avian3d::prelude::Collider::cuboid(0.6, 1.8, 0.6),
-                        cb_weapons::components::Health::new(100.0),
+                        cb_shared::components::Health::new(100.0),
                         crate::gamemode::TargetDummy,
                     ));
                     state.history.push(format!("Spawned Target Dummy at {:?}", pos));

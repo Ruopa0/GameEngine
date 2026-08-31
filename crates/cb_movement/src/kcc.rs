@@ -28,31 +28,31 @@ pub fn apply_movement(
 ) {
     for (state, sense, mut controller, config_handle, mut gravity, mut collider) in query.iter_mut() {
         controller.initiate_action_feeding();
-        // --- Speed from state ----------------------------------------
+        // --- Speed from state (tuned to 1/4th for tactical grounded pace) ---
         let base_speed: f32 = match state.current {
-            MovementState::TacSprint => 15.0,
-            MovementState::Sprint => 9.0,
-            MovementState::Walk => 5.0,
-            MovementState::Slide => 7.0,
-            MovementState::Crouch => 1.25,
-            MovementState::Prone => 1.6,
+            MovementState::TacSprint => 3.75, // was 15.0
+            MovementState::Sprint => 2.25,    // was 9.0
+            MovementState::Walk => 1.25,      // was 5.0
+            MovementState::Slide => 1.75,     // was 7.0
+            MovementState::Crouch => 0.40,    // was 1.25
+            MovementState::Prone => 0.35,     // was 1.6
             MovementState::Idle => 0.0,
-            MovementState::Vault => 3.5,
-            MovementState::Mantle => 2.0,
+            MovementState::Vault => 1.0,      // was 3.5
+            MovementState::Mantle => 0.6,     // was 2.0
             MovementState::LedgeGrab => 0.0,
-            _ => 2.75,
+            _ => 0.75,
         };
 
-        let flow_bonus = (state.momentum.flow * 2.0) / 16.0;
+        let flow_bonus = (state.momentum.flow * 0.5) / 16.0;
         let speed = base_speed + flow_bonus;
 
         let mut desired_velocity = state.desired_direction.normalize_or_zero() * speed;
 
-        // Baseline physics tuning (high acceleration for crisp ground friction and stopping power)
-        let mut air_accel = 15.0;
-        let mut accel = 60.0;
-        let mut free_fall_gravity = 3.5;
-        gravity.0 = 0.5;
+        // Baseline physics tuning (high acceleration for crisp ground friction and no sliding)
+        let mut air_accel = 25.0;
+        let mut accel = 180.0; // High acceleration/stopping power for immediate stop
+        let mut free_fall_gravity = 12.0; // Snappy downward pull
+        gravity.0 = 2.5; // Strong gravity scale
 
         let mut float_height = 0.85;
         let mut capsule_height = 1.0;
@@ -72,7 +72,7 @@ pub fn apply_movement(
         }
 
         if state.current == MovementState::Slide {
-            accel = 2.0; // Controlled momentum slide
+            accel = 8.0; // Controlled momentum slide
         }
 
         if state.current == MovementState::Vault || state.current == MovementState::Mantle {
@@ -87,14 +87,14 @@ pub fn apply_movement(
                 // 3-Phase Kinematic Arc
                 if t < 0.15 {
                     // Phase 1: Launch (Up and forward)
-                    desired_velocity = horizontal_dir * speed + Vec3::Y * 2.25;
+                    desired_velocity = horizontal_dir * speed + Vec3::Y * 1.5;
                     air_accel = 25.0;
                 } else if t < 0.40 {
                     // Phase 2: Apex float
                     desired_velocity = horizontal_dir * speed;
                     air_accel = 20.0;
-                    gravity.0 = 0.5; // hover slightly
-                    free_fall_gravity = 0.0;
+                    gravity.0 = 2.0;
+                    free_fall_gravity = 5.0;
                 } else {
                     // Phase 3: Finish (Normal fall)
                     desired_velocity = horizontal_dir * speed;
@@ -109,8 +109,9 @@ pub fn apply_movement(
             config.basis.free_fall_extra_gravity = free_fall_gravity;
             config.basis.float_height = float_height;
 
-            config.jump.height = 3.6;
-            config.jump.shorten_extra_gravity = 5.0;
+            // Jump tuning: realistic height (1.2m) with strong gravity descent
+            config.jump.height = 1.2;
+            config.jump.shorten_extra_gravity = 15.0;
         }
 
         // --- Walk basis ----------------------------------------------

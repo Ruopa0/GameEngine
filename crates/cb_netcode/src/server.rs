@@ -356,14 +356,13 @@ pub fn handle_editor_actions(
                                 sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::FullSceneSync {
                                     objects: sync_objects,
                                 });
-                            } else if std::path::Path::new("level.ron").exists() {
-                                if let Ok(scene_ron) = std::fs::read_to_string("level.ron") {
+                            } else if std::path::Path::new("level.ron").exists()
+                                && let Ok(scene_ron) = std::fs::read_to_string("level.ron") {
                                     info!("Server: sync_objects was empty, reading level.ron from disk ({} bytes) and serving LoadScene to client", scene_ron.len());
                                     sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::LoadScene {
                                         path: "level.ron".to_string(),
                                         scene_ron,
                                     });
-                                }
                             }
                         }
                     });

@@ -57,10 +57,11 @@ impl Plugin for EditorSerializationPlugin {
            .register_type::<crate::gamemode::TargetDummy>()
            .register_type::<crate::gamemode::GoalZone>()
            .register_type::<TestComponent>()
-           .register_type::<cb_weapons::components::Health>()
-           .register_type::<cb_weapons::health::ImmortalPlayer>()
+           .register_type::<cb_shared::components::Health>()
+           .register_type::<cb_shared::components::ImmortalPlayer>()
            .register_type::<EditorColor>().register_type::<EditorMaterial>()
            .register_type::<EditorPointLight>()
+           .register_type::<crate::zipline::Zipline>()
            .register_type::<avian3d::prelude::RigidBody>()
            .register_type::<avian3d::prelude::Friction>()
            .register_type::<avian3d::prelude::Restitution>()
@@ -286,8 +287,8 @@ fn handle_save(
             std::any::TypeId::of::<crate::gamemode::TargetDummy>(),
             std::any::TypeId::of::<crate::gamemode::GoalZone>(),
             std::any::TypeId::of::<crate::gamemode_chest::WeaponChest>(),
-            std::any::TypeId::of::<cb_weapons::components::Health>(),
-            std::any::TypeId::of::<cb_weapons::health::ImmortalPlayer>(),
+            std::any::TypeId::of::<cb_shared::components::Health>(),
+            // std::any::TypeId::of::<cb_weapons::health::ImmortalPlayer>(), // removed to break cyclic dependency
             std::any::TypeId::of::<avian3d::prelude::RigidBody>(),
             std::any::TypeId::of::<avian3d::prelude::Friction>(),
             std::any::TypeId::of::<avian3d::prelude::Restitution>(),
@@ -298,6 +299,7 @@ fn handle_save(
             std::any::TypeId::of::<avian3d::prelude::LinearDamping>(),
             std::any::TypeId::of::<avian3d::prelude::AngularDamping>(),
             std::any::TypeId::of::<avian3d::prelude::LockedAxes>(),
+            std::any::TypeId::of::<crate::zipline::Zipline>(),
         ];
         for type_id in allowed_types {
             filter = filter.allow_by_id(type_id);
@@ -448,7 +450,7 @@ pub fn restore_missing_visuals(
                     MeshMaterial3d(material),
                     avian3d::prelude::RigidBody::Static,
                     avian3d::prelude::Collider::cuboid(0.6, 1.8, 0.6),
-                    cb_weapons::components::Health::new(100.0),
+                    cb_shared::components::Health::new(100.0),
                     crate::gamemode::TargetDummy,
                     EditorColor(Color::srgb(0.8, 0.2, 0.2)),
                 ));
@@ -507,7 +509,6 @@ pub fn restore_missing_visuals(
                     MeshMaterial3d(material),
                     avian3d::prelude::RigidBody::Static,
                     avian3d::prelude::Collider::cuboid(1.5, 1.0, 1.0),
-                    cb_weapons::components::Health::new(50.0),
                     crate::gamemode_chest::WeaponChest,
                 ));
             }
@@ -580,13 +581,14 @@ pub fn apply_editor_pointlight(
                 light.shadows_enabled = ed_light.shadows_enabled;
             }
         } else {
-            let mut light = PointLight::default();
-            light.color = ed_light.color;
-            light.intensity = ed_light.intensity;
-            light.range = ed_light.range;
-            light.radius = ed_light.radius;
-            light.shadows_enabled = ed_light.shadows_enabled;
-            commands.entity(entity).insert(light);
+            commands.entity(entity).insert(PointLight {
+                color: ed_light.color,
+                intensity: ed_light.intensity,
+                range: ed_light.range,
+                radius: ed_light.radius,
+                shadows_enabled: ed_light.shadows_enabled,
+                ..default()
+            });
         }
     }
 }
@@ -715,6 +717,24 @@ fn handle_generate_city(
                             NetworkId(rand::random::<u64>()),
                             Transform::from_xyz(bx, b_height + 0.5, bz),
                         ));
+
+                        // Spawn ascending zipline so players can reach the crate on top of the building
+                        let ground_x = bx + (b_width * 0.5) + 1.2;
+                        let roof_x = bx + (b_width * 0.5) - 0.4;
+                        commands.spawn((
+                            Name::new(format!("Zipline_{}", chest_index)),
+                            SceneObject {
+                                object_type: "zipline".to_string(),
+                                asset_path: None,
+                            },
+                            NetworkId(rand::random::<u64>()),
+                            crate::zipline::Zipline {
+                                start: Vec3::new(ground_x, 1.0, bz),
+                                end: Vec3::new(roof_x, b_height + 0.5, bz),
+                            },
+                            Transform::from_xyz(ground_x, 1.0, bz),
+                        ));
+
                         chest_index += 1;
                     }
                 }

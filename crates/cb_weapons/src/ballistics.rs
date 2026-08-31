@@ -47,27 +47,28 @@ pub fn process_hitscan(
         let seed = (time.elapsed().as_millis() as u64).wrapping_add(shot.shooter.to_bits());
         let dir = apply_spread(shot.direction, shot.spread_rad, seed);
 
-        let proj_speed = shot.projectile_speed.or(config.projectile_speed);
-        if let Some(speed) = proj_speed {
-            // Projectile weapon -- spawn a physics entity that flies
-            commands.spawn((
-                Mesh3d(meshes.add(Sphere::new(0.08))),
-                MeshMaterial3d(materials.add(StandardMaterial {
-                    base_color: Color::srgb(5.0, 3.0, 0.0),
-                    emissive: LinearRgba::new(5.0, 3.0, 0.0, 1.0),
-                    ..default()
-                })),
-                Transform::from_translation(shot.origin),
-                crate::components::Projectile {
-                    velocity: dir * speed,
-                    damage: config.damage,
-                    penetration: config.penetration,
-                    lifespan: config.range / speed,
-                    owner: shot.shooter,
-                    is_local: shot.is_local,
-                },
-            ));
-        } else {
+        let speed = shot.projectile_speed.or(config.projectile_speed).unwrap_or(200.0);
+        let proj_quat = Quat::from_rotation_arc(Vec3::Z, dir);
+        // All weapons fire physical, high-visibility glowing projectiles
+        commands.spawn((
+            Mesh3d(meshes.add(Sphere::new(0.10))),
+            MeshMaterial3d(materials.add(StandardMaterial {
+                base_color: Color::srgb(1.0, 0.8, 0.2),
+                emissive: LinearRgba::new(10.0, 6.0, 1.0, 1.0),
+                unlit: true,
+                ..default()
+            })),
+            Transform::from_translation(shot.origin).with_rotation(proj_quat),
+            crate::components::Projectile {
+                velocity: dir * speed,
+                damage: config.damage,
+                penetration: config.penetration,
+                lifespan: config.range / speed,
+                owner: shot.shooter,
+                is_local: shot.is_local,
+            },
+        ));
+        if false {
             // Hitscan weapon -- immediate raycast
             if let Some(hit) = spatial.cast_ray(
                 shot.origin,

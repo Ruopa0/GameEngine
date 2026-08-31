@@ -2493,6 +2493,7 @@ dependencies = [
  "bevy_framepace",
  "cb_input",
  "cb_movement",
+ "cb_shared",
  "cb_weapons",
  "egui_dock",
  "fastrand",
@@ -2517,6 +2518,7 @@ dependencies = [
  "cb_movement",
  "cb_netcode",
  "cb_physics",
+ "cb_shared",
  "cb_weapons",
  "clap",
 ]
@@ -2585,12 +2587,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "cb_shared"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "cb_weapons"
 version = "0.1.0"
 dependencies = [
  "avian3d 0.6.1",
  "bevy",
  "cb_input",
+ "cb_shared",
 ]
 
 [[package]]

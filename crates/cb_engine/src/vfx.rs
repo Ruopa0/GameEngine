@@ -1,6 +1,37 @@
-use crate::editor::serialization::EditorColor;
 use bevy::prelude::*;
+
+#[cfg(feature = "weapons")]
+use crate::editor::serialization::EditorColor;
+#[cfg(feature = "weapons")]
 use cb_weapons::ballistics::HitVfxEvent;
+
+pub struct VfxPlugin;
+
+impl Plugin for VfxPlugin {
+    fn build(&self, app: &mut App) {
+        #[cfg(feature = "weapons")]
+        {
+            app.add_message::<HitVfxEvent>()
+                .add_systems(Update, (spawn_hit_particles, update_particles));
+        }
+        #[cfg(not(feature = "weapons"))]
+        {
+            app.add_systems(Update, update_particles);
+        }
+    }
+}
+
+/// Settings for particle system limits
+pub struct ParticleSettings {
+    pub max_particles: u32,
+    pub chest_particle_count: u32,
+}
+
+impl Default for ParticleSettings {
+    fn default() -> Self {
+        Self { max_particles: 200, chest_particle_count: 3 }
+    }
+}
 
 #[derive(Component)]
 pub struct Particle {
@@ -9,15 +40,7 @@ pub struct Particle {
     pub start_lifetime: f32,
 }
 
-pub struct VfxPlugin;
-
-impl Plugin for VfxPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_message::<HitVfxEvent>()
-           .add_systems(Update, (spawn_hit_particles, update_particles));
-    }
-}
-
+#[cfg(feature = "weapons")]
 fn spawn_hit_particles(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -42,10 +65,10 @@ fn spawn_hit_particles(
             ..default()
         });
 
-        let mesh = meshes.add(Cuboid::new(0.05, 0.05, 0.05));
+        let mesh = meshes.add(Cuboid::new(0.035, 0.035, 0.035));
 
-        // Spawn 8-12 particles
-        let num_particles = rng.u32(8..13);
+        // Spawn 4-6 particles (clean and tasteful)
+        let num_particles = rng.u32(4..7);
         for _ in 0..num_particles {
             // Direction heavily biased along normal
             let random_dir = Vec3::new(
@@ -56,7 +79,7 @@ fn spawn_hit_particles(
             .normalize_or_zero();
 
             let dir = (ev.normal * 2.0 + random_dir).normalize_or_zero();
-            let speed = rng.f32() * 5.0 + 2.0;
+            let speed = rng.f32() * 3.5 + 1.5;
 
             commands.spawn((
                 Mesh3d(mesh.clone()),

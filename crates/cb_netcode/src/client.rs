@@ -605,10 +605,9 @@ pub fn handle_remote_editor_actions(
                                 }
 
                                 let mut actual_origin = origin;
-                                if final_gun != shooter {
-                                    if let Some(gtf) = world.get::<GlobalTransform>(final_gun) {
+                                if final_gun != shooter
+                                    && let Some(gtf) = world.get::<GlobalTransform>(final_gun) {
                                         actual_origin = gtf.translation() + *gtf.forward() * 0.4;
-                                    }
                                 }
 
                                 world.write_message(cb_weapons::systems::ShotFiredEvent {
@@ -624,8 +623,8 @@ pub fn handle_remote_editor_actions(
                         });
                     }
                 }
-                crate::protocol::EditorAction::PlayerRespawned { user_id } => {
-                    if user_id != session.client_id {
+                crate::protocol::EditorAction::PlayerRespawned { user_id }
+                    if user_id != session.client_id => {
                         commands.queue(move |world: &mut World| {
                             let mut target_player = None;
                             let mut q_rp = world.query::<(Entity, &cb_engine::player::RemotePlayer)>();
@@ -642,7 +641,6 @@ pub fn handle_remote_editor_actions(
                                 world.entity_mut(target_entity).insert(avian3d::prelude::Collider::capsule(0.35, 1.0));
                             }
                         });
-                    }
                 }
                 _ => {}
             }
@@ -683,7 +681,7 @@ pub fn broadcast_local_player_transform(
             1
         };
         for mut sender in senders.iter_mut() {
-            let _ = sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform {
+            sender.send::<crate::protocol::PlayModeChannel>(crate::protocol::EditorAction::UpdatePlayerTransform {
                 user_id: session.client_id,
                 transform: *player_tf,
                 pitch,

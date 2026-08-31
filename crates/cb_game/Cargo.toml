@@ -15,4 +15,5 @@ bevy-tnua = { workspace = true }
 clap = { version = "4.5", features = ["derive"] }
 cb_weapons = { workspace = true }
 cb_input = { workspace = true }
+cb_shared = { workspace = true }
 bevy_egui = { workspace = true }

@@ -1,7 +1,12 @@
 use bevy::prelude::*;
 use avian3d::prelude::*;
 use bevy_tnua::prelude::*;
+use bevy::time::Timer;
 use bevy_tnua_avian3d::TnuaAvian3dSensorShape;
+
+#[derive(Resource, Deref, DerefMut)]
+pub struct DeathFallSpeed(pub f32);
+
 use cb_movement::fsm::CharacterState;
 
 //  "  "  "  Marker components  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  "  " 
@@ -16,20 +21,31 @@ pub struct Player;
 #[reflect(Component)]
 pub struct PlayerCamera;
 
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct FirstPersonWeapon;
+
 pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
-    let starting_weapon = cb_weapons::components::WeaponBundle {
-        config: cb_weapons::components::WeaponConfig {
+    let starting_weapon = cb_shared::components::WeaponBundle {
+        config: cb_shared::components::WeaponConfig {
             name: "Pistol",
-            fire_mode: cb_weapons::components::FireMode::SemiAuto,
-            damage: 25.0,
+            fire_mode: cb_shared::components::FireMode::SemiAuto,
+            damage: 20.0,
             penetration: 0.2,
-            range: 50.0,
-            projectile_speed: Some(150.0),
+            range: 60.0,
+            projectile_speed: Some(200.0),
         },
-        fire: cb_weapons::components::FireRate::new(400.0),
-        mag: cb_weapons::components::Magazine::new(8, 24, 1.5),
-        spread: cb_weapons::components::Spread::default(),
-        recoil: cb_weapons::components::RecoilPattern::default(),
+        fire: cb_shared::components::FireRate {
+            rpm: 10000.0, // Fire rate as fast as player clicks
+            cooldown: 0.0,
+            timer: 0.0,
+            trigger_held: false,
+            trigger_just: false,
+            burst_remaining: 0,
+        },
+        mag: cb_shared::components::Magazine::new(12, 48, 1.2),
+        spread: cb_shared::components::Spread::default(),
+        recoil: cb_shared::components::RecoilPattern::default(),
     };
 
     commands
@@ -40,13 +56,13 @@ pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
                 Visibility::default(),
             ),
             (
-                // Physics
+                // Physics (high friction & damping to prevent sliding)
                 RigidBody::Dynamic,
                 Collider::capsule(0.35, 1.0),   // radius 0.35, half-height 1.0
                 LockedAxes::ROTATION_LOCKED,
-                GravityScale(2.0),
-                Friction::new(1.0).with_combine_rule(CoefficientCombine::Max),
-                LinearDamping(0.5),
+                GravityScale(3.0),
+                Friction::new(4.0).with_combine_rule(CoefficientCombine::Max),
+                LinearDamping(2.0),
             ),
             (
                 // Tnua
@@ -57,11 +73,11 @@ pub fn spawn_player(commands: &mut Commands, transform: Transform) -> Entity {
             ),
             (
                 // Health & Combat
-                cb_weapons::components::Health::new(100.0),
-                cb_weapons::health::ImmortalPlayer,
-                cb_weapons::components::PlayerCombatant,
+                cb_shared::components::Health::new(100.0),
+                cb_shared::components::ImmortalPlayer,
+                cb_shared::components::PlayerCombatant,
                 starting_weapon.clone_components(),
-                cb_weapons::components::WeaponInventory {
+                cb_shared::components::WeaponInventory {
                     pending_slot: None,
                     primary: Some(starting_weapon.clone_components()),
                     secondary: None,
@@ -98,10 +114,20 @@ pub struct RemotePlayerGun;
 
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
-pub struct IsDead;
+pub struct IsDead {
+    pub timer: Timer,
+}
 
+#[derive(Component)]
+pub struct Ragdoll;
+
+#[derive(Component)]
 #[derive(Message)]
 pub struct PlayerRespawnedEvent;
+
+#[derive(Component)]
+pub struct RespawnReady;
+
 
 pub struct PlayerPlugin;
 
@@ -111,6 +137,8 @@ impl Plugin for PlayerPlugin {
            .register_type::<PlayerCamera>()
            .register_type::<RemotePlayer>()
            .register_type::<IsDead>()
+           .insert_resource(DeathFallSpeed(0.5))
+            .add_message::<PlayerRespawnedEvent>()
            .add_message::<PlayerRespawnedEvent>()
             .add_systems(
                 Update,
@@ -130,24 +158,31 @@ impl Plugin for PlayerPlugin {
     }
 }
 
+#[cfg(feature = "weapons")]
 pub fn handle_player_death(
     mut commands: Commands,
     mut killed_events: MessageReader<cb_weapons::health::EntityKilledEvent>,
-    q_player: Query<Entity, (With<cb_weapons::components::Health>, Without<IsDead>)>,
-    mut q_weapon: Query<&mut Visibility, With<cb_weapons::viewmodel::FirstPersonWeapon>>,
+    q_player: Query<Entity, (With<cb_shared::components::Health>, With<Player>, Without<IsDead>)>,
+    mut q_weapon: Query<&mut Visibility, With<FirstPersonWeapon>>,
+    mut q_camera: Query<&mut Transform, With<PlayerCamera>>,
     mut cursor_options: Query<&mut bevy::window::CursorOptions, With<Window>>,
+    death_fall_speed: Res<DeathFallSpeed>,
 ) {
+    // Original implementation unchanged
     for ev in killed_events.read() {
         if q_player.get(ev.entity).is_ok() {
-            info!("Player was eliminated! Waiting for respawn...");
+            info!("Player was eliminated! Handling death...");
             commands.entity(ev.entity)
-                .insert(IsDead)
-                .remove::<LockedAxes>()
-                .insert(AngularVelocity(Vec3::new(5.0, 0.0, 5.0)));
+                .insert(LockedAxes::ROTATION_LOCKED)
+                .insert(LinearVelocity(Vec3::new(0.0, -death_fall_speed.0, 0.0)))
+                .insert(IsDead { timer: Timer::from_seconds(0.3, TimerMode::Once) });
+            if let Ok(mut cam_tf) = q_camera.single_mut() {
+                cam_tf.translation = Vec3::new(0.0, 0.25, 0.0);
+                cam_tf.rotation = Quat::IDENTITY;
+            }
             for mut vis in q_weapon.iter_mut() {
                 *vis = Visibility::Hidden;
             }
-
             if let Ok(mut cursor) = cursor_options.single_mut() {
                 cursor.grab_mode = bevy::window::CursorGrabMode::None;
                 cursor.visible = true;
@@ -156,11 +191,25 @@ pub fn handle_player_death(
     }
 }
 
+#[cfg(not(feature = "weapons"))]
+pub fn handle_player_death(
+    _commands: Commands,
+    _q_player: Query<Entity, (With<cb_shared::components::Health>, With<Player>, Without<IsDead>)>,
+    _q_weapon: Query<&mut Visibility>,
+    _q_camera: Query<&mut Transform>,
+    _cursor_options: Query<&mut bevy::window::CursorOptions>,
+    _death_fall_speed: Res<DeathFallSpeed>,
+) {
+    // Weapons feature disabled; no death handling via weapons events.
+    // This stub simply does nothing.
+}
+
 pub fn update_player_respawn(
     mut commands: Commands,
-    mut q_player: Query<(Entity, &mut Transform, &mut cb_weapons::components::Health, Option<&mut Position>, Option<&mut LinearVelocity>, Option<&mut Rotation>), (With<Player>, With<IsDead>)>,
-    q_spawns: Query<(&Transform, &crate::editor::serialization::SceneObject), Without<Player>>,
-    mut q_weapon: Query<&mut Visibility, With<cb_weapons::viewmodel::FirstPersonWeapon>>,
+    mut q_player: Query<(Entity, &mut Transform, &mut cb_shared::components::Health, Option<&mut Position>, Option<&mut LinearVelocity>, Option<&mut Rotation>), (With<Player>, With<IsDead>, Without<PlayerCamera>)>,
+    q_spawns: Query<(&Transform, &crate::editor::serialization::SceneObject), (Without<Player>, Without<PlayerCamera>)>,
+    mut q_weapon: Query<&mut Visibility, With<FirstPersonWeapon>>,
+    mut q_camera: Query<&mut Transform, (With<PlayerCamera>, Without<Player>)>,
     mut egui_contexts: Query<&mut bevy_egui::EguiContext, With<bevy::window::PrimaryWindow>>,
     mut cursor_options: Query<&mut bevy::window::CursorOptions, With<Window>>,
     mut ev_respawn: MessageWriter<PlayerRespawnedEvent>,
@@ -197,6 +246,12 @@ pub fn update_player_respawn(
                 *vis = Visibility::Inherited;
             }
 
+            // Restore camera to eye level and upright
+            if let Ok(mut cam_tf) = q_camera.single_mut() {
+                cam_tf.translation = Vec3::new(0.0, 0.75, 0.0);
+                cam_tf.rotation = Quat::IDENTITY;
+            }
+
             let mut available_spawns = Vec::new();
             for (spawn_tf, scene_obj) in q_spawns.iter() {
                 if scene_obj.object_type == "spawn_point" {
@@ -229,7 +284,8 @@ pub fn update_player_respawn(
                 .remove::<avian3d::prelude::Sleeping>()
                 .insert(avian3d::prelude::Collider::capsule(0.35, 1.0))
                 .insert(LockedAxes::ROTATION_LOCKED)
-                .insert(AngularVelocity::ZERO);
+                .insert(AngularVelocity::ZERO)
+                .insert(bevy_tnua::prelude::TnuaController::<cb_movement::kcc::CharacterScheme>::default());
 
             if let Ok(mut cursor) = cursor_options.single_mut() {
                 cursor.grab_mode = bevy::window::CursorGrabMode::Locked;
@@ -248,12 +304,60 @@ pub fn setup_player_mesh(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for cam_entity in q_new_cameras.iter() {
-        cb_weapons::viewmodel::spawn_first_person_weapon(
-            &mut commands,
-            cam_entity,
-            &mut meshes,
-            &mut materials,
-        );
+        // Dark gunmetal body material
+        let body_mat = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.12, 0.13, 0.15),
+            metallic: 0.85,
+            perceptual_roughness: 0.25,
+            ..default()
+        });
+
+        // Accent material
+        let accent_mat = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.08, 0.65, 0.85),
+            emissive: LinearRgba::new(0.02, 0.25, 0.35, 1.0),
+            metallic: 0.5,
+            perceptual_roughness: 0.4,
+            ..default()
+        });
+
+        let frame_mesh = meshes.add(Cuboid::new(0.065, 0.10, 0.28));
+        let barrel_mesh = meshes.add(Cuboid::new(0.045, 0.05, 0.22));
+        let slide_mesh = meshes.add(Cuboid::new(0.060, 0.045, 0.26));
+        let grip_mesh = meshes.add(Cuboid::new(0.055, 0.13, 0.09));
+
+        let weapon_root = commands
+            .spawn((
+                Name::new("FirstPersonWeapon"),
+                FirstPersonWeapon,
+                Transform::from_xyz(0.0, -0.22, -0.42),
+                Visibility::default(),
+            ))
+            .with_children(|parent| {
+                parent.spawn((
+                    Mesh3d(frame_mesh),
+                    MeshMaterial3d(body_mat.clone()),
+                    Transform::from_xyz(0.0, 0.0, 0.0),
+                ));
+                parent.spawn((
+                    Mesh3d(barrel_mesh),
+                    MeshMaterial3d(accent_mat.clone()),
+                    Transform::from_xyz(0.0, 0.025, -0.14),
+                ));
+                parent.spawn((
+                    Mesh3d(slide_mesh),
+                    MeshMaterial3d(body_mat.clone()),
+                    Transform::from_xyz(0.0, 0.045, 0.01),
+                ));
+                parent.spawn((
+                    Mesh3d(grip_mesh),
+                    MeshMaterial3d(body_mat.clone()),
+                    Transform::from_xyz(0.0, -0.07, 0.05).with_rotation(Quat::from_rotation_x(0.22)),
+                ));
+            })
+            .id();
+
+        commands.entity(cam_entity).add_child(weapon_root);
     }
 }
 
@@ -297,9 +401,9 @@ pub fn setup_remote_player_mesh(
             MeshMaterial3d(body_mat.clone()),
             RigidBody::Kinematic,
             Collider::capsule(0.35, 1.0),
-            cb_weapons::components::Health::new(100.0),
-            cb_weapons::components::PlayerCombatant,
-            cb_weapons::health::ImmortalPlayer,
+            cb_shared::components::Health::new(100.0),
+            cb_shared::components::PlayerCombatant,
+            cb_shared::components::ImmortalPlayer,
         ));
 
         commands.entity(entity).with_children(|parent| {
@@ -323,13 +427,13 @@ pub fn setup_remote_player_mesh(
                     Mesh3d(gun_mesh),
                     MeshMaterial3d(gun_mat),
                     Transform::from_xyz(0.30, -0.15, -0.32),
-                    cb_weapons::components::WeaponConfig {
+                    cb_shared::components::WeaponConfig {
                         name: "RemotePistol",
-                        fire_mode: cb_weapons::components::FireMode::SemiAuto,
-                        damage: 25.0,
+                        fire_mode: cb_shared::components::FireMode::SemiAuto,
+                        damage: 20.0,
                         penetration: 0.2,
-                        range: 50.0,
-                        projectile_speed: None,
+                        range: 60.0,
+                        projectile_speed: Some(200.0),
                     },
                 ));
             });
@@ -351,7 +455,7 @@ pub fn update_remote_player_pitch(
 }
 
 pub fn update_remote_player_gun_visibility(
-    q_remote: Query<(&cb_weapons::components::Health, &Children), With<RemotePlayer>>,
+    q_remote: Query<(&cb_shared::components::Health, &Children), With<RemotePlayer>>,
     q_heads: Query<&Children, With<RemotePlayerHead>>,
     mut q_guns: Query<&mut Visibility, With<RemotePlayerGun>>,
 ) {
@@ -374,13 +478,13 @@ pub fn player_input(
     mut query: Query<(
         &mut cb_movement::fsm::CharacterState, 
         &Transform, 
-        &mut cb_weapons::components::WeaponInventory, 
+        &mut cb_shared::components::WeaponInventory, 
         Option<&IsDead>,
-        &mut cb_weapons::components::WeaponConfig,
-        &mut cb_weapons::components::FireRate,
-        &mut cb_weapons::components::Magazine,
-        &mut cb_weapons::components::Spread,
-        &mut cb_weapons::components::RecoilPattern,
+        &mut cb_shared::components::WeaponConfig,
+        &mut cb_shared::components::FireRate,
+        &mut cb_shared::components::Magazine,
+        &mut cb_shared::components::Spread,
+        &mut cb_shared::components::RecoilPattern,
     ), With<Player>>,
 ) {
     let Some(input) = input_opt else { return };
@@ -425,7 +529,7 @@ pub fn player_input(
             let can_swap = if desired_slot == 1 { inventory.primary.is_some() } else { inventory.secondary.is_some() };
             if can_swap {
                     // Save current to active slot
-                    let active_bundle = cb_weapons::components::WeaponBundle {
+                    let active_bundle = cb_shared::components::WeaponBundle {
                         config: w_config.clone(),
                         fire: w_fire.clone(),
                         mag: w_mag.clone(),
@@ -453,9 +557,25 @@ pub fn player_input(
             }
         }
 
-    w_fire.trigger_held = input.fire_held;
-    if input.fire_just {
-        w_fire.trigger_just = true;
+    // Weapon firing: only allowed when walking or standing still (grounded, not sprinting or airborne)
+    let can_shoot = matches!(
+        state.current,
+        cb_movement::fsm::MovementState::Idle
+            | cb_movement::fsm::MovementState::Walk
+            | cb_movement::fsm::MovementState::Crouch
+            | cb_movement::fsm::MovementState::Prone
+    ) && !state.wishes_sprint
+        && !state.wishes_tac_sprint
+        && state.is_grounded;
+
+    if can_shoot {
+        w_fire.trigger_held = input.fire_held;
+        if input.fire_just {
+            w_fire.trigger_just = true;
+        }
+    } else {
+        w_fire.trigger_held = false;
+        w_fire.trigger_just = false;
     }
     
     if input.reload {
@@ -503,18 +623,23 @@ pub fn camera_look(
 
 
 pub fn update_weapon_visuals(
-    q_inventory: Query<&cb_weapons::components::WeaponInventory, With<Player>>,
-    mut q_fp_weapon: Query<&mut Transform, With<cb_weapons::viewmodel::FirstPersonWeapon>>,
+    q_inventory: Query<&cb_shared::components::WeaponInventory, With<Player>>,
+    mut q_fp_weapon: Query<&mut Transform, With<FirstPersonWeapon>>,
     q_remote: Query<(&RemotePlayer, &Children)>,
     q_heads: Query<&Children, With<RemotePlayerHead>>,
-    mut q_remote_guns: Query<&mut Transform, (With<RemotePlayerGun>, Without<cb_weapons::viewmodel::FirstPersonWeapon>)>,
+    mut q_remote_guns: Query<&mut Transform, (With<RemotePlayerGun>, Without<FirstPersonWeapon>)>,
 ) {
     if let Ok(inventory) = q_inventory.single() {
         if let Ok(mut fp_tf) = q_fp_weapon.single_mut() {
             if inventory.active_slot == 2 {
-                fp_tf.scale = Vec3::new(1.0, 1.0, 2.0);
+                // Rifle: longer barrel, extended silhouette
+                fp_tf.scale = Vec3::new(1.2, 1.25, 2.4);
+                fp_tf.translation = Vec3::new(0.0, -0.21, -0.45);
+                fp_tf.rotation = Quat::from_rotation_y(0.1); // slight yaw for visual cue
             } else {
+                // Pistol: compact handgun
                 fp_tf.scale = Vec3::ONE;
+                fp_tf.translation = Vec3::new(0.0, -0.22, -0.42);
             }
         }
     }
@@ -525,9 +650,13 @@ pub fn update_weapon_visuals(
                 for head_child in head_children.iter() {
                     if let Ok(mut gun_tf) = q_remote_guns.get_mut(head_child) {
                         if remote.active_weapon == 2 {
-                            gun_tf.scale = Vec3::new(1.0, 1.0, 2.0);
+                            // Rifle for remote players
+                            gun_tf.scale = Vec3::new(1.3, 1.3, 2.5);
+                            gun_tf.translation = Vec3::new(0.30, -0.15, -0.48);
                         } else {
+                            // Pistol for remote players
                             gun_tf.scale = Vec3::ONE;
+                            gun_tf.translation = Vec3::new(0.30, -0.15, -0.32);
                         }
                     }
                 }

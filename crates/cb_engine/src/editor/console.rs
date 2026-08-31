@@ -11,12 +11,14 @@ impl Plugin for EditorConsolePlugin {
 #[derive(Resource)]
 pub struct ConsoleState {
     pub logs: Vec<String>,
+    pub input: String,
 }
 
 impl Default for ConsoleState {
     fn default() -> Self {
         Self {
             logs: vec!["Code Blue Engine initialized...".to_string()],
+            input: String::new(),
         }
     }
 }

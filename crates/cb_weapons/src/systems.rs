@@ -1,7 +1,7 @@
 /// Weapon fire and reload systems -- run in FixedUpdate.
 
 use bevy::prelude::*;
-use bevy::ecs::relationship::Relationship;
+
 
 
 use crate::components::{FireRate, Magazine, Spread, RecoilPattern, FireMode};
@@ -20,7 +20,7 @@ pub struct ShotFiredEvent {
 }
 
 pub fn weapon_fire_system(
-    time:      Res<Time>,
+    time: Res<Time>,
     mut query: Query<(
         Entity,
         &crate::components::WeaponConfig,
@@ -32,6 +32,7 @@ pub fn weapon_fire_system(
         Option<&ChildOf>,
     )>,
     q_viewmodel: Query<(&GlobalTransform, &ChildOf), With<crate::viewmodel::FirstPersonWeapon>>,
+    q_camera: Query<(Entity, &GlobalTransform, Option<&ChildOf>), With<Camera>>,
     mut ev_shot: MessageWriter<ShotFiredEvent>,
 ) {
     let dt = time.delta_secs();
@@ -76,7 +77,7 @@ pub fn weapon_fire_system(
             // Find the actual viewmodel to get true muzzle position, fallback to camera-relative if not found
             let mut muzzle_origin = gtf.translation() + (*gtf.up() * -0.21) + (*gtf.forward() * 0.74);
             for (vm_gtf, vm_parent) in q_viewmodel.iter() {
-                if vm_parent.get() == entity {
+                if vm_parent.parent() == entity {
                     // The gun mesh faces Z-, so forward is -Z. We want to go to the tip.
                     muzzle_origin = vm_gtf.translation() + *vm_gtf.forward() * 0.6; // ~60cm down the barrel
                     break;
@@ -84,10 +85,18 @@ pub fn weapon_fire_system(
             }
 
             // Compute shot direction aiming toward the crosshair focal point (100m ahead of camera)
-            let crosshair_focal_point = gtf.translation() + *gtf.forward() * 100.0;
+            // Use the camera's forward direction, which includes pitch, instead of the player's horizontal forward.
+            let cam_forward = if let Some((_cam_entity, cam_gtf, _parent)) =
+                q_camera.iter().find(|(_, _, parent)| parent.map(|p| p.parent() == entity).unwrap_or(false))
+            {
+                *cam_gtf.forward()
+            } else {
+                *gtf.forward()
+            };
+            let crosshair_focal_point = gtf.translation() + cam_forward * 100.0;
             let shot_direction = (crosshair_focal_point - muzzle_origin).normalize_or_zero();
 
-            let shooter_entity = parent.map(|p| p.get()).unwrap_or(entity);
+            let shooter_entity = parent.map(|p| p.parent()).unwrap_or(entity);
             ev_shot.write(ShotFiredEvent {
                 shooter:   shooter_entity,
                 weapon:    entity,

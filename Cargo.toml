@@ -29,6 +29,7 @@ cb_engine = { path = "crates/cb_engine" }
 cb_physics = { path = "crates/cb_physics" }
 cb_movement = { path = "crates/cb_movement" }
 cb_weapons = { path = "crates/cb_weapons" }
+cb_shared = { path = "crates/cb_shared" }
 cb_netcode = { path = "crates/cb_netcode" }
 cb_input = { path = "crates/cb_input" }
 

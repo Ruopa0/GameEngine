@@ -89,7 +89,7 @@ fn update_match_timer(time: Res<Time>, mut match_state: ResMut<MatchState>) {
 
 fn check_player_death_and_void(
     q_player: Query<
-        (&Transform, Option<&cb_weapons::components::Health>),
+        (&Transform, Option<&cb_shared::components::Health>),
         With<crate::player::Player>,
     >,
     mut match_state: ResMut<MatchState>,
@@ -151,6 +151,7 @@ fn check_goal_zone_collision(
     }
 }
 
+#[cfg(feature = "weapons")]
 fn handle_target_destroyed(
     mut events: MessageReader<TargetDestroyedEvent>,
     mut killed_events: MessageReader<cb_weapons::health::EntityKilledEvent>,
@@ -166,11 +167,23 @@ fn handle_target_destroyed(
     }
 }
 
+#[cfg(not(feature = "weapons"))]
+fn handle_target_destroyed(
+    mut events: MessageReader<TargetDestroyedEvent>,
+    mut match_state: ResMut<MatchState>,
+) {
+    for _ in events.read() {
+        match_state.score += 100;
+        match_state.kills += 1;
+    }
+}
+
 fn handle_reset_match(
+    mut commands: Commands,
     mut events: MessageReader<ResetMatchEvent>,
     mut match_state: ResMut<MatchState>,
     mut q_player: Query<
-        (&mut Transform, Option<&mut cb_weapons::components::Health>),
+        (&mut Transform, Option<&mut cb_shared::components::Health>),
         With<crate::player::Player>,
     >,
     q_spawn_points: Query<
@@ -180,12 +193,36 @@ fn handle_reset_match(
             Without<crate::player::Player>,
         ),
     >,
+    mut load_events: MessageWriter<crate::editor::serialization::LoadSceneEvent>,
 ) {
     for _ in events.read() {
+        info!("Resetting match: reloading level scene and restoring match targets...");
         match_state.status = MatchStatus::InProgress;
         match_state.elapsed_seconds = 0.0;
         match_state.score = 0;
         match_state.kills = 0;
+        match_state.targets_remaining = 0;
+        match_state.total_targets = 0;
+
+        // Reload the level to restore all destroyed target dummies and chests
+        if std::path::Path::new("level.ron").exists() {
+            load_events.write(crate::editor::serialization::LoadSceneEvent("level.ron".to_string()));
+        } else {
+            // Fallback: spawn 3 fresh target dummies if no saved level exists
+            for (idx, x) in [-4.0, 0.0, 4.0].iter().enumerate() {
+                commands.spawn((
+                    Name::new(format!("TargetDummy_{}", idx)),
+                    crate::editor::serialization::SceneObject {
+                        object_type: "target_dummy".to_string(),
+                        asset_path: None,
+                    },
+                    crate::editor::serialization::NetworkId(rand::random::<u64>()),
+                    Transform::from_xyz(*x, 1.0, -10.0),
+                    TargetDummy,
+                    cb_shared::components::Health { current: 100.0, max: 100.0 },
+                ));
+            }
+        }
 
         let spawn_pos = q_spawn_points
             .iter()

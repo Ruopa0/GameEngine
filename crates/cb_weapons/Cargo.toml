@@ -6,4 +6,6 @@ edition = "2021"
 [dependencies]
 bevy = { workspace = true }
 avian3d = { workspace = true }
-cb_input = { version = "0.1.0", path = "../cb_input" }
+cb_shared = { path = "../cb_shared" }
+cb_input = { path = "../cb_input" }
+

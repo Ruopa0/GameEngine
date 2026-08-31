@@ -16,6 +16,7 @@ pub mod schedule;
 pub mod scripting;
 pub mod vfx;
 pub mod console;
+pub mod zipline;
 
 pub struct EnginePlugin;
 
@@ -25,6 +26,7 @@ impl Plugin for EnginePlugin {
             .add_plugins(scripting::ScriptingPlugin)
             .add_plugins(gamemode::GameModePlugin)
             .add_plugins(vfx::VfxPlugin)
-            .add_plugins(gamemode_chest::ChestPlugin);
+            .add_plugins(gamemode_chest::ChestPlugin)
+            .add_plugins(zipline::ZiplinePlugin);
     }
 }

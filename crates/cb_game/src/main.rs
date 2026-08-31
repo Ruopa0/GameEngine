@@ -171,7 +171,7 @@ fn setup_level(
             Transform::from_xyz(3.0 + i as f32 * 2.0, 0.9, -10.0),
             RigidBody::Static,
             Collider::cuboid(0.6, 1.8, 0.6),
-            cb_weapons::components::Health::new(100.0),
+            cb_shared::components::Health::new(100.0),
         ));
     }
 

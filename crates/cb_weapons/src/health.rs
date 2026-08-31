@@ -3,10 +3,7 @@ use bevy::prelude::*;
 use crate::ballistics::DamageEvent;
 use crate::components::Health;
 
-/// Tag to prevent entity from being despawned on lethal damage (e.g. for player death screens/match state)
-#[derive(Component, Reflect, Default)]
-#[reflect(Component, Default)]
-pub struct ImmortalPlayer;
+pub use cb_shared::components::ImmortalPlayer;
 
 /// Component attached to dead entities to delay despawning by 1.0 second
 #[derive(Component, Reflect)]
