@@ -48,9 +48,12 @@ fn main() {
 fn setup_editor_state(
     mut next_state: ResMut<NextState<cb_engine::editor::EngineState>>,
     mut load_events: MessageWriter<cb_engine::editor::serialization::LoadSceneEvent>,
+    mut connect_events: MessageWriter<cb_engine::editor::serialization::ConnectToServerEvent>,
 ) {
     next_state.set(cb_engine::editor::EngineState::Edit);
     load_events.write(cb_engine::editor::serialization::LoadSceneEvent("level.ron".to_string()));
+    connect_events.write(cb_engine::editor::serialization::ConnectToServerEvent);
 }
+
 
 

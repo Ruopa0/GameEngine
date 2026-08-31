@@ -69,18 +69,21 @@ For in-depth guides, manuals, and technical specifications, explore the **`docs/
 
 Ensure you have [Rust](https://www.rust-lang.org/tools/install) installed.
 
-### 1. Run the Dedicated Server
+### ⚡ 1-Click Instant Launchers (Windows)
+Double-click any of the root scripts to run instantly:
+* **`run_multiplayer_editors.bat`**: 🚀 **Launches 1 Dedicated Server + 2 Collaborative Editor instances** in separate windows with instant live sync and teammate presence!
+* **`run_server.bat`**: Launches the 120Hz UDP dedicated server individually.
+* **`run_editor.bat`**: Launches a single 3D Editor instance (automatically connects to the local server if running, or operates standalone).
+
+### 💻 Manual CLI Commands
 ```bash
+# 1. Run the Dedicated Server
 cargo run --bin cb_server
-```
 
-### 2. Run the Collaborative 3D Editor
-```bash
+# 2. Run the Collaborative 3D Editor (can open multiple terminals to test live collaboration)
 cargo run --bin cb_editor
-```
 
-### 3. Run the Standalone Game Client
-```bash
+# 3. Run the Standalone Game Client
 cargo run --bin cb_game
 ```
 
